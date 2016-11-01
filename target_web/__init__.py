@@ -1,11 +1,20 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 import config
+from flask import Flask
+from flask_bootstrap import Bootstrap
+from modules.api import api
+from modules.editor import editor
+from modules.portal import portal
 
-app = Flask(__name__)
-app.config.from_object('config')
+def create_app(config_file=None):
+	if config_file == None:
+		config_file = 'config'
 
-db = SQLAlchemy(app)
-db.init_app(app)
+	app = Flask(__name__)
+	app.config.from_object('config')
 
-import target_web.views
+	Bootstrap(app)
+	app.register_blueprint(portal)
+	app.register_blueprint(api, url_prefix='/api')
+	app.register_blueprint(editor, url_prefix='/editor')
+
+	return app
