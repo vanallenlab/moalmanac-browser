@@ -10,7 +10,7 @@ def create_app(config_file=None):
 		config_file = 'config'
 
 	app = Flask(__name__)
-	app.config.from_object('config')
+	app.config.from_object(config_file)
 
 	Bootstrap(app)
 	app.register_blueprint(portal)
