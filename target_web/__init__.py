@@ -6,7 +6,7 @@ from modules.editor import editor
 from modules.portal import portal
 
 def create_app(config_file=None):
-	if config_file == None:
+	if config_file is None:
 		config_file = 'config'
 
 	app = Flask(__name__)
