@@ -14,7 +14,7 @@ def create_app(config_file=None):
 
 	Bootstrap(app)
 	app.register_blueprint(portal)
-	app.register_blueprint(api, url_prefix='/api')
+	app.register_blueprint(api, url_prefix='/api/v0')
 	app.register_blueprint(editor, url_prefix='/editor')
 
 	return app

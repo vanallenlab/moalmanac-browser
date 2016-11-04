@@ -6,3 +6,24 @@ label.input-group-label {
 h3 {
   color: #37474f;
 }
+
+.editor-add-item {
+    margin-bottom: 1em;
+}
+
+.form-group .required {
+    display: none;
+}
+
+.form-group.required .input-group-label:after {
+    content: '*';
+    color: blue;
+    font-size: 8pt;
+    font-family: serif;
+    vertical-align: super;
+}
+
+.input-group-checkbox {
+    background: transparent !important;
+    border: none !important;
+}

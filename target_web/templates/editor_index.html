@@ -1,359 +1,145 @@
 {%- extends 'base.html' %}
+{% from "_editor_helpers.html" import render_field, render_field %}
 
 {% block scripts %}
 {{super()}}
 <script src="{{url_for('static', filename='repeatable-fields/repeatable-fields.js')}}"></script>
+<script src="{{url_for('static', filename='parsley.min.js')}}"></script>
 <script src="{{url_for('static', filename='editor.js')}}"></script>
 {% endblock %}
 
 {% block content %}
 
 <div class="container">
+    <h1>Add TARGET Assertions</h1>
     <div class="row repeat">
         <form method="POST" action="#">
-            {{ form.csrf_token }}
-            <div class="col-xs-4 repeat-wrapper">
+            {{ editor_form.csrf_token }}
+            <div class="col-xs-4">
                 <h3>Alterations</h3>
 
-                <a class="btn btn-primary btn-block repeat-add" role="button" href="#">+ Add alteration</a>
+                <div class="repeat-wrapper">
+                    <div class="panel-group repeat-container">
+                        <div class="panel panel-info repeat-row repeat-template">
+                            <div class="panel-heading">
+                                Alteration
+                                <button type="button" class="close pull-right repeat-remove" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
 
-                <div class="panel-group repeat-container">
-                    <div class="panel panel-info repeat-row repeat-template">
-                        <div class="panel-heading">
-                            Alteration
-                            <button type="button" class="close pull-right repeat-remove" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                            <div class="panel-body">
+                                {{ render_field(alt_form.feature_type, parent='alteration', required=True) }}
+                                {{ render_field(alt_form.gene_name, parent='alteration') }}
+                                {{ render_field(alt_form.type, parent='alteration') }}
+                                {{ render_field(alt_form.alteration, parent='alteration') }}
+                            </div>
                         </div>
 
-                        <div class="panel-body">
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.alt_feature_type.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.alt_feature_type(class='form-control') }}
-                                </div>
+                        <div class="panel panel-info repeat-row">
+                            <div class="panel-heading">
+                                Alteration
                             </div>
 
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.alt_gene_name.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.alt_gene_name(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.alt_type.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.alt_type(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.alt_alteration.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.alt_alteration(class='form-control') }}
-                                </div>
+                            <div class="panel-body">
+                                {{ render_field(field=alt_form.feature_type, num=0, parent='alteration', required=True) }}
+                                {{ render_field(field=alt_form.gene_name, parent='alteration', num=0) }}
+                                {{ render_field(field=alt_form.type, parent='alteration', num=0) }}
+                                {{ render_field(field=alt_form.alteration, parent='alteration', num=0) }}
                             </div>
                         </div>
                     </div>
 
-                    <div class="panel panel-info repeat-row">
-                        <div class="panel-heading">
-                            Alteration
-                        </div>
-
-                        <div class="panel-body">
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.alt_feature_type.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.alt_feature_type(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.alt_gene_name.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.alt_gene_name(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.alt_type.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.alt_type(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.alt_alteration.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.alt_alteration(class='form-control') }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <a class="btn btn-primary btn-block repeat-add editor-add-item" role="button" href="#">+ Add alteration</a>
                 </div>
             </div>
 
-            <div class="col-xs-4 repeat-wrapper">
+            <div class="col-xs-4">
                 <h3>Assertions</h3>
 
-                <a class="btn btn-primary btn-block repeat-add" role="button" href="#">+ Add assertion</a>
+                <div class="repeat-wrapper">
+                    <div class="panel-group repeat-container">
+                        <div class="panel panel-info repeat-row repeat-template">
+                            <div class="panel-heading">
+                                Assertion
+                                <button type="button" class="close pull-right repeat-remove" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
 
-                <div class="panel-group repeat-container">
-                    <div class="panel panel-info repeat-row repeat-template">
-                        <div class="panel-heading">
-                            Assertion
-                            <button type="button" class="close pull-right repeat-remove" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                            <div class="panel-body">
+                                {{ render_field(assert_form.disease, parent='assertion', required=True) }}
+                                {{ render_field(assert_form.therapy_name, parent='assertion') }}
+                                {{ render_field(assert_form.therapy_type, parent='assertion') }}
+                                {{ render_field(assert_form.pred_impl, parent='assertion') }}
+                                {{ render_field(assert_form.description, parent='assertion') }}
+                                {{ render_field(assert_form.therapy_sensitivity, parent='assertion') }}
+                                {{ render_field(assert_form.favorable_prognosis, parent='assertion') }}
+                            </div>
                         </div>
 
-                        <div class="panel-body">
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_disease.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_disease(class='form-control') }}
-                                </div>
+                        <div class="panel panel-info repeat-row">
+                            <div class="panel-heading">
+                                Assertion
                             </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_therapy_name.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_therapy_name(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_therapy_type.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_therapy_type(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_pred_impl.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_pred_impl(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_description.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_description(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="checkbox">
-                                    <label>
-                                        {{ form.assert_therapy_sensitivity() }}
-                                        Alteration(s) cause sensitivity to this therapy?
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="checkbox">
-                                    <label>
-                                        {{ form.assert_favorable_prognosis() }}
-                                        Alterations predict favorable prognosis?
-                                    </label>
-                                </div>
+                            <div class="panel-body">
+                                {{ render_field(assert_form.disease, parent='assertion', num=0, required=True) }}
+                                {{ render_field(assert_form.therapy_name, parent='assertion', num=0) }}
+                                {{ render_field(assert_form.therapy_type, parent='assertion', num=0) }}
+                                {{ render_field(assert_form.pred_impl, parent='assertion', num=0) }}
+                                {{ render_field(assert_form.description, parent='assertion', num=0) }}
+                                {{ render_field(assert_form.therapy_sensitivity, parent='assertion', num=0) }}
+                                {{ render_field(assert_form.favorable_prognosis, parent='assertion', num=0) }}
                             </div>
                         </div>
                     </div>
 
-                    <div class="panel panel-info repeat-row">
-                        <div class="panel-heading">
-                            Assertion
-                        </div>
-                        <div class="panel-body">
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_disease.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_disease(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_therapy_name.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_therapy_name(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_therapy_type.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_therapy_type(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_pred_impl.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_pred_impl(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.assert_description.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.assert_description(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="checkbox">
-                                    <label>
-                                        {{ form.assert_therapy_sensitivity() }}
-                                        Alteration(s) cause sensitivity to this therapy?
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="checkbox">
-                                    <label>
-                                        {{ form.assert_favorable_prognosis() }}
-                                        Alterations predict favorable prognosis?
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <a class="btn btn-primary btn-block repeat-add editor-add-item" role="button" href="#">+ Add assertion</a>
                 </div>
             </div>
 
-            <div class="col-xs-4 repeat-wrapper">
+            <div class="col-xs-4">
                 <h3>Sources</h3>
 
-                <a class="btn btn-primary btn-block repeat-add" role="button" href="#">+ Add source</a>
-
-                <div class="panel-group repeat-container">
-                    <div class="panel panel-info repeat-row repeat-template">
-                        <div class="panel-heading">
-                            Source
-                            <button type="button" class="close pull-right repeat-remove" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-
-                        <div class="panel-body">
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.source_doi.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.source_doi(class='form-control') }}
-                                </div>
+                <div class="repeat-wrapper">
+                    <div class="panel-group repeat-container">
+                        <div class="panel panel-info repeat-row repeat-template">
+                            <div class="panel-heading">
+                                Source
+                                <button type="button" class="close pull-right repeat-remove" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                             </div>
 
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.source_cite_text.label(class='input-group-label') }}
-									</span>
+                            <div class="panel-body">
+                                {{ render_field(source_form.doi, parent='source') }}
+                                {{ render_field(source_form.cite_text, parent='source', required=True) }}
+                            </div>
+                        </div>
 
-                                    {{ form.source_cite_text(class='form-control') }}
-                                </div>
+                        <div class="panel panel-info repeat-row">
+                            <div class="panel-heading">
+                                Source
+                            </div>
+
+                            <div class="panel-body">
+                                {{ render_field(source_form.doi, parent='source', num=0) }}
+                                {{ render_field(source_form.cite_text, parent='source', num=0, required=True) }}
                             </div>
                         </div>
                     </div>
 
-                    <div class="panel panel-info repeat-row">
-                        <div class="panel-heading">
-                            Source
-                        </div>
-
-                        <div class="panel-body">
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.source_doi.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.source_doi(class='form-control') }}
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="input-group">
-									<span class="input-group-addon">
-                                        {{ form.source_cite_text.label(class='input-group-label') }}
-									</span>
-
-                                    {{ form.source_cite_text(class='form-control') }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <a class="btn btn-primary btn-block repeat-add editor-add-item" role="button" href="#">+ Add source</a>
                 </div>
             </div>
 
             <div class="clearfix visible-xs-block"></div>
 
             <div class="col-xs-12">
-                <button class="btn btn-primary btn-lg btn-block" href="#" role="button">Submit Assertion(s)</button>
+                <button id="submit-assertions-button" class="btn btn-primary btn-lg btn-block" href="#" role="button">Submit Assertion(s)</button>
             </div>
         </form>
     </div>
 </div>
+
 {%- endblock %}

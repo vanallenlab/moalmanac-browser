@@ -1,33 +1,57 @@
 from flask import Blueprint, render_template
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField
-from wtforms.widgets import TextArea
-from wtforms.validators import DataRequired
+from wtforms import StringField, BooleanField, validators, fields
 
 editor = Blueprint('editor', __name__)
 
+class AlterationForm(FlaskForm):
+    feature_type = StringField(label='Feature type',
+                                   validators=[validators.InputRequired(message='A feature type is required.')])
+    gene_name = StringField(label='Gene name')
+    type = StringField(label='Alteration type')
+    alteration = StringField(label='Alteration')
+
+    def __init__(self, csrf_enabled=False, *args, **kwargs):
+        super(AlterationForm, self).__init__(csrf_enabled=csrf_enabled, *args, **kwargs)
+
+class AssertionForm(FlaskForm):
+    disease = StringField(label='Disease',
+                                 validators=[validators.InputRequired(message='A disease is required.')])
+    therapy_name = StringField(label='Therapy name')
+    therapy_type = StringField(label='Therapy type')
+    pred_impl = StringField(label='Predictive implication')
+    description = StringField(label='Description')
+    therapy_sensitivity = BooleanField(label='Alteration(s) cause sensitivity to this therapy?')
+    favorable_prognosis = BooleanField(label='Alteration(s) predict favorable prognosis?')
+
+    def __init__(self, csrf_enabled=False, *args, **kwargs):
+        super(AssertionForm, self).__init__(csrf_enabled=csrf_enabled, *args, **kwargs)
+
+class SourceForm(FlaskForm):
+    doi = StringField(label='DOI')
+    cite_text = StringField(label='Cite text',
+                              validators=[validators.InputRequired(message='Citation text is required.')])
+
+    def __init__(self, csrf_enabled=False, *args, **kwargs):
+        super(SourceForm, self).__init__(csrf_enabled=csrf_enabled, *args, **kwargs)
+
 class EditorForm(FlaskForm):
-    alt_feature_type = StringField('Feature type', validators=[DataRequired()])
-    alt_gene_name = StringField('Gene name')
-    alt_type = StringField('Alteration type')
-    alt_alteration = StringField('Alteration')
-
-    assert_disease = StringField('Disease', validators=[DataRequired()])
-    assert_therapy_name = StringField('Therapy name')
-    assert_therapy_type = StringField('Therapy type')
-    assert_pred_impl = StringField('Predictive implication')
-    assert_description = StringField('Description', widget=TextArea())
-    assert_therapy_sensitivity = BooleanField('Therapy sensitivity')
-    assert_favorable_prognosis = BooleanField('Favorable prognosis')
-
-    source_doi = StringField('DOI')
-    source_cite_text = StringField('Cite text', widget=TextArea())
+    alteration = fields.FieldList(fields.FormField(AlterationForm))
+    assertion = fields.FieldList(fields.FormField(AssertionForm))
+    source = fields.FieldList(fields.FormField(SourceForm))
 
 @editor.route('/', methods=('GET', 'POST'))
 def index():
-    form = EditorForm()
+    editor_form = EditorForm()
+    alt_form = AlterationForm()
+    assert_form = AssertionForm()
+    source_form = SourceForm()
 
-    if form.validate_on_submit():
-        return form
+    if editor_form.validate_on_submit():
+        return str(editor_form.data)
 
-    return render_template('editor_index.html', form=form)
+    return render_template('editor_index.html',
+                           editor_form=editor_form,
+                           alt_form=alt_form,
+                           assert_form=assert_form,
+                           source_form=source_form)

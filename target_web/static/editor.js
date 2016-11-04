@@ -8,7 +8,7 @@ $(function() {
             remove: '.repeat-remove',
             move: '.repeat-move',
             template: '.repeat-template',
-            //row_count_placeholder: '[[row-count-placeholder]]',
+            row_count_placeholder: '{{row-count-placeholder}}',
         });
     });
 });
