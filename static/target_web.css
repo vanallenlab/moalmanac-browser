@@ -27,3 +27,9 @@ h3 {
     background: transparent !important;
     border: none !important;
 }
+
+ul.flashes {
+    text-align: center;
+    padding: 1em;
+    background-color: #f1f8e9;
+}

@@ -1,0 +1,808 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DatabaseModel VersionId="2.3">
+    <Name>TARGET 3.0</Name>
+    <Description></Description>
+    <DatabaseEngine>
+        <Name>sqlite</Name>
+        <Version>3.7.x</Version>
+    </DatabaseEngine>
+    <Counters>
+        <Counter>
+            <Name>table</Name>
+            <Value>54</Value>
+            <Prefix>t</Prefix>
+        </Counter>
+        <Counter>
+            <Name>column</Name>
+            <Value>272</Value>
+            <Prefix>c</Prefix>
+        </Counter>
+        <Counter>
+            <Name>index</Name>
+            <Value>0</Value>
+            <Prefix>i</Prefix>
+        </Counter>
+        <Counter>
+            <Name>reference</Name>
+            <Value>99</Value>
+            <Prefix>r</Prefix>
+        </Counter>
+        <Counter>
+            <Name>table_check</Name>
+            <Value>3</Value>
+            <Prefix>tc</Prefix>
+        </Counter>
+        <Counter>
+            <Name>alternate_key</Name>
+            <Value>3</Value>
+            <Prefix>a</Prefix>
+        </Counter>
+        <Counter>
+            <Name>sequence</Name>
+            <Value>0</Value>
+            <Prefix>s</Prefix>
+        </Counter>
+        <Counter>
+            <Name>note</Name>
+            <Value>7</Value>
+            <Prefix>n</Prefix>
+        </Counter>
+        <Counter>
+            <Name>view</Name>
+            <Value>1</Value>
+            <Prefix>v</Prefix>
+        </Counter>
+        <Counter>
+            <Name>view_column</Name>
+            <Value>0</Value>
+            <Prefix>vc</Prefix>
+        </Counter>
+        <Counter>
+            <Name>area</Name>
+            <Value>4</Value>
+            <Prefix>ar</Prefix>
+        </Counter>
+        <Counter>
+            <Name>text</Name>
+            <Value>0</Value>
+            <Prefix>tx</Prefix>
+        </Counter>
+        <Counter>
+            <Name>tableDisplay</Name>
+            <Value>54</Value>
+            <Prefix>td</Prefix>
+        </Counter>
+        <Counter>
+            <Name>viewDisplay</Name>
+            <Value>1</Value>
+            <Prefix>vd</Prefix>
+        </Counter>
+        <Counter>
+            <Name>referenceDisplay</Name>
+            <Value>99</Value>
+            <Prefix>rd</Prefix>
+        </Counter>
+    </Counters>
+    <AdditionalSQLBeforeCreate></AdditionalSQLBeforeCreate>
+    <AdditionalSQLAfterCreate></AdditionalSQLAfterCreate>
+    <AdditionalSQLBeforeDrop></AdditionalSQLBeforeDrop>
+    <AdditionalSQLAfterDrop></AdditionalSQLAfterDrop>
+    <Tables>
+        <Table Id="t48">
+            <Name>Assertion</Name>
+            <Description></Description>
+            <Columns>
+                <Column Id="c233">
+                    <Name>assertion_id</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c271">
+                    <Name>last_updated</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c248">
+                    <Name>disease</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c272">
+                    <Name>stage</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c266">
+                    <Name>therapy_name</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c267">
+                    <Name>therapy_type</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c236">
+                    <Name>therapy_sensitivity</Name>
+                    <Type>boolean</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c247">
+                    <Name>predictive_implication</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c238">
+                    <Name>favorable_prognosis</Name>
+                    <Type>boolean</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c256">
+                    <Name>description</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+            </Columns>
+            <PrimaryKey>
+                <Name></Name>
+                <Columns>
+                    <Column>c233</Column>
+                </Columns>
+            </PrimaryKey>
+            <AlternateKeys/>
+            <Indexes/>
+            <TableChecks/>
+            <AdditionalSQLBefore></AdditionalSQLBefore>
+            <AdditionalSQLAfter></AdditionalSQLAfter>
+            <Properties/>
+        </Table>
+        <Table Id="t51">
+            <Name>Alteration</Name>
+            <Description>feature = {Amplification, Biallelic Inactivation, Deletion, Mutation, Rearrangement}
+alt = Alteration specified using HGVS notation (http://varnomen.hgvs.org/recommendations/)</Description>
+            <Columns>
+                <Column Id="c249">
+                    <Name>alt_id</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c251">
+                    <Name>feature</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c252">
+                    <Name>alt_type</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c253">
+                    <Name>alt</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c250">
+                    <Name>gene_name</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+            </Columns>
+            <PrimaryKey>
+                <Name></Name>
+                <Columns>
+                    <Column>c249</Column>
+                </Columns>
+            </PrimaryKey>
+            <AlternateKeys/>
+            <Indexes/>
+            <TableChecks/>
+            <AdditionalSQLBefore></AdditionalSQLBefore>
+            <AdditionalSQLAfter></AdditionalSQLAfter>
+            <Properties/>
+        </Table>
+        <Table Id="t52">
+            <Name>Source</Name>
+            <Description></Description>
+            <Columns>
+                <Column Id="c257">
+                    <Name>source_id</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c270">
+                    <Name>source_type</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c259">
+                    <Name>cite_text</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c258">
+                    <Name>doi</Name>
+                    <Type>text</Type>
+                    <Description></Description>
+                    <Nullable>true</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+            </Columns>
+            <PrimaryKey>
+                <Name></Name>
+                <Columns>
+                    <Column>c257</Column>
+                </Columns>
+            </PrimaryKey>
+            <AlternateKeys/>
+            <Indexes/>
+            <TableChecks/>
+            <AdditionalSQLBefore></AdditionalSQLBefore>
+            <AdditionalSQLAfter></AdditionalSQLAfter>
+            <Properties/>
+        </Table>
+        <Table Id="t53">
+            <Name>Assertion_To_Source</Name>
+            <Description></Description>
+            <Columns>
+                <Column Id="c262">
+                    <Name>ats_id</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c260">
+                    <Name>assertion_id</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c261">
+                    <Name>source_id</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+            </Columns>
+            <PrimaryKey>
+                <Name></Name>
+                <Columns>
+                    <Column>c262</Column>
+                </Columns>
+            </PrimaryKey>
+            <AlternateKeys/>
+            <Indexes/>
+            <TableChecks/>
+            <AdditionalSQLBefore></AdditionalSQLBefore>
+            <AdditionalSQLAfter></AdditionalSQLAfter>
+            <Properties/>
+        </Table>
+        <Table Id="t54">
+            <Name>Assertion_To_Alteration</Name>
+            <Description></Description>
+            <Columns>
+                <Column Id="c263">
+                    <Name>aa_id</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c264">
+                    <Name>assertion_id</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+                <Column Id="c265">
+                    <Name>alt_id</Name>
+                    <Type>integer</Type>
+                    <Description></Description>
+                    <Nullable>false</Nullable>
+                    <DefaultValue></DefaultValue>
+                    <CheckExpression></CheckExpression>
+                    <Properties/>
+                </Column>
+            </Columns>
+            <PrimaryKey>
+                <Name></Name>
+                <Columns>
+                    <Column>c263</Column>
+                </Columns>
+            </PrimaryKey>
+            <AlternateKeys/>
+            <Indexes/>
+            <TableChecks/>
+            <AdditionalSQLBefore></AdditionalSQLBefore>
+            <AdditionalSQLAfter></AdditionalSQLAfter>
+            <Properties/>
+        </Table>
+    </Tables>
+    <Views/>
+    <References>
+        <Reference Id="r96">
+            <Name>Assertion_To_Source_Assertion</Name>
+            <Description></Description>
+            <PKTable>t48</PKTable>
+            <FKTable>t53</FKTable>
+            <PKRole></PKRole>
+            <FKRole></FKRole>
+            <ReferenceColumns>
+                <ReferenceColumn>
+                    <PKColumn>c233</PKColumn>
+                    <FKColumn>c260</FKColumn>
+                </ReferenceColumn>
+            </ReferenceColumns>
+            <Cardinality>0..*</Cardinality>
+            <Mandatory>true</Mandatory>
+            <OnUpdateAction>None</OnUpdateAction>
+            <OnDeleteAction>None</OnDeleteAction>
+            <Properties/>
+        </Reference>
+        <Reference Id="r97">
+            <Name>Assertion_To_Source_Source</Name>
+            <Description></Description>
+            <PKTable>t52</PKTable>
+            <FKTable>t53</FKTable>
+            <PKRole></PKRole>
+            <FKRole></FKRole>
+            <ReferenceColumns>
+                <ReferenceColumn>
+                    <PKColumn>c257</PKColumn>
+                    <FKColumn>c261</FKColumn>
+                </ReferenceColumn>
+            </ReferenceColumns>
+            <Cardinality>0..*</Cardinality>
+            <Mandatory>true</Mandatory>
+            <OnUpdateAction>None</OnUpdateAction>
+            <OnDeleteAction>None</OnDeleteAction>
+            <Properties/>
+        </Reference>
+        <Reference Id="r98">
+            <Name>Assertion_To_Alteration_Assertion</Name>
+            <Description></Description>
+            <PKTable>t48</PKTable>
+            <FKTable>t54</FKTable>
+            <PKRole></PKRole>
+            <FKRole></FKRole>
+            <ReferenceColumns>
+                <ReferenceColumn>
+                    <PKColumn>c233</PKColumn>
+                    <FKColumn>c264</FKColumn>
+                </ReferenceColumn>
+            </ReferenceColumns>
+            <Cardinality>0..*</Cardinality>
+            <Mandatory>true</Mandatory>
+            <OnUpdateAction>None</OnUpdateAction>
+            <OnDeleteAction>None</OnDeleteAction>
+            <Properties/>
+        </Reference>
+        <Reference Id="r99">
+            <Name>Assertion_To_Alteration_Alteration</Name>
+            <Description></Description>
+            <PKTable>t51</PKTable>
+            <FKTable>t54</FKTable>
+            <PKRole></PKRole>
+            <FKRole></FKRole>
+            <ReferenceColumns>
+                <ReferenceColumn>
+                    <PKColumn>c249</PKColumn>
+                    <FKColumn>c265</FKColumn>
+                </ReferenceColumn>
+            </ReferenceColumns>
+            <Cardinality>0..*</Cardinality>
+            <Mandatory>true</Mandatory>
+            <OnUpdateAction>None</OnUpdateAction>
+            <OnDeleteAction>None</OnDeleteAction>
+            <Properties/>
+        </Reference>
+    </References>
+    <Sequences/>
+    <Notes>
+        <Note Id="n1">
+            <Name>Examples</Name>
+            <Content>Ex:
+(BRAF, Mutation, SNP, V600E) = (Melanoma, Sensitivity=TRUE, FDA-approved) = (Vemurafenib)
+(AR, CNV, Amplification, *) = (Prostate adenocarcinoma, Sensitivity=TRUE, FDA-approved) = (Enzalutamide)
+(AR, CNV, Amplification, *) = (Prostate adenocarcinoma, Sensitivity=FALSE) = (Leuprolide)
+(BCL2, Translocation, NULL, t(14;18)) = (Lymphoma, FavPrognosis=TRUE, FDA-approved)</Content>
+            <DisplayInfo>
+                <X>275.5</X>
+                <Y>385.5</Y>
+                <Width>639.0</Width>
+                <Height>88.0</Height>
+                <LineColor>#000000</LineColor>
+                <FillColor>#fff9c3</FillColor>
+            </DisplayInfo>
+        </Note>
+        <Note Id="n3">
+            <Name>Drug sensitivity scoring</Name>
+            <Content>B1. Drug sensitivity scoring:
+
++ 1 if therapy_sensitivity = True
++ 1 if therapy_fda_approved = True</Content>
+            <DisplayInfo>
+                <X>499.5</X>
+                <Y>829.5</Y>
+                <Width>227.0</Width>
+                <Height>68.0</Height>
+                <LineColor>#000000</LineColor>
+                <FillColor>#fff9c3</FillColor>
+            </DisplayInfo>
+        </Note>
+        <Note Id="n4">
+            <Name>Drug resistance scoring</Name>
+            <Content>B2. Drug resistance scoring:
+
++ 1 if therapy_sensitivity = False</Content>
+            <DisplayInfo>
+                <X>734.5</X>
+                <Y>828.5</Y>
+                <Width>205.0</Width>
+                <Height>69.0</Height>
+                <LineColor>#000000</LineColor>
+                <FillColor>#fff9c3</FillColor>
+            </DisplayInfo>
+        </Note>
+        <Note Id="n5">
+            <Name>Prognostic scoring</Name>
+            <Content>B3. Prognostic scoring:
+
+(none; rely on specificity scoring)</Content>
+            <DisplayInfo>
+                <X>947.5</X>
+                <Y>828.5</Y>
+                <Width>213.0</Width>
+                <Height>69.0</Height>
+                <LineColor>#000000</LineColor>
+                <FillColor>#fff9c3</FillColor>
+            </DisplayInfo>
+        </Note>
+        <Note Id="n6">
+            <Name>Copy_of_Examples</Name>
+            <Content>A. Specificity scoring:
+
++ 1 if gene_name matches
++ 2 if gene_name feature match
++ 3 if gene_name, feature, alt_type match
++ 4 if gene_name, feature, alt_type, alt match
+
++ 1 if disease matches</Content>
+            <DisplayInfo>
+                <X>498.5</X>
+                <Y>688.5</Y>
+                <Width>661.0</Width>
+                <Height>130.0</Height>
+                <LineColor>#000000</LineColor>
+                <FillColor>#fff9c3</FillColor>
+            </DisplayInfo>
+        </Note>
+        <Note Id="n7">
+            <Name>VUS Scoring</Name>
+            <Content>C. VUS Scoring
+
++ 1 if gene in COSMIC
++ 2 if gene in cancer module
++ 3 if gene in cancer pathway
++ 4 if gene in linked pathway
++ 5 if gene in CGC/COSMIC
++ 6 if gene, alteration in CGC/COSMIC</Content>
+            <DisplayInfo>
+                <X>498.5</X>
+                <Y>913.5</Y>
+                <Width>661.0</Width>
+                <Height>130.0</Height>
+                <LineColor>#000000</LineColor>
+                <FillColor>#fff9c3</FillColor>
+            </DisplayInfo>
+        </Note>
+    </Notes>
+    <Areas/>
+    <Texts/>
+    <TableDisplays>
+        <TableDisplay Id="td48">
+            <X>920.5</X>
+            <Y>504.5</Y>
+            <Width>219.0</Width>
+            <Height>174.0</Height>
+            <LineColor>#000000</LineColor>
+            <FillColor>#ffffff</FillColor>
+            <Table>t48</Table>
+            <FixedSize>false</FixedSize>
+        </TableDisplay>
+        <TableDisplay Id="td51">
+            <X>526.5</X>
+            <Y>540.5</Y>
+            <Width>144.0</Width>
+            <Height>104.0</Height>
+            <LineColor>#000000</LineColor>
+            <FillColor>#ffffff</FillColor>
+            <Table>t51</Table>
+            <FixedSize>false</FixedSize>
+        </TableDisplay>
+        <TableDisplay Id="td52">
+            <X>952.5</X>
+            <Y>279.5</Y>
+            <Width>143.0</Width>
+            <Height>87.0</Height>
+            <LineColor>#000000</LineColor>
+            <FillColor>#ffffff</FillColor>
+            <Table>t52</Table>
+            <FixedSize>false</FixedSize>
+        </TableDisplay>
+        <TableDisplay Id="td53">
+            <X>925.5</X>
+            <Y>390.5</Y>
+            <Width>198.0</Width>
+            <Height>73.0</Height>
+            <LineColor>#000000</LineColor>
+            <FillColor>#ffffff</FillColor>
+            <Table>t53</Table>
+            <FixedSize>false</FixedSize>
+        </TableDisplay>
+        <TableDisplay Id="td54">
+            <X>724.5</X>
+            <Y>557.5</Y>
+            <Width>142.0</Width>
+            <Height>76.0</Height>
+            <LineColor>#000000</LineColor>
+            <FillColor>#ffffff</FillColor>
+            <Table>t54</Table>
+            <FixedSize>false</FixedSize>
+        </TableDisplay>
+    </TableDisplays>
+    <ViewDisplays/>
+    <ReferenceDisplays>
+        <ReferenceDisplay Id="rd96">
+            <Color>#000000</Color>
+            <Type>Vertical_2CP</Type>
+            <ControlPoints>
+                <ControlPoint>
+                    <X>1026.5</X>
+                    <Y>587.5</Y>
+                </ControlPoint>
+                <ControlPoint>
+                    <X>1026.5</X>
+                    <Y>429.5</Y>
+                </ControlPoint>
+            </ControlPoints>
+            <PkTableDisplay>td48</PkTableDisplay>
+            <FkTableDisplay>td53</FkTableDisplay>
+            <Reference>r96</Reference>
+        </ReferenceDisplay>
+        <ReferenceDisplay Id="rd97">
+            <Color>#000000</Color>
+            <Type>Vertical_2CP</Type>
+            <ControlPoints>
+                <ControlPoint>
+                    <X>1024.5</X>
+                    <Y>327.5</Y>
+                </ControlPoint>
+                <ControlPoint>
+                    <X>1024.5</X>
+                    <Y>414.5</Y>
+                </ControlPoint>
+            </ControlPoints>
+            <PkTableDisplay>td52</PkTableDisplay>
+            <FkTableDisplay>td53</FkTableDisplay>
+            <Reference>r97</Reference>
+        </ReferenceDisplay>
+        <ReferenceDisplay Id="rd98">
+            <Color>#000000</Color>
+            <Type>Horizontal_2CP</Type>
+            <ControlPoints>
+                <ControlPoint>
+                    <X>986.5</X>
+                    <Y>586.5</Y>
+                </ControlPoint>
+                <ControlPoint>
+                    <X>790.5</X>
+                    <Y>586.5</Y>
+                </ControlPoint>
+            </ControlPoints>
+            <PkTableDisplay>td48</PkTableDisplay>
+            <FkTableDisplay>td54</FkTableDisplay>
+            <Reference>r98</Reference>
+        </ReferenceDisplay>
+        <ReferenceDisplay Id="rd99">
+            <Color>#000000</Color>
+            <Type>Horizontal_4CP</Type>
+            <ControlPoints>
+                <ControlPoint>
+                    <X>597.5</X>
+                    <Y>585.5</Y>
+                </ControlPoint>
+                <ControlPoint>
+                    <X>733.5</X>
+                    <Y>585.5</Y>
+                </ControlPoint>
+                <ControlPoint>
+                    <X>733.5</X>
+                    <Y>594.5</Y>
+                </ControlPoint>
+                <ControlPoint>
+                    <X>806.5</X>
+                    <Y>594.5</Y>
+                </ControlPoint>
+            </ControlPoints>
+            <PkTableDisplay>td51</PkTableDisplay>
+            <FkTableDisplay>td54</FkTableDisplay>
+            <Reference>r99</Reference>
+        </ReferenceDisplay>
+    </ReferenceDisplays>
+    <Properties>
+        <Property>
+            <Name>pdf-printer-paper-size</Name>
+            <Value>A4</Value>
+        </Property>
+        <Property>
+            <Name>pdf-printer-margin-top</Name>
+            <Value>10</Value>
+        </Property>
+        <Property>
+            <Name>pdf-printer-margin-bottom</Name>
+            <Value>10</Value>
+        </Property>
+        <Property>
+            <Name>pdf-printer-margin-left</Name>
+            <Value>10</Value>
+        </Property>
+        <Property>
+            <Name>pdf-printer-margin-right</Name>
+            <Value>10</Value>
+        </Property>
+        <Property>
+            <Name>pdf-printer-page-orientation</Name>
+            <Value>landscape</Value>
+        </Property>
+        <Property>
+            <Name>pdf-printer-show-pages</Name>
+            <Value>false</Value>
+        </Property>
+        <Property>
+            <Name>pdf-printer-include-footer</Name>
+            <Value>true</Value>
+        </Property>
+    </Properties>
+    <DefaultAdditionalProperties>
+        <Types>
+            <Name>table</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>column</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>alternate_key</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>index</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>table_check</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>trigger</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>reference</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>view</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>sequence</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>procedure</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>all</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>view_column</Name>
+            <Properties/>
+        </Types>
+        <Types>
+            <Name>primary_key</Name>
+            <Properties/>
+        </Types>
+    </DefaultAdditionalProperties>
+</DatabaseModel>

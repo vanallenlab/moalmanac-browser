@@ -12,6 +12,17 @@
 
 <div class="container">
     <h1>Add TARGET Assertions</h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul class="flashes list-unstyled">
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+
     <div class="row repeat">
         <form method="POST" action="#">
             {{ editor_form.csrf_token }}
@@ -30,8 +41,8 @@
 
                             <div class="panel-body">
                                 {{ render_field(alt_form.feature_type, parent='alteration', required=True) }}
+                                {{ render_field(alt_form.alt_type, parent='alteration') }}
                                 {{ render_field(alt_form.gene_name, parent='alteration') }}
-                                {{ render_field(alt_form.type, parent='alteration') }}
                                 {{ render_field(alt_form.alteration, parent='alteration') }}
                             </div>
                         </div>
@@ -43,8 +54,8 @@
 
                             <div class="panel-body">
                                 {{ render_field(field=alt_form.feature_type, num=0, parent='alteration', required=True) }}
+                                {{ render_field(field=alt_form.alt_type, parent='alteration', num=0) }}
                                 {{ render_field(field=alt_form.gene_name, parent='alteration', num=0) }}
-                                {{ render_field(field=alt_form.type, parent='alteration', num=0) }}
                                 {{ render_field(field=alt_form.alteration, parent='alteration', num=0) }}
                             </div>
                         </div>
@@ -69,6 +80,7 @@
 
                             <div class="panel-body">
                                 {{ render_field(assert_form.disease, parent='assertion', required=True) }}
+                                {{ render_field(assert_form.stage, parent='assertion') }}
                                 {{ render_field(assert_form.therapy_name, parent='assertion') }}
                                 {{ render_field(assert_form.therapy_type, parent='assertion') }}
                                 {{ render_field(assert_form.pred_impl, parent='assertion') }}
@@ -84,6 +96,7 @@
                             </div>
                             <div class="panel-body">
                                 {{ render_field(assert_form.disease, parent='assertion', num=0, required=True) }}
+                                {{ render_field(assert_form.stage, parent='assertion') }}
                                 {{ render_field(assert_form.therapy_name, parent='assertion', num=0) }}
                                 {{ render_field(assert_form.therapy_type, parent='assertion', num=0) }}
                                 {{ render_field(assert_form.pred_impl, parent='assertion', num=0) }}
@@ -112,8 +125,9 @@
                             </div>
 
                             <div class="panel-body">
-                                {{ render_field(source_form.doi, parent='source') }}
                                 {{ render_field(source_form.cite_text, parent='source', required=True) }}
+                                {{ render_field(source_form.doi, parent='source') }}
+                                {{ render_field(source_form.source_type, parent='source') }}
                             </div>
                         </div>
 
@@ -123,8 +137,9 @@
                             </div>
 
                             <div class="panel-body">
-                                {{ render_field(source_form.doi, parent='source', num=0) }}
                                 {{ render_field(source_form.cite_text, parent='source', num=0, required=True) }}
+                                {{ render_field(source_form.doi, parent='source', num=0) }}
+                                {{ render_field(source_form.source_type, parent='source', num=0) }}
                             </div>
                         </div>
                     </div>

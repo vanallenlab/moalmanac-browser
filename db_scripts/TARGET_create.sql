@@ -1,24 +1,26 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2016-10-27 13:50:04.067
+-- Last modification date: 2016-11-07 22:58:29.343
 
 -- tables
 -- Table: Alteration
 CREATE TABLE Alteration (
     alt_id integer NOT NULL CONSTRAINT Alteration_pk PRIMARY KEY,
     feature text NOT NULL,
-    gene_name text,
     alt_type text,
-    alt text
+    alt text,
+    gene_name text
 );
 
 -- Table: Assertion
 CREATE TABLE Assertion (
     assertion_id integer NOT NULL CONSTRAINT Assertion_pk PRIMARY KEY,
+    last_updated text NOT NULL,
     disease text NOT NULL,
+    stage integer,
     therapy_name text,
     therapy_type text,
     therapy_sensitivity boolean,
-    predictive_impliciation text,
+    predictive_implication text,
     favorable_prognosis boolean,
     description text
 );
@@ -48,8 +50,9 @@ CREATE TABLE Assertion_To_Source (
 -- Table: Source
 CREATE TABLE Source (
     source_id integer NOT NULL CONSTRAINT Source_pk PRIMARY KEY,
-    doi text,
-    cite_text text NOT NULL
+    source_type text NOT NULL,
+    cite_text text NOT NULL,
+    doi text
 );
 
 -- End of file.
