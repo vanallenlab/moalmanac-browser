@@ -1,5 +1,5 @@
 {%- extends 'base.html' %}
-{% from "_editor_helpers.html" import render_field, render_field %}
+{% from "_editor_helpers.html" import render_text_field, render_select_field %}
 
 {% block scripts %}
 {{super()}}
@@ -11,7 +11,7 @@
 {% block content %}
 
 <div class="container">
-    <h1>Add TARGET Assertions</h1>
+    <h1>Add TARGET Assertion</h1>
 
     {% with messages = get_flashed_messages() %}
     {% if messages %}
@@ -23,135 +23,138 @@
     {% endif %}
     {% endwith %}
 
-    <div class="row repeat">
-        <form method="POST" action="#">
-            {{ editor_form.csrf_token }}
-            <div class="col-xs-4">
+    <form method="POST" id="assertion-form" action="#" data-parsley-validate>
+        {{ editor_form.csrf_token }}
+        <div class="row repeat">
+            <div class="col-xs-12">
+                <div class="repeat-wrapper">
+                    <div class="panel-group repeat-container">
+                        <div class="panel panel-default repeat-row repeat-template">
+                            <div class="panel-heading panel-heading-assertion">
+                                <h3 class="panel-title">Assertion</h3>
+                                <button type="button" class="close pull-right repeat-remove" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+
+                            <div class="panel-body">
+                                {{ render_text_field(assert_form.disease, parent='assertion', required=True) }}
+                                {{ render_text_field(assert_form.stage, parent='assertion') }}
+                                {{ render_text_field(assert_form.therapy_name, parent='assertion') }}
+                                {{ render_text_field(assert_form.therapy_type, parent='assertion') }}
+                                {{ render_text_field(assert_form.pred_impl, parent='assertion') }}
+                                {{ render_text_field(assert_form.description, parent='assertion') }}
+
+                                {{ render_select_field(assert_form.therapy_sensitivity, parent='assertion') }}
+                                {{ render_select_field(assert_form.favorable_prognosis, parent='assertion') }}
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default repeat-row">
+                            <div class="panel-heading panel-heading-assertion">
+                                <h3 class="panel-title">Assertion</h3>
+                            </div>
+                            <div class="panel-body">
+                                {{ render_text_field(assert_form.disease, parent='assertion', num=0, required=True) }}
+                                {{ render_text_field(assert_form.stage, parent='assertion') }}
+                                {{ render_text_field(assert_form.therapy_name, parent='assertion', num=0) }}
+                                {{ render_text_field(assert_form.therapy_type, parent='assertion', num=0) }}
+                                {{ render_text_field(assert_form.pred_impl, parent='assertion', num=0) }}
+                                {{ render_text_field(assert_form.description, parent='assertion', num=0) }}
+
+                                {{ render_select_field(assert_form.therapy_sensitivity, parent='assertion', num=0) }}
+                                {{ render_select_field(assert_form.favorable_prognosis, parent='assertion', num=0) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row repeat">
+            <div class="col-xs-12">
                 <h3>Alterations</h3>
 
                 <div class="repeat-wrapper">
                     <div class="panel-group repeat-container">
-                        <div class="panel panel-info repeat-row repeat-template">
-                            <div class="panel-heading">
-                                Alteration
+                        <div class="panel panel-default repeat-row repeat-template">
+                            <div class="panel-heading panel-heading-alteration">
+                                <h3 class="panel-title">Alteration</h3>
                                 <button type="button" class="close pull-right repeat-remove" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
 
                             <div class="panel-body">
-                                {{ render_field(alt_form.feature_type, parent='alteration', required=True) }}
-                                {{ render_field(alt_form.alt_type, parent='alteration') }}
-                                {{ render_field(alt_form.gene_name, parent='alteration') }}
-                                {{ render_field(alt_form.alteration, parent='alteration') }}
+                                {{ render_text_field(alt_form.feature_type, parent='alteration', required=True) }}
+                                {{ render_text_field(alt_form.alt_type, parent='alteration') }}
+                                {{ render_text_field(alt_form.gene_name, parent='alteration') }}
+                                {{ render_text_field(alt_form.alteration, parent='alteration') }}
                             </div>
                         </div>
 
-                        <div class="panel panel-info repeat-row">
-                            <div class="panel-heading">
-                                Alteration
+                        <div class="panel panel-default repeat-row">
+                            <div class="panel-heading panel-heading-alteration">
+                                <h3 class="panel-title">Alteration</h3>
                             </div>
 
                             <div class="panel-body">
-                                {{ render_field(field=alt_form.feature_type, num=0, parent='alteration', required=True) }}
-                                {{ render_field(field=alt_form.alt_type, parent='alteration', num=0) }}
-                                {{ render_field(field=alt_form.gene_name, parent='alteration', num=0) }}
-                                {{ render_field(field=alt_form.alteration, parent='alteration', num=0) }}
+                                {{ render_text_field(field=alt_form.feature_type, num=0, parent='alteration', required=True) }}
+                                {{ render_text_field(field=alt_form.alt_type, parent='alteration', num=0) }}
+                                {{ render_text_field(field=alt_form.gene_name, parent='alteration', num=0) }}
+                                {{ render_text_field(field=alt_form.alteration, parent='alteration', num=0) }}
                             </div>
                         </div>
                     </div>
 
-                    <a class="btn btn-primary btn-block repeat-add editor-add-item" role="button" href="#">+ Add alteration</a>
+                    <a class="btn btn-primary btn-block repeat-add editor-add-item add-alteration" role="button" href="#">+ Add alteration</a>
                 </div>
             </div>
+        </div>
 
-            <div class="col-xs-4">
-                <h3>Assertions</h3>
 
-                <div class="repeat-wrapper">
-                    <div class="panel-group repeat-container">
-                        <div class="panel panel-info repeat-row repeat-template">
-                            <div class="panel-heading">
-                                Assertion
-                                <button type="button" class="close pull-right repeat-remove" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-
-                            <div class="panel-body">
-                                {{ render_field(assert_form.disease, parent='assertion', required=True) }}
-                                {{ render_field(assert_form.stage, parent='assertion') }}
-                                {{ render_field(assert_form.therapy_name, parent='assertion') }}
-                                {{ render_field(assert_form.therapy_type, parent='assertion') }}
-                                {{ render_field(assert_form.pred_impl, parent='assertion') }}
-                                {{ render_field(assert_form.description, parent='assertion') }}
-                                {{ render_field(assert_form.therapy_sensitivity, parent='assertion') }}
-                                {{ render_field(assert_form.favorable_prognosis, parent='assertion') }}
-                            </div>
-                        </div>
-
-                        <div class="panel panel-info repeat-row">
-                            <div class="panel-heading">
-                                Assertion
-                            </div>
-                            <div class="panel-body">
-                                {{ render_field(assert_form.disease, parent='assertion', num=0, required=True) }}
-                                {{ render_field(assert_form.stage, parent='assertion') }}
-                                {{ render_field(assert_form.therapy_name, parent='assertion', num=0) }}
-                                {{ render_field(assert_form.therapy_type, parent='assertion', num=0) }}
-                                {{ render_field(assert_form.pred_impl, parent='assertion', num=0) }}
-                                {{ render_field(assert_form.description, parent='assertion', num=0) }}
-                                {{ render_field(assert_form.therapy_sensitivity, parent='assertion', num=0) }}
-                                {{ render_field(assert_form.favorable_prognosis, parent='assertion', num=0) }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <a class="btn btn-primary btn-block repeat-add editor-add-item" role="button" href="#">+ Add assertion</a>
-                </div>
-            </div>
-
-            <div class="col-xs-4">
+        <div class="row repeat">
+            <div class="col-xs-12">
                 <h3>Sources</h3>
 
                 <div class="repeat-wrapper">
                     <div class="panel-group repeat-container">
-                        <div class="panel panel-info repeat-row repeat-template">
-                            <div class="panel-heading">
-                                Source
+                        <div class="panel panel-default repeat-row repeat-template">
+                            <div class="panel-heading panel-heading-source">
+                                <h3 class="panel-title">Source</h3>
                                 <button type="button" class="close pull-right repeat-remove" aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
                             </div>
 
                             <div class="panel-body">
-                                {{ render_field(source_form.cite_text, parent='source', required=True) }}
-                                {{ render_field(source_form.doi, parent='source') }}
-                                {{ render_field(source_form.source_type, parent='source') }}
+                                {{ render_text_field(source_form.cite_text, parent='source', required=True) }}
+                                {{ render_text_field(source_form.doi, parent='source') }}
+                                {{ render_text_field(source_form.source_type, parent='source') }}
                             </div>
                         </div>
 
-                        <div class="panel panel-info repeat-row">
-                            <div class="panel-heading">
-                                Source
+                        <div class="panel panel-default repeat-row">
+                            <div class="panel-heading panel-heading-source">
+                                <h3 class="panel-title">Source</h3>
                             </div>
 
                             <div class="panel-body">
-                                {{ render_field(source_form.cite_text, parent='source', num=0, required=True) }}
-                                {{ render_field(source_form.doi, parent='source', num=0) }}
-                                {{ render_field(source_form.source_type, parent='source', num=0) }}
+                                {{ render_text_field(source_form.cite_text, parent='source', num=0, required=True) }}
+                                {{ render_text_field(source_form.doi, parent='source', num=0) }}
+                                {{ render_text_field(source_form.source_type, parent='source', num=0) }}
                             </div>
                         </div>
                     </div>
 
-                    <a class="btn btn-primary btn-block repeat-add editor-add-item" role="button" href="#">+ Add source</a>
+                    <a class="btn btn-primary btn-block repeat-add editor-add-item add-source" role="button" href="#">+ Add source</a>
                 </div>
             </div>
 
             <div class="clearfix visible-xs-block"></div>
 
             <div class="col-xs-12">
-                <button id="submit-assertions-button" class="btn btn-primary btn-lg btn-block" href="#" role="button">Submit Assertion(s)</button>
+                <button id="submit-assertions-button" class="btn btn-primary btn-lg btn-block" href="#" role="button">Submit Assertion</button>
             </div>
         </form>
     </div>

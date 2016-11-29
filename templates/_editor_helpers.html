@@ -1,50 +1,41 @@
-{% macro render_field(field, parent, num='{{row-count-placeholder}}', required=False) %}
+{% macro render_text_field(field, parent, num='__row-count-placeholder__', required=False) %}
 <div id="parsley-class-handler-{{ field.id ~ '-' ~ num }}" class="form-group{% if field.errors %} has-feedback has-error{% endif %}{%if required %} required{% endif %}">
     <div class="input-group">
-        {% if field.type != 'BooleanField' %}
         <span class="input-group-addon">
             {{ field.label(class='input-group-label', for=field.short_name ~ '-' ~ num) }}
         </span>
-        {% endif %}
 
         <input name="{{parent}}-{{num}}-{{field.short_name}}"
                class="form-control"
                id="{{field.short_name}}-{{num}}"
-               type="{{ {'BooleanField': 'checkbox', 'StringField': 'text'}[field.type] }}"
+               type="text" {% if required %}data-parsley-required="true"{% endif %}
                data-parsley-class-handler="#parsley-class-handler-{{field.short_name}}-{{num}}"
                data-parsley-error-class="has-error"
                data-parsley-errors-container="#parsley-error-list-{{field.short_name}}-{{num}}">
-
-        {% if field.type == 'BooleanField' %}
-        <span class="input-group-addon input-group-checkbox">
-            {{ field.label(class='input-group-label', for=field.short_name ~ '-' ~ num) }}
-        </span>
-        {% endif %}
     </div>
 
     {{ render_errors(field, num) }}
 </div>
 {% endmacro %}
 
-{% macro render_checkbox(field, parent, num='{{row-count-placeholder}}') %}
-<div class="form-group">
-    <div class="checkbox">
-        <label>
-        {{
-            field(**{
-                'data-parsley-errors-container': '#parsley-error-list-' ~ field.id ~ num,
-                'data-parsley-class-handler': '#parsley-class-handler-' ~ field.id ~ num,
-                'data-parsley-error-class': 'has-error',
-            })
-        }}
-        {{ field.label() }}
-        </label>
+{% macro render_select_field(field, parent, num='__row-count-placeholder__', required=False) %}
+<div id="parsley-class-handler-{{ field.id ~ '-' ~ num }}" class="form-group{% if field.errors %} has-feedback has-error{% endif %}{%if required %} required{% endif %}">
+    <div class="input-group">
+        <span class="input-group-addon">
+            {{ field.label(class='input-group-label', for=field.short_name ~ '-' ~ num) }}
+        </span>
+
+        <select name="{{parent}}-{{num}}-{{field.short_name}}">
+            {% for value, label, type in field.iter_choices() %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+        </select>
     </div>
 </div>
 {% endmacro %}
 
 {% macro render_errors(field, num) %}
-<span id="parsley-error-list-{{ field.short_name ~ num }}" class="help-block">
+<span id="parsley-error-list-{{field.short_name}}-{{num}}" class="help-block">
     {%if field.errors %}
     <ul class="unstyled">
         {% for error in field.errors %}

@@ -28,6 +28,46 @@ h3 {
     border: none !important;
 }
 
+.panel-default > .panel-heading-assertion {
+    background-color: #ffbb33 !important;
+    border-color: #ffbb33 !important;
+}
+
+.panel-default > .panel-heading-alteration {
+    background-color: #00C851 !important;
+}
+
+.panel-default > .panel-heading-source {
+    background-color: #aa66cc !important;
+}
+
+.add-assertion {
+    color: black;
+    background-color: #ffbb33 !important;
+    border-color: #ffbb33 !important;
+}
+
+.add-alteration {
+    color: black;
+    background-color: #00C851 !important;
+    border-color: #00C851 !important;
+}
+
+.add-source {
+    color: black;
+    background-color: #aa66cc !important;
+    border-color: #aa66cc !important;
+}
+
+.editor-add-item {
+    width: 20% !important;
+    float: right;
+}
+
+.panel-title {
+    display: inline;
+}
+
 ul.flashes {
     text-align: center;
     padding: 1em;
