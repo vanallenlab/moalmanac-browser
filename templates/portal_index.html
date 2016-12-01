@@ -1,46 +1,81 @@
 {%- extends 'base.html' %}
 
+{% macro pagination_nav() -%}
+<p class='text-center'>
+    {% if viewing_all %}
+        <a href='{{ url_for('gene_views.genes', page=1) }}'>View first 10</a>
+    {% else %}
+        {% if paginate_has_prev %}
+            <a href='{{ url_for('gene_views.genes', page=1) }}'>&lt;&lt; first 10</a> |
+            <a href='{{ url_for('gene_views.genes', page=paginate_prev_num) }}'>&lt; 10 previous</a> |
+        {% endif %}
+        <a href='{{ url_for('gene_views.genes-all') }}'>View all</a>
+        {% if paginate_has_next %}
+            | <a href='{{ url_for('gene_views.genes', page=paginate_next_num) }}'>10 next &gt;</a>
+            | <a href='{{ url_for('gene_views.genes', page=paginate_total_pages) }}'>last 10 &gt;&gt;</a>
+        {% endif %}
+    {% endif %}
+</p>
+{%- endmacro %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='target/portal.js')}}"></script>
+{% endblock %}
+
 {% block content %}
 
 <div class="container">
+    <h2>TARGET Database</h2>
     <table class="table table-condensed table-hover">
         <tr>
-            <th>Alterations</th><th>Assertions</th><th>Sources</th>
+            <th>Alterations</th><th>Assertions</th><th>Sources</th><th></th>
         </tr>
         {% for assert in assertions %}
         <tr>
             <td class="col-xs-3">
                 {% for alteration in assert.alterations %}
-                <ul class="list-unstyled">
-                    <li><strong>Feature:</strong> {{alteration.feature}}</li>
-                    <li><strong>Gene name:</strong> {{alteration.gene_name}}</li>
-                    <li><strong>Alt type:</strong> {{alteration.alt_type}}</li>
-                    <li><strong>Alteration:</strong> {{alteration.alt}}</li>
-                    <li>(Alteration ID: {{alteration.alt_id}})</li>
+                <ul class="list-unstyled" title="Alteration ID: {{alteration.alt_id}}">
+                    <li><strong>{{alteration.feature}}</strong> {% if alteration.alt_type %}({{alteration.alt_type}}){% endif %}</li>
+                    <li>{% if alteration.gene_name %}{{alteration.gene_name}} {% endif %}{% if alteration.alt %}{{alteration.alt}}{% endif %}</li>
                 </ul>
                 {% endfor %}
             </td>
 
             <td class="col-xs-4">
                 <ul class="list-unstyled">
-                    <li><strong>Disease:</strong> {{assert.disease}}</li>
-                    <li><strong>Therapy name:</strong> {{assert.therapy_name}}</li>
-                    <li><strong>Therapy type:</strong> {{assert.therapy_type}}</li>
-                    <li><strong>Therapy sensitivity:</strong> {{assert.therapy_sensitivity}}</li>
-                    <li><strong>Predictive implication:</strong> {{assert.predictive_implication}}</li>
-                    <li><strong>Favorable prognosis:</strong> {{assert.favorable_prognosis}}</li>
-                    <li><strong>Description:</strong> {{assert.description}}</li>
-                    <li>(Assertion ID: {{assert.assertion_id}})</li>
+                    <li title="Assertion ID: {{assert.assertion_id}}; Last updated: {{assert.last_updated}}"><strong>{{assert.disease}}</strong></li>
+                    {% if assert.therapy_name %}
+                        <li>
+                            {% if assert.therapy_sensitivity == True %}<strong>Resistant</strong>
+                            {% elif assert.therapy_sensitivity == False %}<strong>Sensitivity</strong>
+                            {% endif %}
+                            to <strong>{{assert.therapy_name}}</strong>{% if assert.therapy_type %} ({{assert.therapy_type}}){% endif %}
+                        </li>
+                    {% endif %}
+
+                    {% if assert.favorable_prognosis != None %}
+                    <li><strong>{% if assert.favorable_prognosis %}Favorable{% else %}Unfavorable{% endif %}</strong> prognosis</li>
+                    {% endif %}
                 </ul>
+
+                {% if assert.predictive_implication %}<p><strong>
+                    <a href="#" data-toggle="tooltip" title=
+"FDA-Approved: Validated association between alteration and assertion.
+Level A: Alteration used in clinical trial eligibility criterion.
+Level B: Limited clinical evidence.
+Level C: Limited clinical evidence in a different tumor type.
+Level D: Preclinical evidence.
+Level E: Inferential association."
+                    >{{assert.predictive_implication}}</a>
+                </strong></p>{% endif %}
+                <p>{{assert.description}}</p>
             </td>
 
             <td class="col-xs-4">
                 {% for source in assert.sources %}
-                <ul class="list-unstyled">
-                    <li><strong>DOI:</strong> {{source.doi}}</li>
-                    <li><strong>Cite text:</strong> {{source.cite_text}}</li>
-                    <li>(Source ID: {{source.source_id}})</li>
-                </ul>
+                <p title="{{source.source_id}}">{{source.cite_text}}</p>
+                {% if source.doi %}<p><a href="https://doi.org/{{source.doi|urlencode}}">{{source.doi}}</a></p>{% endif %}
                 {% endfor %}
             </td>
 
