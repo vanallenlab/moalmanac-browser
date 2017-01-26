@@ -18,13 +18,13 @@ class Assertion(Base, db.Model):
     description = db.Column('description', db.Text)
 
     alterations = orm.relationship('Alteration',
-                                   single_parent=True,
+                                   #single_parent=True,
                                    secondary='Assertion_To_Alteration',
-                                   cascade='all, delete-orphan')
+                                   )#cascade='all, delete-orphan')
     sources = orm.relationship('Source',
-                               single_parent=True,
+                               #single_parent=True,
                                secondary='Assertion_To_Source',
-                               cascade='all, delete-orphan')
+                               )#cascade='all, delete-orphan')
 
 # feature = {Amplification, Biallelic Inactivation, Deletion, Mutation, Rearrangement}
 # alt = Alteration specified using HGVS notation (http://varnomen.hgvs.org/recommendations/)

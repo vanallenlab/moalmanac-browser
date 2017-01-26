@@ -25,11 +25,21 @@
 
 {% block content %}
 
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashes list-unstyled">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
 <div class="container">
     <h2>TARGET Database</h2>
     <table class="table table-condensed table-hover">
         <tr>
-            <th>Alterations</th><th>Assertions</th><th>Sources</th><th></th>
+            <th><h4>Alterations</h4></th><th><h4>Assertions</h4></th><th><h4>Sources</h4></th><th></th>
         </tr>
         {% for assert in assertions %}
         <tr>
@@ -43,12 +53,27 @@
             </td>
 
             <td class="col-xs-4">
-                <ul class="list-unstyled">
-                    <li title="Assertion ID: {{assert.assertion_id}}; Last updated: {{assert.last_updated}}"><strong>{{assert.disease}}</strong></li>
+                <p title="Assertion ID: {{assert.assertion_id}}; Last updated: {{assert.last_updated}}">
+                    <strong>
+                        {{assert.disease}}
+                        {% if assert.predictive_implication %}
+                         • <a href="#" data-toggle="tooltip" class="tooltip-text" title=
+    "FDA-Approved: Validated association between alteration and assertion.
+    Level A: Alteration used in clinical trial eligibility criterion.
+    Level B: Limited clinical evidence.
+    Level C: Limited clinical evidence in a different tumor type.
+    Level D: Preclinical evidence.
+    Level E: Inferential association."
+                        >{{assert.predictive_implication}}</a>
+                        {% endif %}
+                    </strong>
+                </p>
+
+                <ul>
                     {% if assert.therapy_name %}
                         <li>
-                            {% if assert.therapy_sensitivity == True %}<strong>Resistant</strong>
-                            {% elif assert.therapy_sensitivity == False %}<strong>Sensitivity</strong>
+                            {% if assert.therapy_sensitivity == True %}<strong>Sensitivity</strong>
+                            {% elif assert.therapy_sensitivity == False %}<strong>Resistance</strong>
                             {% endif %}
                             to <strong>{{assert.therapy_name}}</strong>{% if assert.therapy_type %} ({{assert.therapy_type}}){% endif %}
                         </li>
@@ -59,23 +84,17 @@
                     {% endif %}
                 </ul>
 
-                {% if assert.predictive_implication %}<p><strong>
-                    <a href="#" data-toggle="tooltip" title=
-"FDA-Approved: Validated association between alteration and assertion.
-Level A: Alteration used in clinical trial eligibility criterion.
-Level B: Limited clinical evidence.
-Level C: Limited clinical evidence in a different tumor type.
-Level D: Preclinical evidence.
-Level E: Inferential association."
-                    >{{assert.predictive_implication}}</a>
-                </strong></p>{% endif %}
                 <p>{{assert.description}}</p>
             </td>
 
             <td class="col-xs-4">
                 {% for source in assert.sources %}
-                <p title="{{source.source_id}}">{{source.cite_text}}</p>
-                {% if source.doi %}<p><a href="https://doi.org/{{source.doi|urlencode}}">{{source.doi}}</a></p>{% endif %}
+                <p title="{{source.source_id}}">
+                    {% if source.source_type %}{{source.source_type}}: {% endif %}
+                    {% if source.doi %}<a class="doi" href="https://doi.org/{{source.doi|urlencode}}">{% endif %}
+                    <i>{{source.cite_text}}</i>
+                    {% if source.doi %}</a>{% endif %}
+                </p>
                 {% endfor %}
             </td>
 

@@ -1,3 +1,8 @@
+body {
+    background: url("/static/target/target-logo.png") no-repeat;
+    background-size: 10%;
+}
+
 label.input-group-label {
   font-weight: normal !important;
   margin: 0;
@@ -72,4 +77,22 @@ ul.flashes {
     text-align: center;
     padding: 1em;
     background-color: #f1f8e9;
+}
+
+.tooltip-text {
+    color: #000000;
+    border-bottom: 1px dashed #AAAAAA;
+}
+
+.tooltip-text:hover {
+    text-decoration: none;
+}
+
+.tooltip-inner {
+    white-space: pre-wrap;
+}
+
+a.doi {
+    background-image: url('static/target/ext_link.png') center right no-repeat;
+    padding-right: 13px;
 }

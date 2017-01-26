@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, flash, redirect, url_for
 
 from db import db
 from models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
@@ -15,8 +15,8 @@ def index():
 
 @portal.route('/delete/<int:assert_id>')
 def delete(assert_id):
-    needle = Assertion.query.filter_by(assertion_id=assert_id).one()
-    db.session.delete(needle)
+    Assertion.query.filter_by(assertion_id=assert_id).delete()
     db.session.commit()
 
-    return 'Assertion %s deleted.' % str(assert_id)
+    flash('Deleted assertion.')
+    return redirect(url_for('portal.index'))

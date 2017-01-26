@@ -124,12 +124,20 @@ def index():
             db.session.flush()
 
             assert_data = editor_form.data['assertion'][0]
+
+            sensitivity = None
+            if assert_data['therapy_sensitivity'] == 'sensitive': sensitivity = True
+            elif assert_data['therapy_sensitivity'] == 'resistant': sensitivity = False
+
+            prognosis = None
+            if assert_data['favorable_prognosis'] == 'favorable': prognosis = True
+            elif assert_data['favorable_prognosis'] == 'negative': prognosis = False
             new_assert = Assertion(disease=assert_data['disease'],
                                    therapy_name=assert_data['therapy_name'],
                                    therapy_type=assert_data['therapy_type'],
-                                   therapy_sensitivity=(assert_data['therapy_sensitivity'] == 'True'),
+                                   therapy_sensitivity=sensitivity,
                                    predictive_implication=assert_data['pred_impl'],
-                                   favorable_prognosis=(assert_data['favorable_prognosis'] == 'True'),
+                                   favorable_prognosis=prognosis,
                                    description=assert_data['description'],
                                    last_updated=datetime.now())
 
@@ -143,7 +151,7 @@ def index():
             db.session.commit()
             db.session.flush()
 
-            flash('Assertion added (%s).' % new_assert.disease)
+            flash('Assertion added (%s).' % assert_data['therapy_sensitivity'])#new_assert.disease)
         else:
             flash('Error')
 
