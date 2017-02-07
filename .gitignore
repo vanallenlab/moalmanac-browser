@@ -3,3 +3,4 @@ logs/
 .idea/
 *.pyc
 *.sqlite3
+*.swp
