@@ -33,9 +33,20 @@ def index():
 
 @portal.route('/search')
 def search():
+    def _make_row(alt, assertion):
+        return {
+            'gene_name': alt.gene_name,
+            'feature': alt.feature,
+            'alt_type': alt.alt_type,
+            'alt': alt.alt,
+            'therapy_name': assertion.therapy_name,
+            'therapy_sensitivity': assertion.therapy_sensitivity,
+            'disease': assertion.disease,
+            'predictive_implication': assertion.predictive_implication,
+            'assertion_id': assertion.assertion_id
+        }
+
     typeahead_genes = _query_distinct_column(Alteration, 'gene_name')
-    gene_needle = request.args.get('g')
-    alts = db.session.query(Alteration).filter(Alteration.gene_name.like('%'+gene_needle+'%')).all()
     pred_impl_orders = {
         'FDA-Approved': 5,
         'Level A': 4,
@@ -44,10 +55,28 @@ def search():
         'Level D': 1,
     }
 
+
+    gene_needle = request.args.get('g')
+    cancer_needle = request.args.get('d')
+    pred_impl_needle = request.args.get('p')
+    therapy_needle = request.args.get('t')
+
+    rows = []
+    if gene_needle:
+        alts = db.session.query(Alteration).filter(Alteration.gene_name.like('%'+gene_needle+'%')).all()
+        for alt in alts:
+            for assertion in alt.assertions:
+                rows.append(_make_row(alt, assertion))
+    elif cancer_needle:
+        assertions = db.session.query(Assertion).filter(Assertion.disease == cancer_needle).all()
+        for assertion in assertions:
+            for alt in assertion.alterations:
+                rows.append(_make_row(alt, assertion))
+
     return render_template('portal_search_results.html',
                            typeahead_genes=typeahead_genes,
-                           alts=alts,
-                           pred_impl_orders=pred_impl_orders)
+                           pred_impl_orders=pred_impl_orders,
+                           rows=rows)
 
 @portal.route('/delete/<int:assert_id>')
 def delete(assert_id):
