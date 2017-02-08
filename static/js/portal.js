@@ -27,9 +27,17 @@ $('.typeahead').typeahead({
 {
 	name: 'typeahead_genes',
 	source: substring_matcher(typeahead_genes)
-})
+});
 
 $('#gene-input').bind('typeahead:select', function(ev, suggestion) {
     $('#gene-input').value = suggestion;
     this.form.submit();
-})
+});
+
+$(document).ready(function(){
+    $('.results-table').DataTable({
+        ordering: true,
+        paging: true,
+        searching: false
+    });
+});

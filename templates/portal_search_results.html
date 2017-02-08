@@ -1,5 +1,10 @@
 {%- extends 'base.html' %}
 
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/jquery.dataTables.min.css')}}">
+{% endblock %}
+
 {% block scripts %}
 {{super()}}
 <script type="text/javascript">
@@ -11,6 +16,7 @@ var typeahead_genes = [
 </script>
 <script src="{{url_for('static', filename='js/typeahead.bundle.js')}}"></script>
 <script src="{{url_for('static', filename='js/portal.js')}}"></script>
+<script src="{{url_for('static', filename='js/jquery.dataTables.min.js')}}"></script>
 {% endblock %}
 
 {% block content %}
@@ -20,88 +26,54 @@ var typeahead_genes = [
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 <ul class="flashes list-unstyled">
-	{% for message in messages %}
-	<li>{{ message }}</li>
-	{% endfor %}
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
 </ul>
 {% endif %}
 {% endwith %}
 
 <section class="container-fluid target-content">
-	<div class="container">
-		<h1>TARGET DB Search Results</h1>
+    <div class="container">
+        <h1>TARGET DB Search Results</h1>
 
-		<div id="browse-search-row" class="row">
-			<div class="col-md-5">
-				<div class="input-group">
-					<input type="text" class="form-control typeahead" placeholder="Gene name">
-					<span class="input-group-btn">
-                        <button class="btn btn-default btn-search" type="button">Search</button>
+        <div id="browse-search-row" class="row">
+            <div class="col-md-5">
+                <form action="search" method="get">
+                    <div class="input-group">
+                        <input type="text" name="g" class="form-control typeahead" placeholder="Gene name">
+                        <span class="input-group-btn">
+                        <button type="submit" class="btn btn-default btn-search" type="button">Search</button>
                     </span>
-				</div>
-			</div>
-		</div>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-		<p class="text-muted">Click on any gene below to view all corresponding alteration-action relationships.</p>
+        <p class="text-muted">Click on any gene below to more details about its corresponding alteration-action relationships.</p>
 
-		<nav aria-label="Page navigation">
-			<ul class="pagination">
-				<li>
-					<a href="#" aria-label="Previous">
-						<span aria-hidden="true">&laquo;</span>
-					</a>
-				</li>
-				<li class="active"><a href="#">1</a></li>
-				<li><a href="#">2</a></li>
-				<li><a href="#">3</a></li>
-				<li><a href="#">4</a></li>
-				<li><a href="#">5</a></li>
-				<li>
-					<a href="#" aria-label="Next">
-						<span aria-hidden="true">&raquo;</span>
-					</a>
-				</li>
-			</ul>
-		</nav>
-
-		<div class="table-responsive">
-			<table class="table table-striped">
-				<thead>
-				<tr><th>Gene</th><th>Feature</th><th>Alt. type</th><th>Alteration</th><th>Therapy</th><th>Response</th><th>Cancer type</th><th>Predictive Level</tr>
-				</thead>
-				<tbody>
-				<tr><td><a href="gene.html">KRAS</a></td><td>Mutation</td><td></td><td></td><td>Tyrosine-Kinase Inhibitor (Drug Class)</td><td>Resistance</td><td>Lung Cancer</td><td></td></tr>
-				<tr><td><a href="gene.html">EGFR</a></td><td>Mutation</td><td>InDel</td><td></td><td>Tyrosine-Kinase Inhibitor (Drug Class)</td><td>Resistance</td><td>Lung Cancer</td><td></td></tr>
-				<tr><td><a href="gene.html">EGFR</a></td><td>Mutation</td><td>SNV</td><td></td><td>Tyrosine-Kinase Inhibitor (Drug Class)</td><td>Resistance</td><td>Lung Cancer</td><td></td></tr>
-				<tr><td><a href="gene.html">PIK3CA</a></td><td>Mutation</td><td>SNV</td><td>Y1021C</td><td>Pictillisib (Targeted Drug)</td><td>Sensitivity</td><td>Breast Cancer</td><td>Level D</td></tr>
-				<tr><td><a href="gene.html">MPL</a></td><td>Mutation</td><td>SNV</td><td>W515L</td><td>EXEL-8232 (Targeted Drug)</td><td>Sensitivity</td><td>Myeloproliferative Disorders</td><td>Level D</td></tr>
-				<tr><td><a href="gene.html">BRAF</a></td><td>Mutation</td><td>SNV</td><td>V600E</td><td>Vemurafenib+EGFR Inhibitor (Targeted Drug)</td><td>Sensitivity</td><td>Glioma</td><td>Level D</td></tr>
-				<tr><td><a href="gene.html">BRAF</a></td><td>Mutation</td><td>SNV</td><td>V600E</td><td>Vemurafenib (Targeted Drug)</td><td>Sensitivity</td><td>Glioma</td><td>Level D</td></tr>
-				<tr><td><a href="gene.html">BRAF</a></td><td>Mutation</td><td>SNV</td><td>V600E</td><td>Panitumumab (Targeted Drug)</td><td>Resistance</td><td>Colorectal Cancer</td><td>Level B</td></tr>
-				</tbody>
-			</table>
-		</div>
-
-		<nav aria-label="Page navigation">
-			<ul class="pagination">
-				<li>
-					<a href="#" aria-label="Previous">
-						<span aria-hidden="true">&laquo;</span>
-					</a>
-				</li>
-				<li class="active"><a href="#">1</a></li>
-				<li><a href="#">2</a></li>
-				<li><a href="#">3</a></li>
-				<li><a href="#">4</a></li>
-				<li><a href="#">5</a></li>
-				<li>
-					<a href="#" aria-label="Next">
-						<span aria-hidden="true">&raquo;</span>
-					</a>
-				</li>
-			</ul>
-		</nav>
-	</div>
+        <table class="results-table display compact">
+            <thead>
+            <tr><th>Gene</th><th>Feature</th><th>Alt. type</th><th>Alteration</th><th>Therapy</th><th>Response</th><th>Cancer type</th><th>Predictive Level</tr>
+            </thead>
+            <tbody>
+            {% for alt in alts %}
+            {% for assertion in alt.assertions %}
+            <tr>
+                <td><a href="gene/{{alt.gene_name}}">{{alt.gene_name}}</a></td>
+                <td>{{alt.feature if alt.feature is not none}}</td>
+                <td>{{alt.alt_type if alt.alt_type is not none}}</td>
+                <td>{{alt.alt if alt.alt is not none}}</td>
+                <td>{{assertion.therapy_name if assertion.therapy_name is not none}}</td>
+                <td>{% if assertion.therapy_sensitivity %}Sensitivity{% else %}Resistance{% endif %}</td>
+                <td>{{assertion.disease if assertion.disease is not none}}</td>
+                <td data-order="{{pred_impl_orders[assertion.predictive_implication]}}">{{assertion.predictive_implication if assertion.predictive_implication is not none}}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </section>
 
 {% include 'footer.html' %}
