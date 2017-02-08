@@ -1,5 +1,6 @@
-$(document).ready(function(){
+$(document).ready(function() {
 	$('[data-toggle="tooltip"]').tooltip();
+	$('.browse-dropdown').on('change', function() { this.form.submit() })
 });
 
 var substring_matcher = function(strs) {

@@ -1,23 +1,5 @@
 {%- extends 'base.html' %}
 
-{% macro pagination_nav() -%}
-<p class='text-center'>
-    {% if viewing_all %}
-        <a href='{{ url_for('gene_views.genes', page=1) }}'>View first 10</a>
-    {% else %}
-        {% if paginate_has_prev %}
-            <a href='{{ url_for('gene_views.genes', page=1) }}'>&lt;&lt; first 10</a> |
-            <a href='{{ url_for('gene_views.genes', page=paginate_prev_num) }}'>&lt; 10 previous</a> |
-        {% endif %}
-        <a href='{{ url_for('gene_views.genes-all') }}'>View all</a>
-        {% if paginate_has_next %}
-            | <a href='{{ url_for('gene_views.genes', page=paginate_next_num) }}'>10 next &gt;</a>
-            | <a href='{{ url_for('gene_views.genes', page=paginate_total_pages) }}'>last 10 &gt;&gt;</a>
-        {% endif %}
-    {% endif %}
-</p>
-{%- endmacro %}
-
 {% block scripts %}
 {{super()}}
 <script type="text/javascript">
@@ -66,37 +48,41 @@ var typeahead_genes = [
 		<div class="row">
 			<div class="col-md-4">
 				<h3>Cancer Type</h3>
-				<p>Select from <strong>12</strong> cancer types:</p>
-				<select class="form-control browse-dropdown">
-					<option>Acute Lymphoblastic Leukemia</option>
-					<option>Acute Myeloid Leukemia</option>
-					<option>Anaplastic Large Cell Lymphoma</option>
-					<option>Basal Cell Carcinoma</option>
-					<option>Bladder Cancer</option>
-					<option>Breast Cancer</option>
-				</select>
+				<p>Select from <strong>{{diseases|length}}</strong> cancer types:</p>
+                <form action="search" method="get">
+                    <select name="d" class="form-control browse-dropdown">
+                        <option selected disabled hidden>Select cancer type</option>
+                        {% for disease in diseases %}
+                            <option>{{disease}}</option>
+                        {% endfor %}
+                    </select>
+                </form>
 			</div>
 
 			<div class="col-md-4">
 				<h3>Predictive Implication Level</h3>
-				<p>Select from <strong>5</strong> predictive implication levels</p>
-				<select class="form-control browse-dropdown">
-					<option>FDA-Approved</option>
-					<option>Level A</option>
-					<option>Level B</option>
-					<option>Level C</option>
-					<option>Level D</option>
-				</select>
+				<p>Select from <strong>{{pred_impls|length}}</strong> predictive implication levels</p>
+                <form action="search" method="get">
+                    <select name="p" class="form-control browse-dropdown">
+                        <option selected disabled hidden>Select predictive implication level</option>
+                        {% for pred_impl in pred_impls %}
+                        <option>{{pred_impl}}</option>
+                        {% endfor %}
+                    </select>
+                </form>
 			</div>
 
 			<div class="col-md-4">
 				<h3>Therapy</h3>
-				<p>Select from <strong>100</strong> therapies:</p>
-				<select class="form-control browse-dropdown">
-					<option>Erlotinib</option>
-					<option>Imatinib</option>
-					<option>Thalidomide</option>
-				</select>
+				<p>Select from <strong>{{therapy_names|length}}</strong> therapies:</p>
+                <form action="search" method="get">
+                    <select name="t" class="form-control browse-dropdown">
+                        <option selected disabled hidden>Select therapy</option>
+                        {% for therapy_name in therapy_names %}
+                        <option>{{therapy_name}}</option>
+                        {% endfor %}
+                    </select>
+                </form>
 			</div>
 
 		</div>
