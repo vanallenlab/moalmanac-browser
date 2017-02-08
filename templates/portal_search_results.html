@@ -19,63 +19,43 @@ var typeahead_genes = [
 <script src="{{url_for('static', filename='js/jquery.dataTables.min.js')}}"></script>
 {% endblock %}
 
-{% block content %}
+{% block page_content %}
+<h1>TARGET DB Search Results</h1>
 
-{% include 'nav.html' %}
-
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-<ul class="flashes list-unstyled">
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{% endwith %}
-
-<section class="container-fluid target-content">
-    <div class="container">
-        <h1>TARGET DB Search Results</h1>
-
-        <div id="browse-search-row" class="row">
-            <div class="col-md-5">
-                <form action="search" method="get">
-                    <div class="input-group">
-                        <input type="text" name="g" class="form-control typeahead" placeholder="Gene name">
-                        <span class="input-group-btn">
+<div id="browse-search-row" class="row">
+    <div class="col-md-5">
+        <form action="search" method="get">
+            <div class="input-group">
+                <input type="text" name="g" class="form-control typeahead" placeholder="Gene name">
+                <span class="input-group-btn">
                         <button type="submit" class="btn btn-default btn-search" type="button">Search</button>
                     </span>
-                    </div>
-                </form>
             </div>
-        </div>
-
-        <p class="text-muted">Click on any gene below to more details about its corresponding alteration-action relationships.</p>
-
-        <table class="results-table display compact">
-            <thead>
-            <tr><th>Gene</th><th>Feature</th><th>Alt. type</th><th>Alteration</th><th>Therapy</th><th>Response</th><th>Cancer type</th><th>Predictive Level</tr>
-            </thead>
-            <tbody>
-            {% for alt in alts %}
-            {% for assertion in alt.assertions %}
-            <tr>
-                <td><a href="gene/{{alt.gene_name}}">{{alt.gene_name}}</a></td>
-                <td>{{alt.feature if alt.feature is not none}}</td>
-                <td>{{alt.alt_type if alt.alt_type is not none}}</td>
-                <td>{{alt.alt if alt.alt is not none}}</td>
-                <td>{{assertion.therapy_name if assertion.therapy_name is not none}}</td>
-                <td>{% if assertion.therapy_sensitivity %}Sensitivity{% else %}Resistance{% endif %}</td>
-                <td>{{assertion.disease if assertion.disease is not none}}</td>
-                <td data-order="{{pred_impl_orders[assertion.predictive_implication]}}">{{assertion.predictive_implication if assertion.predictive_implication is not none}}</td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
+        </form>
     </div>
-</section>
+</div>
 
-{% include 'footer.html' %}
+<p class="text-muted">Click on any gene below to more details about its corresponding alteration-action relationships.</p>
 
+<table class="results-table display compact">
+    <thead>
+    <tr><th>Gene</th><th>Feature</th><th>Alt. type</th><th>Alteration</th><th>Therapy</th><th>Response</th><th>Cancer type</th><th>Predictive Level</tr>
+    </thead>
+    <tbody>
+    {% for alt in alts %}
+    {% for assertion in alt.assertions %}
+    <tr>
+        <td><a href="gene/{{alt.gene_name}}">{{alt.gene_name}}</a></td>
+        <td>{{alt.feature if alt.feature is not none}}</td>
+        <td>{{alt.alt_type if alt.alt_type is not none}}</td>
+        <td>{{alt.alt if alt.alt is not none}}</td>
+        <td>{{assertion.therapy_name if assertion.therapy_name is not none}}</td>
+        <td>{% if assertion.therapy_sensitivity %}Sensitivity{% else %}Resistance{% endif %}</td>
+        <td>{{assertion.disease if assertion.disease is not none}}</td>
+        <td data-order="{{pred_impl_orders[assertion.predictive_implication]}}">{{assertion.predictive_implication if assertion.predictive_implication is not none}}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    </tbody>
+</table>
 {%- endblock %}

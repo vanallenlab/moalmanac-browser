@@ -12,3 +12,23 @@
     {{super()}}
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/target_web.css')}}">
 {% endblock %}
+
+{% block content %}
+{% include 'nav.html' %}
+<section class="container-fluid target-content">
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul class="flashes list-unstyled">
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        {% block page_content %}{% endblock %}
+    </div>
+</section>
+{% include 'footer.html' %}
+{% endblock %}
