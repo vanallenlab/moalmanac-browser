@@ -31,9 +31,13 @@ body {
 	}
 }
 
-.input-group button {
+.btn {
 	background-color: #FFCE00;
 	color: #000000;
+}
+
+.btn-alt-search {
+    width: 100%;
 }
 
 /* browse page */
@@ -193,6 +197,7 @@ table.target-browse-table td a {
 .tt-suggestion {
 	padding: 3px 20px;
 	line-height: 24px;
+	text-align: left;
 }
 
 .tt-suggestion.tt-cursor,.tt-suggestion:hover {
