@@ -1,5 +1,5 @@
 from flask_sqlalchemy import orm, declarative_base
-from target_web import db
+from target_portal import db
 
 Base = declarative_base()
 

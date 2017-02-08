@@ -20,10 +20,21 @@
 
 {% block scripts %}
 {{super()}}
-<script src="{{url_for('static', filename='target/portal.js')}}"></script>
+<script type="text/javascript">
+var typeahead_genes = [
+{% for gene in typeahead_genes %}
+'{{gene}}',
+{% endfor %}
+];
+</script>
+<script src="{{url_for('static', filename='js/typeahead.bundle.js')}}"></script>
+<script src="{{url_for('static', filename='js/portal.js')}}"></script>
 {% endblock %}
 
 {% block content %}
+
+{% set current_page = 'index' %}
+{% include 'nav.html' %}
 
 {% with messages = get_flashed_messages() %}
 {% if messages %}
@@ -35,75 +46,63 @@
 {% endif %}
 {% endwith %}
 
-<div class="container">
-    <h2>TARGET Database</h2>
-    <table class="table table-condensed table-hover">
-        <tr>
-            <th><h4>Alterations</h4></th><th><h4>Assertions</h4></th><th><h4>Sources</h4></th><th></th>
-        </tr>
-        {% for assert in assertions %}
-        <tr>
-            <td class="col-xs-3">
-                {% for alteration in assert.alterations %}
-                <ul class="list-unstyled" title="Alteration ID: {{alteration.alt_id}}">
-                    <li><strong>{{alteration.feature}}</strong> {% if alteration.alt_type %}({{alteration.alt_type}}){% endif %}</li>
-                    <li>{% if alteration.gene_name %}{{alteration.gene_name}} {% endif %}{% if alteration.alt %}{{alteration.alt}}{% endif %}</li>
-                </ul>
-                {% endfor %}
-            </td>
+<section class="container-fluid target-content">
+	<div class="container">
+		<div class="jumbotron text-center">
+			<h1 class="jumbotron-heading">TARGET DB</h1>
+			<p class="lead text-muted">Search over 200 genes associated with clinical actionability.</p>
+			<div id="jumbo-gene-search-group" class="input-group">
+				<input type="text" class="form-control typeahead" placeholder="Gene name">
+				<span class="input-group-btn">
+					<button class="btn btn-default btn-search" type="button">Search</button>
+				</span>
+			</div>
+		</div>
 
-            <td class="col-xs-4">
-                <p title="Assertion ID: {{assert.assertion_id}}; Last updated: {{assert.last_updated}}">
-                    <strong>
-                        {{assert.disease}}
-                        {% if assert.predictive_implication %}
-                         • <a href="#" data-toggle="tooltip" class="tooltip-text" title=
-    "FDA-Approved: Validated association between alteration and assertion.
-    Level A: Alteration used in clinical trial eligibility criterion.
-    Level B: Limited clinical evidence.
-    Level C: Limited clinical evidence in a different tumor type.
-    Level D: Preclinical evidence.
-    Level E: Inferential association."
-                        >{{assert.predictive_implication}}</a>
-                        {% endif %}
-                    </strong>
-                </p>
+		<div class="text-center">
+			<p class="lead text-muted">Or browse alterations by:</p>
+		</div>
 
-                <ul>
-                    {% if assert.therapy_name %}
-                        <li>
-                            {% if assert.therapy_sensitivity == True %}<strong>Sensitivity</strong>
-                            {% elif assert.therapy_sensitivity == False %}<strong>Resistance</strong>
-                            {% endif %}
-                            to <strong>{{assert.therapy_name}}</strong>{% if assert.therapy_type %} ({{assert.therapy_type}}){% endif %}
-                        </li>
-                    {% endif %}
+		<div class="row">
+			<div class="col-md-4">
+				<h3>Cancer Type</h3>
+				<p>Select from <strong>12</strong> cancer types:</p>
+				<select class="form-control browse-dropdown">
+					<option>Acute Lymphoblastic Leukemia</option>
+					<option>Acute Myeloid Leukemia</option>
+					<option>Anaplastic Large Cell Lymphoma</option>
+					<option>Basal Cell Carcinoma</option>
+					<option>Bladder Cancer</option>
+					<option>Breast Cancer</option>
+				</select>
+			</div>
 
-                    {% if assert.favorable_prognosis != None %}
-                    <li><strong>{% if assert.favorable_prognosis %}Favorable{% else %}Unfavorable{% endif %}</strong> prognosis</li>
-                    {% endif %}
-                </ul>
+			<div class="col-md-4">
+				<h3>Predictive Implication Level</h3>
+				<p>Select from <strong>5</strong> predictive implication levels</p>
+				<select class="form-control browse-dropdown">
+					<option>FDA-Approved</option>
+					<option>Level A</option>
+					<option>Level B</option>
+					<option>Level C</option>
+					<option>Level D</option>
+				</select>
+			</div>
 
-                <p>{{assert.description}}</p>
-            </td>
+			<div class="col-md-4">
+				<h3>Therapy</h3>
+				<p>Select from <strong>100</strong> therapies:</p>
+				<select class="form-control browse-dropdown">
+					<option>Erlotinib</option>
+					<option>Imatinib</option>
+					<option>Thalidomide</option>
+				</select>
+			</div>
 
-            <td class="col-xs-4">
-                {% for source in assert.sources %}
-                <p title="{{source.source_id}}">
-                    {% if source.source_type %}{{source.source_type}}: {% endif %}
-                    {% if source.doi %}<a class="doi" href="https://doi.org/{{source.doi|urlencode}}">{% endif %}
-                    <i>{{source.cite_text}}</i>
-                    {% if source.doi %}</a>{% endif %}
-                </p>
-                {% endfor %}
-            </td>
+		</div>
+	</div>
+</section>
 
-            <td class="col-xs-1">
-                <a href="{{url_for('portal.delete', assert_id=assert.assertion_id)}}">Delete</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
+{% include 'footer.html' %}
 
 {%- endblock %}

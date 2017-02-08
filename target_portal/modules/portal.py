@@ -7,11 +7,10 @@ portal = Blueprint('portal', __name__)
 
 @portal.route('/')
 def index():
-    all_asserts = Assertion.query.all()
-    all_asserts.reverse()
+	query = db.session.query(Alteration.gene_name.distinct().label('gene_name'))
+	typeahead_genes = [row.gene_name for row in query.all() if row.gene_name not in [None, '']]
 
-    return render_template('portal_index.html',
-                           assertions=all_asserts)
+	return render_template('portal_index.html', typeahead_genes=typeahead_genes)
 
 @portal.route('/delete/<int:assert_id>')
 def delete(assert_id):
