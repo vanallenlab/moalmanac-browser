@@ -67,8 +67,14 @@ def search():
         for alt in alts:
             for assertion in alt.assertions:
                 rows.append(_make_row(alt, assertion))
-    elif cancer_needle:
-        assertions = db.session.query(Assertion).filter(Assertion.disease == cancer_needle).all()
+    elif cancer_needle or pred_impl_needle or therapy_needle:
+        if cancer_needle:
+            assertions = db.session.query(Assertion).filter(Assertion.disease == cancer_needle).all()
+        if pred_impl_needle:
+            assertions = db.session.query(Assertion).filter(Assertion.predictive_implication == pred_impl_needle).all()
+        if therapy_needle:
+            assertions = db.session.query(Assertion).filter(Assertion.therapy_name == therapy_needle).all()
+
         for assertion in assertions:
             for alt in assertion.alterations:
                 rows.append(_make_row(alt, assertion))

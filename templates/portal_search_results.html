@@ -49,10 +49,13 @@ var typeahead_genes = [
         <td>{{row['alt_type'] if row['alt_type'] is not none}}</td>
         <td><a href="assertion/{{row['assertion_id']}}">{{row['alt'] if row['alt'] is not none else '(any)'}}</a></td>
         <td>{% if row['therapy_name'] %}<a href="search?t={{row['therapy_name']}}">{{row['therapy_name']}}</a>{% endif %}</td>
-        <td>{% if row['therapy_sensitivity'] is not none %}
-            {% if row['therapy_sensitivity'] %}Sensitivity{% else %}Resistance{% endif %}{% endif %}</td>
+        <td>{% if row['therapy_sensitivity'] is not none %}{% if row['therapy_sensitivity'] %}Sensitivity{% else %}Resistance{% endif %}{% endif %}</td>
         <td>{% if row['disease'] %}<a href="search?d={{row['disease']}}">{{row['disease']}}{% endif %}</td>
-        <td data-order="{{pred_impl_orders[row['predictive_implication']]}}">{{row['predictive_implication'] if row['predictive_implication'] is not none}}</td>
+        {%if row['predictive_implication'] is not none %}
+        <td data-order="{{pred_impl_orders[row['predictive_implication']]}}"><a href="search?p={{row['predictive_implication']}}">{{row['predictive_implication']}}</a></td>
+        {% else %}
+        <td></td>
+        {% endif %}
     </tr>
     {% endfor %}
     </tbody>
