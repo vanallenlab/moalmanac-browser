@@ -1,0 +1,87 @@
+{%- extends 'base.html' %}
+
+{% block title %}TARGET DB: Assertion Details{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/jquery.dataTables.min.css')}}">
+{% endblock %}
+
+{% block page_content %}
+<h3><small>
+</small></h3>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <strong>Assertion:</strong>
+            {% if assertion.therapy_sensitivity is not none %}
+            {% if assertion.therapy_sensitivity %}Sensitivity{% else %}Resistance{% endif %} to {{assertion.therapy_name}}
+            {% elif assertion.favorable_prognosis is not none %}
+            {% if assertion.favorable_prognosis %}a favorable{% else %}an unfavorable{% endif %} prognosis
+            {% endif %}
+            {% if assertion.disease is not none %} (in {{assertion.disease}}){% endif %}
+            {% if assertion.predictive_implication is not none %}
+            <span class="gene-panel-level label
+{% if assertion.predictive_implication=='FDA-Approved' %}label-success
+{% elif assertion.predictive_implication=='Level A' %}label-primary
+{% elif assertion.predictive_implication=='Level B' %}label-info
+{% elif assertion.predictive_implication=='Level C' %}label-warning
+{% elif assertion.predictive_implication=='Level D' %}label-danger{%endif%}">
+                <h3 class="panel-title">{{assertion.predictive_implication}}</h3>
+            </span>
+            {% endif %}
+        </h3>
+    </div>
+
+    <div class="panel-body">
+        <p>{{assertion.description}}</p>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Gene</th>
+                    <th>Feature</th>
+                    <th>Alt. type</th>
+                    <th>Alteration</th>
+                    {% if assertion.therapy_sensitivity is not none %}
+                    <th>Therapy</th>
+                    <th>Response</th>
+                    {% elif assertion.favorable_prognosis is not none %}
+                    <th>Prognosis</th>
+                    {% endif %}
+                    <th>Cancer type</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for alt in assertion.alterations %}
+                <tr>
+                    <td>{% if alt.gene_name is not none %}{{alt.gene_name}}{% endif %}</td>
+                    <td>{% if alt.feature is not none %}{{alt.feature}}{% endif %}</td>
+                    <td>{% if alt.alt_type is not none %}{{alt.alt_type}}{% endif %}</td>
+                    <td>{% if alt.alt is not none %}{{alt.alt}}{% endif %}</td>
+                    {% if assertion.therapy_sensitivity is not none %}
+                    <td>{{assertion.therapy_name}}</td>
+                    <td>{% if assertion.therapy_sensitivity %}Sensitivity{% else %}Resistance{% endif %}</td>
+                    {% elif assertion.favorable_prognosis is not none %}
+                    <td>{% if assertion.favorable_prognosis %}Favorable{% else %}Unfavorable{% endif %}</td>
+                    {% endif %}
+                    <td>{% if assertion.disease is not none %}{{assertion.disease}}{% endif %}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-muted">Citations:</p>
+        {% for source in assertion.sources %}
+        <ul>
+			{% if source.doi is not none %}
+			<li><a href="https://doi.org/{{source.doi}}">{{source.cite_text}}</a></li>
+			{% else %}
+			<li>{{source.cite_text}}</li>
+			{% endif %}
+        </ul>
+        {% endfor %}
+    </div>
+</div>
+{%- endblock %}

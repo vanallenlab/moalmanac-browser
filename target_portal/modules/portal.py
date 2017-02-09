@@ -84,6 +84,13 @@ def search():
                            pred_impl_orders=pred_impl_orders,
                            rows=rows)
 
+@portal.route('/assertion/<int:assertion_id>')
+def assertion(assertion_id):
+    assertion = db.session.query(Assertion).filter(Assertion.assertion_id == assertion_id).first()
+
+    return render_template('portal_assertion.html',
+                           assertion=assertion)
+
 @portal.route('/delete/<int:assert_id>')
 def delete(assert_id):
     Assertion.query.filter_by(assertion_id=assert_id).delete()
