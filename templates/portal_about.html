@@ -1,0 +1,80 @@
+{%- extends 'base.html' %}
+
+{% block title %}TARGET DB: About{% endblock %}
+
+{% block page_content %}
+<h1>About TARGET DB</h1>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><strong>Purpose</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            TARGET DB attempts to capture the current body of knowledge on how genetic alterations affect clinical
+            actionability. As the field of precision medicine grows, the quantity of research on how specific alterations
+            affect therapeutic response and patient prognosis expands at an increasing rate. TARGET DB seeks to curate this
+            information from the literature, increasing the abilities of clinicians and researchers alike to rapidly
+            assess the importance of an alteration.
+        </p>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><strong>Literature curation</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            TARGET DB draws primarily from primary research articles, review articles, and
+            <a href="https://www.nccn.org/professionals/physician_gls/f_guidelines.asp">the NCCN guidelines</a>. Data
+            is curated through both expert review and using a Natural Language Processing (NLP) approach to select
+            potentially informative articles from <a href="https://www.ncbi.nlm.nih.gov/pubmed/">PubMed</a>.
+        </p>
+
+        <p>
+            TARGET DB is co-developed with the <a href="http://archive.broadinstitute.org/cancer/cga/phial">PHIAL
+            (Precision Heuristics for Interpreting the Alteration Landscape) algorithm</a>, which draws from TARGET
+            and other alterations databases to classify patient tumor data.
+        </p>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><strong>Predictive Implication Levels</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            TARGET DB classifies each curated assertion with a "predictive implication level" that describes the
+            strength of the relationship between the given alteration and clinical action. The levels used are:
+        </p>
+        <table class="table table-condensed">
+            <tr><th>Level</th><th>Description</th></tr>
+            <tr>
+                <td>FDA-Approved</td>
+                <td>There is a validated association between the alteration and the recommended clinical action.</td>
+            </tr>
+            <tr>
+                <td>Level A</td>
+                <td>The alteration is or has been used as an eligibility criterion for a clinical trial.</td>
+            </tr>
+            <tr>
+                <td>Level B</td>
+                <td>There is limited early clinical evidence in support of this alteration/action relationship.</td>
+            </tr>
+            <tr>
+                <td>Level C</td>
+				<td>There is limited early clinical evidence in support of this alteration/action relationship, but it is observed in a different tumor type.<br><small><em style="color:gray;">Used in PHIAL, but not applicable to TARGET.</em></small></td>
+            </tr>
+            <tr>
+                <td>Level D</td>
+                <td>There is preclinical evidence in support of this alteration/action relationship.</td>
+            </tr>
+            <tr>
+                <td>Level E</td>
+                <td>There is inferential evidence in support of this alteration/action relationship.</td>
+            </tr>
+        </table>
+    </div>
+</div>
+{%- endblock %}

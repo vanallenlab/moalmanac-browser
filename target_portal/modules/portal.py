@@ -31,6 +31,11 @@ def index():
                            pred_impls=pred_impls,
                            therapy_names=therapy_names)
 
+@portal.route('/about')
+def about():
+    return render_template('portal_about.html',
+                           nav_current_page='about')
+
 @portal.route('/search')
 def search():
     def _make_row(alt, assertion):
