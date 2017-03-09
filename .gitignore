@@ -4,3 +4,4 @@ logs/
 *.pyc
 *.sqlite3
 *.swp
+secret_key.py
