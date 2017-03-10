@@ -69,6 +69,16 @@ table.target-browse-table td a {
 	}
 }
 
+/* suggestion google form */
+#google-form-suggest {
+	width: 100%;
+	height: 1200px;
+}
+
+#google-form-container {
+	padding-top: 1em;
+}
+
 /* navbar */
 .navbar-default {
 	background-color: #ffcf00;

@@ -36,6 +36,11 @@ def about():
     return render_template('portal_about.html',
                            nav_current_page='about')
 
+@portal.route('/suggest')
+def suggest():
+    return render_template('portal_suggest.html',
+                           nav_current_page='suggest')
+
 @portal.route('/search')
 def search():
     def _make_row(alt, assertion):
@@ -95,11 +100,3 @@ def assertion(assertion_id):
 
     return render_template('portal_assertion.html',
                            assertion=assertion)
-
-@portal.route('/delete/<int:assert_id>')
-def delete(assert_id):
-    Assertion.query.filter_by(assertion_id=assert_id).delete()
-    db.session.commit()
-
-    flash('Deleted assertion.')
-    return redirect(url_for('portal.index'))
