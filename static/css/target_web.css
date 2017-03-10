@@ -20,6 +20,10 @@ body {
 	margin-right: 2em;
 }
 
+#logo-list {
+	margin-top: 1em;
+}
+
 /* front page gene search bar */
 #jumbo-gene-search-group {
 	margin: 0 auto;
