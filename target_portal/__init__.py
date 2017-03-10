@@ -11,8 +11,8 @@ def create_app(name=__name__):
     app.config.from_object('config')
 
     Bootstrap(app)
-    app.register_blueprint(api, url_prefix='/api/v0')
-    app.register_blueprint(editor, url_prefix='/editor')
+    #app.register_blueprint(api, url_prefix='/api/v0')
+    #app.register_blueprint(editor, url_prefix='/editor')
     app.register_blueprint(portal)
 
     db.init_app(app)
