@@ -78,9 +78,9 @@
 			<li>
 				{% if source.doi is not none %}
 				{% if source.source_type == 'Journal' %}
-				<a href="https://doi.org/{{source.doi}}">{{source.cite_text}}</a>
+				<a href="https://doi.org/{{source.doi|urlencode}}">{{source.cite_text}}</a>
 				{% elif source.source_type == 'Clinical Trial' %}
-				<a href="https://clinicaltrials.gov/ct2/show/{{source.doi}}">{{source.cite_text}}</a>
+				<a href="https://clinicaltrials.gov/ct2/show/{{source.doi|urlencode}}">{{source.cite_text}}</a>
 				{% else %}
 				<li>{{source.cite_text}}</li>
 				{% endif %}

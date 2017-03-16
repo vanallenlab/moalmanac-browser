@@ -46,19 +46,19 @@ var typeahead_genes = [
     <tbody>
     {% for row in rows %}
     <tr>
-        <td>{% if row['gene_name'] %}<a href="search?g={{row['gene_name']}}">{{row['gene_name']}}</a>{% endif %}</td>
+        <td>{% if row['gene_name'] %}<a href="search?g={{row['gene_name']|urlencode}}">{{row['gene_name']}}</a>{% endif %}</td>
         <td>{{row['feature'] if row['feature'] is not none}}</td>
         <td>{{row['alt_type'] if row['alt_type'] is not none}}</td>
-        <td><a href="assertion/{{row['assertion_id']}}">{{row['alt'] if row['alt'] is not none else '(any)'}}</a></td>
-        <td>{% if row['therapy_name'] %}<a href="search?t={{row['therapy_name']}}">{{row['therapy_name']}}</a>{% endif %}</td>
+        <td><a href="assertion/{{row['assertion_id']|urlencode}}">{{row['alt'] if row['alt'] is not none else '(any)'}}</a></td>
+        <td>{% if row['therapy_name'] %}<a href="search?t={{row['therapy_name']|urlencode}}">{{row['therapy_name']}}</a>{% endif %}</td>
         {% if row['therapy_sensitivity'] is not none %}
         <td>{% if row['therapy_sensitivity'] %}Sensitivity{% else %}Resistance{% endif %}</td>
         {% elif row['favorable_prognosis'] is not none %}
         <td>{% if row['favorable_prognosis'] %}Good{% else %}Poor{% endif %} prognosis</td>
         {% endif %}
-        <td>{% if row['disease'] %}<a href="search?d={{row['disease']}}">{{row['disease']}}{% endif %}</td>
+        <td>{% if row['disease'] %}<a href="search?d={{row['disease']|urlencode}}">{{row['disease']}}{% endif %}</td>
         {%if row['predictive_implication'] is not none %}
-        <td data-order="{{pred_impl_orders[row['predictive_implication']]}}"><a href="search?p={{row['predictive_implication']}}">{{row['predictive_implication']}}</a></td>
+        <td data-order="{{pred_impl_orders[row['predictive_implication']]}}"><a href="search?p={{row['predictive_implication']|urlencode}}">{{row['predictive_implication']}}</a></td>
         {% else %}
         <td></td>
         {% endif %}
