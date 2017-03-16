@@ -6,7 +6,7 @@ sys.path.insert(0, 'target_web/modules/')
 
 import csv
 from datetime import datetime
-from models import Alteration, Assertion, Source
+from target_portal.modules.models import Alteration, Assertion, Source
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -31,9 +31,11 @@ def insert_if_new(model, defaults=None, **kwargs):
         session.add(instance)
         return instance, True
 
-with open('db_scripts/gdoc_export.txt') as tsvfile:
+with open('db_export/Reference-a-thon - TARGET_NoAndy_March11.tsv') as tsvfile:
 	tsvreader = csv.reader(tsvfile, delimiter='\t')
 	for row in tsvreader:
+		row = [unicode(cell, 'utf-8') for cell in row]
+
 		new_alterations = []
 		new_sources = []
 
