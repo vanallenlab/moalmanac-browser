@@ -31,7 +31,7 @@ def insert_if_new(model, defaults=None, **kwargs):
         session.add(instance)
         return instance, True
 
-with open('db_export/Reference-a-thon - TARGET_NoAndy_March11.tsv') as tsvfile:
+with open('db_export/Reference-a-thon - TARGET_PostEli_031617.tsv') as tsvfile:
 	tsvreader = csv.reader(tsvfile, delimiter='\t')
 	for row in tsvreader:
 		row = [unicode(cell, 'utf-8') for cell in row]
@@ -48,13 +48,25 @@ with open('db_export/Reference-a-thon - TARGET_NoAndy_March11.tsv') as tsvfile:
 		)
 		new_alterations.append(new_alt)
 
-		new_source, __ = insert_if_new(
-				Source,
-				doi=row[12] if row[12].strip() else None,
-				cite_text=row[13] if row[13].strip() else None,
-				source_type=row[14] if row[14].strip() else None
-		)
-		new_sources.append(new_source)
+		dois = row[12].split('|')
+		cite_texts = row[13].split('|')
+		source_types = row[14].split('|')
+		if (len(dois) != len(cite_texts)) or \
+				(len(dois) != len(source_types)) or \
+				(len(cite_texts) != len(source_types)):
+			print 'Error: Mismatching source information.'
+			print row
+			sys.exit(1)
+
+		for i in xrange(0, len(dois)):
+			new_source, __ = insert_if_new(
+					Source,
+					doi=dois[i] if dois[i].strip() else None,
+					cite_text=cite_texts[i] if cite_texts[i].strip() else None,
+					source_type=source_types[i] if source_types[i].strip() else None
+			)
+
+			new_sources.append(new_source)
 
 		session.bulk_save_objects(new_sources + new_alterations, return_defaults=True)
 		session.commit()

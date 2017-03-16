@@ -73,15 +73,21 @@
         </div>
 
         <p class="text-muted">Citations:</p>
-        {% for source in assertion.sources %}
         <ul>
-			{% if source.doi is not none %}
-			<li><a href="https://doi.org/{{source.doi}}">{{source.cite_text}}</a></li>
-			{% else %}
-			<li>{{source.cite_text}}</li>
-			{% endif %}
-        </ul>
+        {% for source in assertion.sources %}
+			<li>
+				{% if source.doi is not none %}
+				{% if source.source_type == 'Journal' %}
+				<a href="https://doi.org/{{source.doi}}">{{source.cite_text}}</a>
+				{% elif source.source_type == 'Clinical Trial' %}
+				<a href="https://clinicaltrials.gov/ct2/show/{{source.doi}}">{{source.cite_text}}</a>
+				{% else %}
+				<li>{{source.cite_text}}</li>
+				{% endif %}
+				{% endif %}
+			</li>
         {% endfor %}
+        </ul>
     </div>
 </div>
 {%- endblock %}
