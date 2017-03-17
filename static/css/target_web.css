@@ -33,6 +33,24 @@ a:hover {
 	margin-top: 1em;
 }
 
+/* front page */
+#index-title-block {
+	padding-bottom: 1em !important;
+	margin-bottom: 0;
+}
+
+#index-title {
+	margin-bottom: 0;
+}
+
+.index-abbrev {
+	color: #333333;
+}
+
+.index-abbrev-explain {
+	padding-bottom: 1em;
+}
+
 /* front page gene search bar */
 #jumbo-gene-search-group {
 	margin: 0 auto;
