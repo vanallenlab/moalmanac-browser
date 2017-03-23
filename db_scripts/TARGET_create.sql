@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2016-11-07 22:58:29.343
+-- Last modification date: 2017-03-17 14:14:20.135
 
 -- tables
 -- Table: Alteration
@@ -53,6 +53,13 @@ CREATE TABLE Source (
     source_type text NOT NULL,
     cite_text text NOT NULL,
     doi text
+);
+
+-- Table: Version
+CREATE TABLE Version (
+    major integer NOT NULL CONSTRAINT Version_pk PRIMARY KEY,
+    minor integer NOT NULL,
+    patch integer NOT NULL
 );
 
 -- End of file.

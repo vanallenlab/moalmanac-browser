@@ -6,11 +6,22 @@ sys.path.insert(0, 'target_web/modules/')
 
 import csv
 from datetime import datetime
-from target_portal.modules.models import Alteration, Assertion, Source
+from target_portal.modules.models import Alteration, Assertion, Source, Version
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:///target.sqlite3')
+if len(sys.argv) != 6:
+	print 'Usage:'
+	print 'TARGET_insert.py import_file.tsv db_name.sqlite3 1 2 3'
+	sys.exit()
+
+import_file = sys.argv[1]
+db_name = sys.argv[2]
+v_major = sys.argv[3]
+v_minor = sys.argv[4]
+v_patch = sys.argv[5]
+
+engine = create_engine('sqlite:///%s' % db_name)
 session = sessionmaker(bind=engine)()
 
 def insert_if_new(model, defaults=None, **kwargs):
@@ -31,7 +42,7 @@ def insert_if_new(model, defaults=None, **kwargs):
         session.add(instance)
         return instance, True
 
-with open('db_export/Reference-a-thon - TARGET_PostEli_031617.tsv') as tsvfile:
+with open(import_file) as tsvfile:
 	tsvreader = csv.reader(tsvfile, delimiter='\t')
 	for row in tsvreader:
 		row = [unicode(cell, 'utf-8') for cell in row]
@@ -99,3 +110,12 @@ with open('db_export/Reference-a-thon - TARGET_PostEli_031617.tsv') as tsvfile:
 		session.add(new_assert)
 		session.commit()
 		session.flush()
+
+	version = Version(
+			major=v_major,
+			minor=v_minor,
+			patch=v_patch
+	)
+	session.add(version)
+	session.commit()
+	session.flush()

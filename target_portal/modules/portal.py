@@ -19,7 +19,7 @@ def index():
     pred_impls = _query_distinct_column(Assertion, 'predictive_implication')
     therapy_names = _query_distinct_column(Assertion, 'therapy_name')
 
-    num_genes = db.session.query(Alteration).distinct(Alteration.gene_name).count()
+    num_genes = db.session.query(Alteration.gene_name).distinct().count()
     num_assertions = db.session.query(Assertion).count()
 
     return render_template('portal_index.html',

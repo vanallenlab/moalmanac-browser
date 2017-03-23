@@ -68,3 +68,10 @@ class AssertionToAlteration(Base, db.Model):
 
     assertion = orm.relationship('Assertion', foreign_keys=assertion_id)
     alteration = orm.relationship('Alteration', foreign_keys=alt_id)
+
+class Version(Base, db.Model):
+	__tablename__ = 'Version'
+
+	major = db.Column('major', db.Integer, primary_key=True)
+	minor = db.Column('minor', db.Integer)
+	patch = db.Column('patch', db.Integer)

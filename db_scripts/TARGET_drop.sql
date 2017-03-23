@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2016-11-07 22:58:29.343
+-- Last modification date: 2017-03-17 14:14:20.135
 
 -- foreign keys
 -- ALTER TABLE DROP CONSTRAINT not supported
@@ -20,6 +20,8 @@ DROP TABLE Assertion_To_Alteration;
 DROP TABLE Assertion_To_Source;
 
 DROP TABLE Source;
+
+DROP TABLE Version;
 
 -- End of file.
 
