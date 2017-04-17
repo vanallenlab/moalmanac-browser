@@ -1,6 +1,6 @@
 {%- extends 'base.html' %}
 
-{% block title %}SALSA DB: Search Results{% endblock %}
+{% block title %}{{ config['APP_NAME'] }}: Search Results{% endblock %}
 
 {% block styles %}
 {{super()}}
@@ -22,7 +22,7 @@ var typeahead_genes = [
 {% endblock %}
 
 {% block page_content %}
-<h1>SALSA DB Search Results</h1>
+<h1>{{ config['APP_NAME'] }} Search Results</h1>
 
 <div id="browse-search-row" class="row">
     <div class="col-md-5">

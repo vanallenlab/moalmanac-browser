@@ -1,6 +1,6 @@
 {%- extends 'base.html' %}
 
-{% block title %}SALSA DB: Assertion Details{% endblock %}
+{% block title %}{{ config['APP_NAME'] }}: Assertion Details{% endblock %}
 
 {% block styles %}
 {{super()}}
@@ -81,9 +81,9 @@
 				<a href="https://doi.org/{{source.doi|urlencode}}">{{source.cite_text}}</a>
 				{% elif source.source_type == 'Clinical Trial' %}
 				<a href="https://clinicaltrials.gov/ct2/show/{{source.doi|urlencode}}">{{source.cite_text}}</a>
-				{% else %}
-				<li>{{source.cite_text}}</li>
 				{% endif %}
+				{% else %}
+				{{source.cite_text}}
 				{% endif %}
 			</li>
         {% endfor %}

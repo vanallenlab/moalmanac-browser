@@ -1,18 +1,18 @@
 {%- extends 'base.html' %}
 
-{% block title %}SALSA DB: About{% endblock %}
+{% block title %}{{ config['APP_NAME'] }}: About{% endblock %}
 
 {% block page_content %}
-<h1>About SALSA DB</h1>
+<h1>About {{ config['APP_NAME'] }}</h1>
 <div class="panel panel-default">
     <div class="panel-heading">
         <h3 class="panel-title"><strong>Purpose</strong></h3>
     </div>
     <div class="panel-body">
         <p>
-            SALSA DB attempts to capture the current body of knowledge on how genetic alterations affect clinical
+            {{ config['APP_NAME'] }} attempts to capture the current body of knowledge on how genetic alterations affect clinical
             actionability. As the field of precision medicine grows, the quantity of research on how specific alterations
-            affect therapeutic response and patient prognosis expands at an increasing rate. SALSA DB seeks to curate this
+            affect therapeutic response and patient prognosis expands at an increasing rate. {{ config['APP_NAME'] }} seeks to curate this
             information from the literature, increasing the abilities of clinicians and researchers alike to rapidly
             assess the importance of an alteration.
         </p>
@@ -25,15 +25,15 @@
     </div>
     <div class="panel-body">
         <p>
-            SALSA DB draws primarily from primary research articles, review articles, and
+            {{ config['APP_NAME'] }} draws primarily from primary research articles, review articles, and
             <a href="https://www.nccn.org/professionals/physician_gls/f_guidelines.asp">the NCCN guidelines</a>. Data
             is curated through both expert review and using a Natural Language Processing (NLP) approach to select
             potentially informative articles from <a href="https://www.ncbi.nlm.nih.gov/pubmed/">PubMed</a>.
         </p>
 
         <p>
-            SALSA DB is co-developed with the <a href="http://archive.broadinstitute.org/cancer/cga/phial">PHIAL
-            (Precision Heuristics for Interpreting the Alteration Landscape) algorithm</a>, which draws from SALSA
+            {{ config['APP_NAME'] }} is co-developed with the <a href="http://archive.broadinstitute.org/cancer/cga/phial">PHIAL
+            (Precision Heuristics for Interpreting the Alteration Landscape) algorithm</a>, which draws from {{ config['APP_NAME_SHORT'] }}
             and other alterations databases to classify patient tumor data.
         </p>
     </div>
@@ -45,7 +45,7 @@
     </div>
     <div class="panel-body">
         <p>
-            SALSA DB classifies each curated assertion with a "predictive implication level" that describes the
+            {{ config['APP_NAME'] }} classifies each curated assertion with a "predictive implication level" that describes the
             strength of the relationship between the given alteration and clinical action. The levels used are:
         </p>
         <table class="table table-condensed">
@@ -64,7 +64,7 @@
             </tr>
             <tr>
                 <td>Level C</td>
-				<td>There is limited early clinical evidence in support of this alteration/action relationship, but it is observed in a different tumor type.<br><small><em style="color:gray;">Used in PHIAL, but not applicable to SALSA.</em></small></td>
+				<td>There is limited early clinical evidence in support of this alteration/action relationship, but it is observed in a different tumor type.<br><small><em style="color:gray;">Used in PHIAL, but not applicable to {{ config['APP_NAME_SHORT'] }}.</em></small></td>
             </tr>
             <tr>
                 <td>Level D</td>
@@ -83,8 +83,8 @@
 		<h3 class="panel-title"><strong>Terms</strong></h3>
 	</div>
 	<div class="panel-body">
-		<p>SALSA DB is made available under the <a href="http://opendatacommons.org/licenses/odbl/1.0">Open Database License (ODbL)</a>. A <a href="https://opendatacommons.org/licenses/odbl/summary/">"plain-language" summary of the ODbL is available here.</a></p>
-		<p>You are free to share and modify the contents of SALSA DB under the following restrictions:</p>
+		<p>{{ config['APP_NAME'] }} is made available under the <a href="http://opendatacommons.org/licenses/odbl/1.0">Open Database License (ODbL)</a>. A <a href="https://opendatacommons.org/licenses/odbl/summary/">"plain-language" summary of the ODbL is available here.</a></p>
+		<p>You are free to share and modify the contents of {{ config['APP_NAME'] }} under the following restrictions:</p>
 		<ol>
 			<li>All public use of the data (either in its entirety or in part) must be attributed.</li>
 			<li>Any works produced using the data must also be licensed under the ODbL.</li>
