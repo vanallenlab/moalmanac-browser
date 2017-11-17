@@ -20,7 +20,7 @@ INSERT_SCRIPT="$SCRIPT_DIR/TARGET_insert.py"
 eval `/broad/software/dotkit/init -b`
 reuse Python-2.7
 
-. venv/bin/activate # venv activation limited to script's shell
+# . venv/bin/activate # venv activation limited to script's shell
 
 if [ "$#" -ne 5 ]; then
 	echo 'Usage:'

@@ -2,9 +2,9 @@ from flask import Flask
 from flask_bootstrap import Bootstrap
 
 from db import db
-from modules.api import api
-from modules.editor import editor
-from modules.portal import portal
+from .modules.api import api
+from .modules.editor import editor
+from .modules.portal import portal
 
 def create_app(name=__name__):
     app = Flask(name)

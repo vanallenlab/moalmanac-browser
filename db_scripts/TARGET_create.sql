@@ -16,6 +16,8 @@ CREATE TABLE Assertion (
     assertion_id integer NOT NULL CONSTRAINT Assertion_pk PRIMARY KEY,
     last_updated text NOT NULL,
     disease text NOT NULL,
+    oncotree_term,
+    oncotree_code,
     stage integer,
     therapy_name text,
     therapy_type text,

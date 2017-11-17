@@ -1,7 +1,7 @@
 from flask import Blueprint, request, render_template, flash, redirect, url_for
 
 from db import db
-from models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
+from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 
 portal = Blueprint('portal', __name__)
 

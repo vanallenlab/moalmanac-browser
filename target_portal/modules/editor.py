@@ -4,7 +4,7 @@ from wtforms import StringField, SelectField, validators, fields
 from datetime import datetime
 
 from db import db
-from models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
+from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 
 editor = Blueprint('editor', __name__)
 
