@@ -2,7 +2,6 @@ venv/
 logs/
 .idea/
 *.pyc
-*.sqlite3
 *.swp
 secret_key.py
 db_export
