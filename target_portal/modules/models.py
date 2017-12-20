@@ -3,6 +3,7 @@ from target_portal import db
 
 Base = declarative_base()
 
+
 class Assertion(Base, db.Model):
     __tablename__ = 'Assertion'
 
@@ -27,6 +28,7 @@ class Assertion(Base, db.Model):
                                secondary='Assertion_To_Source',
                                )#cascade='all, delete-orphan')
 
+
 # feature = {Amplification, Biallelic Inactivation, Deletion, Mutation, Rearrangement}
 # alt = Alteration specified using HGVS notation (http://varnomen.hgvs.org/recommendations/)
 class Alteration(Base, db.Model):
@@ -40,6 +42,7 @@ class Alteration(Base, db.Model):
 
     assertions = orm.relationship('Assertion', secondary='Assertion_To_Alteration')
 
+
 class Source(Base, db.Model):
     __tablename__ = 'Source'
 
@@ -49,6 +52,7 @@ class Source(Base, db.Model):
     source_type = db.Column('source_type', db.Text)
 
     assertions = orm.relationship('Assertion', secondary='Assertion_To_Source')
+
 
 class AssertionToSource(Base, db.Model):
     __tablename__ = 'Assertion_To_Source'
@@ -60,6 +64,7 @@ class AssertionToSource(Base, db.Model):
     assertion = orm.relationship('Assertion', foreign_keys=assertion_id)
     source = orm.relationship('Source', foreign_keys=source_id)
 
+
 class AssertionToAlteration(Base, db.Model):
     __tablename__ = 'Assertion_To_Alteration'
 
@@ -69,6 +74,7 @@ class AssertionToAlteration(Base, db.Model):
 
     assertion = orm.relationship('Assertion', foreign_keys=assertion_id)
     alteration = orm.relationship('Alteration', foreign_keys=alt_id)
+
 
 class Version(Base, db.Model):
 	__tablename__ = 'Version'
