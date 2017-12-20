@@ -1,0 +1,81 @@
+{%- extends 'base.html' %}
+{% block scripts %}
+{{super()}}
+<script type="text/javascript">
+var typeahead_genes = [
+{% for gene in typeahead_genes %}
+'{{gene}}',
+{% endfor %}
+];
+</script>
+<script src="{{url_for('static', filename='js/typeahead.bundle.js')}}"></script>
+<script src="{{url_for('static', filename='js/portal.js')}}"></script>
+{% endblock %}
+
+{% block title %}{{ config['APP_NAME'] }}: Suggest addition{% endblock %}
+
+{% block page_content %}
+<h1>Add Entry to {{ config['APP_NAME'] }}</h1>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><strong>Add Entry to Database Backing</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            Add a row to the Salsa database.
+        </p>
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Gene</h3>
+                    <form action="search" method="get">
+                        <div id="jumbo-gene-add-group" class="input-group">
+                        <input id="gene-add-input" name="g" type="text" class="form-control typeahead" placeholder="Gene Symbol">
+                        </div>
+                    </form>
+            </div>
+
+            <div class="col-md-4">
+                <h3>Cancer Type</h3>
+                <p>Select from <strong>{{diseases|length}}</strong> cancer types:</p>
+                <form action="search" method="get">
+                    <select name="d" class="form-control browse-dropdown">
+                        <option selected disabled hidden>Select cancer type</option>
+                        {% for disease in diseases %}
+                        <option>{{disease}}</option>
+                        {% endfor %}
+                    </select>
+                    <noscript><button type="submit" class="btn btn-default btn-alt-search" type="button">Search by cancer type</button></noscript>
+                </form>
+            </div>
+
+            <div class="col-md-4">
+                <h3>Predictive Implication Level</h3>
+                <p>Select from <strong>{{pred_impls|length}}</strong> predictive implication levels</p>
+                <form action="search" method="get">
+                    <select name="p" class="form-control browse-dropdown">
+                        <option selected disabled hidden>Select predictive implication level</option>
+                        {% for pred_impl in pred_impls %}
+                        <option>{{pred_impl}}</option>
+                        {% endfor %}
+                    </select>
+                    <noscript><button type="submit" class="btn btn-default btn-alt-search" type="button">Search by predictive implication level</button></noscript>
+                </form>
+            </div>
+
+            <div class="col-md-4">
+                <h3>Therapy</h3>
+                <p>Select from <strong>{{therapy_names|length}}</strong> therapies:</p>
+                <form action="search" method="get">
+                    <select name="t" class="form-control browse-dropdown">
+                        <option selected disabled hidden>Select therapy</option>
+                        {% for therapy_name in therapy_names %}
+                        <option>{{therapy_name}}</option>
+                        {% endfor %}
+                    </select>
+                    <noscript><button type="submit" class="btn btn-default btn-alt-search" type="button">Search by therapy</button></noscript>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{%- endblock %}

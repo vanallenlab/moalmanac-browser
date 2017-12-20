@@ -6,6 +6,7 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
 			</button>
 			<a class="navbar-brand" href="/">
 				{{ config['APP_NAME_SHORT'] }}
@@ -16,7 +17,8 @@
 			<ul class="nav navbar-nav">
 				<li{% if nav_current_page == 'index' %} class="active"{% endif %}><a href="/">Home</span></a></li>
 				<li{% if nav_current_page == 'about' %} class="active"{% endif %}><a href="about">About</a></li>
-				<li{% if nav_current_page == 'suggest' %} class="active"{% endif %}><a href="suggest">Suggest addition</a></li>
+				<li{% if nav_current_page == 'suggest' %} class="active"{% endif %}><a href="suggest">Suggest Addition</a></li>
+				<li{% if nav_current_page == 'add' %} class="active"{% endif %}><a href="add">Add Entry</a></li>
 			</ul>
 		</div>
 	</div>
