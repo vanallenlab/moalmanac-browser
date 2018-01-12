@@ -19,15 +19,17 @@ var substring_matcher = function(strs) {
   };
 };
 
-$('.typeahead').typeahead({
-	hint: true,
-	highlight: true,
-	minLength: 1
-},
-{
-	name: 'typeahead_genes',
-	source: substring_matcher(typeahead_genes)
-});
+if ($('.typeahead')) {
+    $('.typeahead').typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 1
+    },
+    {
+        name: 'typeahead_genes',
+        source: substring_matcher(typeahead_genes)
+    });
+}
 
 $('#gene-input').bind('typeahead:select', function(ev, suggestion) {
     $('#gene-input').value = suggestion;
@@ -35,9 +37,11 @@ $('#gene-input').bind('typeahead:select', function(ev, suggestion) {
 });
 
 $(document).ready(function(){
-    $('.results-table').DataTable({
-        ordering: true,
-        paging: true,
-        searching: false
-    });
+    if ($('.results-table').DataTable) {
+        $('.results-table').DataTable({
+            ordering: true,
+            paging: true,
+            searching: false
+        });
+    }
 });

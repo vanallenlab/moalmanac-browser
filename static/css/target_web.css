@@ -51,6 +51,12 @@ a:hover {
 	padding-bottom: 1em;
 }
 
+/* Submit entry page */
+#btn-sub {
+    float: right;
+	margin-top: 10px;
+}
+
 /* front page gene search bar */
 #jumbo-gene-search-group {
 	margin: 0 auto;

@@ -48,6 +48,11 @@ def suggest():
                            nav_current_page='suggest')
 
 
+@portal.route('/submit')
+def submit():
+    print("Hello")
+
+
 @portal.route('/add')
 def add():
     typeahead_genes = _query_distinct_column(Alteration, 'gene_name')
