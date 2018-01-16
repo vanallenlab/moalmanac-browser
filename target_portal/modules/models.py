@@ -11,6 +11,7 @@ class Assertion(Base, db.Model):
     assertion_id = db.Column('assertion_id', db.Integer, primary_key=True)
     last_updated = db.Column('last_updated', db.Text, default=datetime.now)
     disease = db.Column('oncotree_term', db.Text)
+    old_disease = db.Column('disease', db.Text)
     oncotree_code = db.Column('oncotree_code', db.Text)
     stage = db.Column('stage', db.Integer)
     therapy_name = db.Column('therapy_name', db.Text)

@@ -24,6 +24,14 @@ EFFECTS = [
  'MSI-High'
 ]
 
+pred_impl_orders = {
+    'FDA-Approved': 5,
+    'Level A': 4,
+    'Level B': 3,
+    'Level C': 2,
+    'Level D': 1,
+}
+
 
 def _filter_row_column(query_results, column):
     return [getattr(row, column) for row in query_results if getattr(row, column) not in [None, '']]
@@ -59,6 +67,18 @@ def index():
 def about():
     return render_template('portal_about.html',
                            nav_current_page='about')
+
+
+@portal.route('/approve')
+def approve():
+    unapproved_assertions = db.session.query(Assertion).filter(Assertion.validated == 0).all()
+    rows = []
+    for assertion in unapproved_assertions:
+        for alt in assertion.alterations:
+            rows.append(_make_row(alt, assertion))
+    return render_template('admin_approval.html',
+                           pred_impl_orders=pred_impl_orders,
+                           rows=rows)
 
 
 @portal.route('/submit', methods=['POST'])
@@ -111,9 +131,10 @@ def submit():
     assertion.predictive_implication = implication
     assertion.therapy_type = therapy
     assertion.disease = cancer_type
+    assertion.old_disease = cancer_type
     assertion.sources.append(source)
     db.session.add(assertion)
-    db.session.flush()
+    db.session.commit()
 
     return render_template('portal_add.html',
                            nav_current_page='add')
@@ -141,31 +162,23 @@ def add():
                            therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name']
                            )
 
+def _make_row(alt, assertion):
+    return {
+        'gene_name': alt.gene_name,
+        'feature': alt.feature,
+        'alt_type': alt.alt_type,
+        'alt': alt.alt,
+        'therapy_name': assertion.therapy_name,
+        'therapy_sensitivity': assertion.therapy_sensitivity,
+        'disease': assertion.disease,
+        'predictive_implication': assertion.predictive_implication,
+        'assertion_id': assertion.assertion_id
+    }
+
 
 @portal.route('/search')
 def search():
-    def _make_row(alt, assertion):
-        return {
-            'gene_name': alt.gene_name,
-            'feature': alt.feature,
-            'alt_type': alt.alt_type,
-            'alt': alt.alt,
-            'therapy_name': assertion.therapy_name,
-            'therapy_sensitivity': assertion.therapy_sensitivity,
-            'disease': assertion.disease,
-            'predictive_implication': assertion.predictive_implication,
-            'assertion_id': assertion.assertion_id
-        }
-
     typeahead_genes = _query_distinct_column(Alteration, 'gene_name')
-    pred_impl_orders = {
-        'FDA-Approved': 5,
-        'Level A': 4,
-        'Level B': 3,
-        'Level C': 2,
-        'Level D': 1,
-    }
-
 
     gene_needle = request.args.get('g')
     cancer_needle = request.args.get('d')
