@@ -14,8 +14,9 @@ CREATE TABLE Alteration (
 -- Table: Assertion
 CREATE TABLE Assertion (
     assertion_id integer NOT NULL CONSTRAINT Assertion_pk PRIMARY KEY,
-    last_updated text NOT NULL,
-    disease text NOT NULL,
+    created_on text NOT NULL DEFAULT CURRENT_DATE,
+    last_updated text NOT NULL DEFAULT CURRENT_DATE,
+    disease text,
     oncotree_term,
     oncotree_code,
     stage integer,
@@ -52,6 +53,8 @@ CREATE TABLE Assertion_To_Source (
 -- Table: Source
 CREATE TABLE Source (
     source_id integer NOT NULL CONSTRAINT Source_pk PRIMARY KEY,
+    created_on NOT NULL,
+    modified_on NOT NULL,
     source_type text NOT NULL,
     cite_text text NOT NULL,
     doi text

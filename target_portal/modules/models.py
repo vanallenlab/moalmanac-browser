@@ -1,5 +1,6 @@
 from flask_sqlalchemy import orm, declarative_base
 from target_portal import db
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -8,25 +9,31 @@ class Assertion(Base, db.Model):
     __tablename__ = 'Assertion'
 
     assertion_id = db.Column('assertion_id', db.Integer, primary_key=True)
-    last_updated = db.Column('last_updated', db.Text)
+    last_updated = db.Column('last_updated', db.Text, default=datetime.now)
     disease = db.Column('oncotree_term', db.Text)
     oncotree_code = db.Column('oncotree_code', db.Text)
     stage = db.Column('stage', db.Integer)
     therapy_name = db.Column('therapy_name', db.Text)
     therapy_type = db.Column('therapy_type', db.Text)
     therapy_sensitivity = db.Column('therapy_sensitivity', db.Boolean)
-    predictive_implication = db.Column('predictive_implication', db.Text)
+    predictive_implication = db.Column('predictive_implication', db.Enum('FDA-Approved',
+                                                                         'Level A',
+                                                                         'Level B',
+                                                                         'Level C',
+                                                                         'Level D',
+                                                                         'Level E',
+                                                                         'Predictive implication'))
     favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
     description = db.Column('description', db.Text)
 
     alterations = orm.relationship('Alteration',
-                                   #single_parent=True,
                                    secondary='Assertion_To_Alteration',
-                                   )#cascade='all, delete-orphan')
+                                   )
+
     sources = orm.relationship('Source',
-                               #single_parent=True,
-                               secondary='Assertion_To_Source',
-                               )#cascade='all, delete-orphan')
+                               secondary='Assertion_To_Source', uselist=True,
+                               )
+    validated = db.Column('validated', db.Boolean)
 
 
 # feature = {Amplification, Biallelic Inactivation, Deletion, Mutation, Rearrangement}
@@ -35,7 +42,13 @@ class Alteration(Base, db.Model):
     __tablename__ = 'Alteration'
 
     alt_id = db.Column('alt_id', db.Integer, primary_key=True)
-    feature = db.Column('feature', db.Text)
+    feature = db.Column('feature', db.Enum('Rearrangement',
+                                           'Mutation',
+                                           'CNV',
+                                           'Germline Mutation',
+                                           'Knockout',
+                                           'Silencing',
+                                           'MSI'))
     alt_type = db.Column('alt_type', db.Text)
     alt = db.Column('alt', db.Text)
     gene_name = db.Column('gene_name', db.Text)

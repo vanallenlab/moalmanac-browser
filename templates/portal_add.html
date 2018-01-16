@@ -1,6 +1,7 @@
 {%- extends 'base.html' %}
 {% block scripts %}
 {{super()}}
+<script src="{{url_for('static', filename='js/underscore-min.js')}}"></script>
 <script type="text/javascript">
     var typeahead_genes = [
     {% for gene in typeahead_genes %}
@@ -8,17 +9,44 @@
     {% endfor %}
     ];
 
+    // Selectors
+    var implication_select = $('#implication-select')[0];
+    var type_select = $('#type-select')[0];
+    var therapy_select = $('#therapy-select')[0];
+    var class_select = $('#class-select')[0];
+    var effect_select = $('#effect-select')[0];
+    var source_input = $('#source-input')[0];
+    var gene_input = $('#gene-input')[0];
+
+    // Reactions
     $('#btn-sub').click(function () {
-        var therapy = $('#therapy-select')[0].value;
-        var type =  $('#type-select')[0].value;
-        var implication =  $('#implication-select')[0].value;
-        var source = $('#source-input')[0].value;
-        var gene = $('#gene-input')[0].value;
-        if (!(therapy && type && implication && source && gene)) {
-            console.log('error');
-        } else {
-            console.log('wahoo');
-        }
+        var therapy = therapy_select.value;
+        var type =  type_select.value;
+        var implication =  implication_select.value;
+        var source = source_input.value;
+        var gene = gene_input.value;
+        var _class = class_select.value;
+        var effect = effect_select.value;
+        $.ajax({
+          type: "POST",
+          url: '/submit',
+          data: {
+            'therapy': therapy,
+            'type': type,
+            'implication': implication,
+            'source': source,
+            'gene': gene,
+            'effect': effect,
+            'class': _class
+          },
+          success: function (response) {
+            $('#success-panel').show();
+            $('#success-text').html("<b>Therapy: " + therapy + "</br> with implication " + implication + " for gene " + gene + " for " + type + " (" + source + ")</b>");
+          },
+          error: function (response) {
+            alert("Please fill in all fields");
+          }
+        });
     });
 </script>
 <script src="{{url_for('static', filename='js/typeahead.bundle.js')}}"></script>
@@ -29,18 +57,52 @@
 
 {% block page_content %}
 <h1>Submit Entry to {{ config['APP_NAME'] }}</h1>
+<div class="panel panel-default" id="success-panel" hidden>
+    <div class="panel-heading green">
+        <h3 class="panel-title green"><strong>Success</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            Entry was submitted for review: <span id="success-text"></span>
+        </p>
+    </div>
+</div>
 <div class="panel panel-default">
     <div class="panel-body">
         <div class="row">
             <div class="col-md-8">
                 <h3>Source</h3>
-                <input id="source-input" name="g" type="text" class="form-control" placeholder="URL">
+                <p>DOI, e.g. 10.1126/science.1062538</p>
+                <input id="source-input" name="g" type="text" class="form-control" placeholder="">
             </div>
+        </div>
+        <div class="row">
             <div class="col-md-4">
                 <h3>Gene</h3>
+                <p>HGNC Gene Symbol</p>
                 <div class="input-group">
-                    <input id="gene-input" name="g" type="text" class="form-control typeahead" placeholder="Gene Symbol">
+                    <input id="gene-input" name="g" type="text" class="form-control typeahead" placeholder="">
                 </div>
+            </div>
+            <div class="col-md-4">
+                <h3>Alteration Class</h3>
+                <p>Class of Alteration</p>
+                <select id="class-select" name="d" class="form-control">
+                    <option selected disabled hidden>Select alteration class</option>
+                    {% for at in alteration_classes %}
+                    <option>{{at}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+             <div class="col-md-4">
+                <h3>Alteration Effect</h3>
+                <p>Effect of Alteration</p>
+                <select id="effect-select" name="d" class="form-control">
+                    <option selected disabled hidden>Select effect</option>
+                    {% for e in effects %}
+                    <option>{{e}}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
         <div class="row">
