@@ -41,7 +41,7 @@
           },
           success: function (response) {
             $('#success-panel').show();
-            $('#success-text').html("<b>Therapy: " + therapy + "</br> with implication " + implication + " for gene " + gene + " for " + type + " (" + source + ")</b>");
+            $('#success-text').html("<b></br>Therapy: " + therapy + "</br> Implication: " + implication + "</br> Gene: " + gene + "</br> Type: " + type + "</br> DOI: " + source + "</b>");
           },
           error: function (response) {
             alert("Please fill in all fields");

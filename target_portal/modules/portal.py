@@ -1,4 +1,6 @@
 from flask import Blueprint, request, render_template, flash, redirect, url_for, make_response
+import simplejson as json
+
 from werkzeug.exceptions import BadRequest
 
 from db import db
@@ -32,6 +34,13 @@ pred_impl_orders = {
     'Level D': 1,
 }
 
+
+def http200response():
+    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+
+
+def http404response():
+    return json.dumps({'success': False}), 404, {'ContentType': 'application/json'}
 
 def _filter_row_column(query_results, column):
     return [getattr(row, column) for row in query_results if getattr(row, column) not in [None, '']]
@@ -69,14 +78,61 @@ def about():
                            nav_current_page='about')
 
 
-@portal.route('/approve')
-def approve():
+@portal.route('/approve_submission')
+def approve_submission():
+    assertion_id = int(request.args['assertion_id'])
+    assertion_to_submit = db.session.query(Assertion).filter(Assertion.assertion_id == assertion_id,
+                                                             Assertion.validated == 0).first()
+    db.session.add(assertion_to_submit)
+    assertion_to_submit.validated = True
+    db.session.commit()
+
+    return http200response()
+
+
+@portal.route('/delete_submission')
+def delete_submission():
+    assertion_id = int(request.args['assertion_id'])
+    assertion_to_delete = db.session.query(Assertion).filter(Assertion.assertion_id == assertion_id,
+                                                             Assertion.validated == 0).first()
+
+    if assertion_to_delete:
+        # Before deleting the assertion, check whether deleting it would orphan any rows in the Source or Alteration
+        # tables, and delete these if so.
+        for alt in assertion_to_delete.alterations:
+            other_assertions_with_same_alteration = db.session.query(AssertionToAlteration)\
+                .filter(AssertionToAlteration.alt_id == alt.alt_id,
+                        AssertionToAlteration.assertion_id != assertion_to_delete.assertion_id).all()
+            if not other_assertions_with_same_alteration:
+                db.session.delete(alt)
+
+        for s in assertion_to_delete.sources:
+            other_assertions_with_same_source = db.session.query(AssertionToSource)\
+                .filter(AssertionToSource.source_id == s.source_id,
+                        AssertionToSource.assertion_id != assertion_to_delete.assertion_id).all()
+            if not other_assertions_with_same_source:
+                db.session.delete(s)
+
+        db.session.delete(assertion_to_delete)
+        db.session.commit()
+        return http200response()
+    return http404response()
+
+
+def _get_unapproved_assertion_rows():
     unapproved_assertions = db.session.query(Assertion).filter(Assertion.validated == 0).all()
     rows = []
     for assertion in unapproved_assertions:
         for alt in assertion.alterations:
             rows.append(_make_row(alt, assertion))
+    return rows
+
+
+@portal.route('/approve')
+def approve():
+    rows = _get_unapproved_assertion_rows()
     return render_template('admin_approval.html',
+                           nav_current_page='approve',
                            pred_impl_orders=pred_impl_orders,
                            rows=rows)
 
@@ -162,17 +218,20 @@ def add():
                            therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name']
                            )
 
+
 def _make_row(alt, assertion):
     return {
         'gene_name': alt.gene_name,
         'feature': alt.feature,
         'alt_type': alt.alt_type,
         'alt': alt.alt,
+        'alt_id': alt.alt_id,
         'therapy_name': assertion.therapy_name,
         'therapy_sensitivity': assertion.therapy_sensitivity,
         'disease': assertion.disease,
         'predictive_implication': assertion.predictive_implication,
-        'assertion_id': assertion.assertion_id
+        'assertion_id': assertion.assertion_id,
+        'sources': [s for s in assertion.sources]
     }
 
 

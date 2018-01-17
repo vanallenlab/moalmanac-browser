@@ -79,6 +79,11 @@ a:hover {
 	color: #FFFFFF;
 }
 
+.btn-delete {
+    background-color: black;
+    color: white;
+}
+
 .btn-alt-search {
     width: 100%;
 }
