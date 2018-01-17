@@ -17,6 +17,7 @@
     var effect_select = $('#effect-select')[0];
     var source_input = $('#source-input')[0];
     var gene_input = $('#gene-input')[0];
+    var email_input = $('#email-input')[0];
 
     // Reactions
     $('#btn-sub').click(function () {
@@ -27,6 +28,7 @@
         var gene = gene_input.value;
         var _class = class_select.value;
         var effect = effect_select.value;
+        var email = email_input.value;
         $.ajax({
           type: "POST",
           url: '/submit',
@@ -37,11 +39,12 @@
             'source': source,
             'gene': gene,
             'effect': effect,
-            'class': _class
+            'class': _class,
+            'email': email
           },
           success: function (response) {
             $('#success-panel').show();
-            $('#success-text').html("<b></br>Therapy: " + therapy + "</br> Implication: " + implication + "</br> Gene: " + gene + "</br> Type: " + type + "</br> DOI: " + source + "</b>");
+            $('#success-text').html("<b></br>Email: " + email + "</br>Therapy: " + therapy + "</br> Implication: " + implication + "</br> Gene: " + gene + "</br> Type: " + type + "</br> DOI: " + source + "</b>");
           },
           error: function (response) {
             alert("Please fill in all fields");
@@ -139,11 +142,17 @@
                 </select>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-8">
+                <h3>Email Address</h3>
+                <p>We may contact you to ask you about your experience with this portal.</p>
+                <input id="email-input" name="e" type="text" class="form-control" placeholder="">
+            </div>
+        </div>
         <div>
             <span class="input-group-btn">
                 <button type="submit" class="btn btn-default" id="btn-sub" style="float:right; margin-top: 10px;">Submit</button>
             </span>
-
         </div>
     </div>
 </div>

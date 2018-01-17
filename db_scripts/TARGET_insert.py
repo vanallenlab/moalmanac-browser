@@ -110,6 +110,8 @@ with open(import_file) as tsvfile:
                                description=row[11],
                                oncotree_term=oncotree_term,
                                oncotree_code=oncotree_code,
+                               submitted_by='breardon@broadinstitute.org',
+                               created_on=datetime.now(),
                                last_updated=datetime.now())
 
         for source in new_sources:

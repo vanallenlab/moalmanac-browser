@@ -26,7 +26,8 @@ CREATE TABLE Assertion (
     predictive_implication text,
     favorable_prognosis boolean,
     description text,
-    validated boolean DEFAULT 0
+    validated boolean DEFAULT 0,
+    submitted_by text
 );
 
 -- Table: Assertion_To_Alteration

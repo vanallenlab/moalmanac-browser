@@ -9,6 +9,7 @@ class Assertion(Base, db.Model):
     __tablename__ = 'Assertion'
 
     assertion_id = db.Column('assertion_id', db.Integer, primary_key=True)
+    created_on = db.Column('created_on', db.Text, default=datetime.now)
     last_updated = db.Column('last_updated', db.Text, default=datetime.now)
     disease = db.Column('oncotree_term', db.Text)
     old_disease = db.Column('disease', db.Text)
@@ -35,6 +36,7 @@ class Assertion(Base, db.Model):
                                secondary='Assertion_To_Source', uselist=True,
                                )
     validated = db.Column('validated', db.Boolean, default=False)
+    submitted_by = db.Column('submitted_by', db.Text)
 
 
 # feature = {Amplification, Biallelic Inactivation, Deletion, Mutation, Rearrangement}

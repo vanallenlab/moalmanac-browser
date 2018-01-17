@@ -147,6 +147,7 @@ def submit():
     doi = submission.get('source').strip()
     _class = submission.get('class').strip()
     effect = submission.get('effect').strip()
+    email = submission.get('email').strip()
 
     if not therapy or therapy == 'Select therapy':
         raise BadRequest("Please select a therapy")
@@ -158,6 +159,8 @@ def submit():
         raise BadRequest("Please enter a valid HGNC gene symbol")
     if not doi:
         raise BadRequest("Please enter a valid source DOI")
+    if not email:
+        raise BadRequest("Please enter a valid email")
 
     existing_alteration = db.session.query(Alteration).filter(Alteration.gene_name == gene,
                                                               Alteration.alt_type == effect,
@@ -189,6 +192,7 @@ def submit():
     assertion.disease = cancer_type
     assertion.old_disease = cancer_type
     assertion.sources.append(source)
+    assertion.submitted_by = email
     db.session.add(assertion)
     db.session.commit()
 
@@ -229,6 +233,7 @@ def _make_row(alt, assertion):
         'therapy_name': assertion.therapy_name,
         'therapy_sensitivity': assertion.therapy_sensitivity,
         'disease': assertion.disease,
+        'submitter': assertion.submitted_by,
         'predictive_implication': assertion.predictive_implication,
         'assertion_id': assertion.assertion_id,
         'sources': [s for s in assertion.sources]

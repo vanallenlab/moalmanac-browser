@@ -1,0 +1,151 @@
+{%- extends 'base.html' %}
+
+{% block title %}{{ config['APP_NAME'] }} Submission Approval {% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/jquery.dataTables.min.css')}}">
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='js/portal.js')}}"></script>
+<script src="{{url_for('static', filename='js/jquery.dataTables.min.js')}}"></script>
+<script type="text/javascript">
+    renderTable = function () {
+        $('.results-table').DataTable({
+            ordering: false,
+            paging: true,
+            searching: false
+        });
+    }
+
+    renderTable();
+
+    $('.btn-approve').click(function (e) {
+        var button = $(e.currentTarget);
+        var button_data = button.data();
+        var assertion_id = button_data.id;
+        $.get('/approve_submission?assertion_id=' + assertion_id).done(function (data) {
+            if (JSON.parse(data).success == true) {
+                // Reload page
+                location.reload();
+            } else {
+                alert("Something went wrong -- submission could not be approved.")
+            }
+        });
+    });
+
+    $('.btn-delete').click(function (e) {
+        var button = $(e.currentTarget);
+        var button_data = button.data();
+        var assertion_id = button_data.id;
+        var gene = button_data.gene;
+        var disease = button_data.disease;
+        var r = confirm("Really delete submission for " + gene + " in " + disease + "?");
+        if (r == true) {
+            $.get('/delete_submission?assertion_id=' + assertion_id).done(function (data) {
+                if (JSON.parse(data).success == true) {
+                    // Reload page
+                    location.reload();
+                } else {
+                    alert("Something went wrong -- submission could not be deleted.")
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block page_content %}
+<h1>{{ config['APP_NAME'] }} Submission Approval </h1>
+
+<p class="text-muted">Approve and edit submissions.</p>
+
+<table class="results-table display compact">
+    <thead>
+        <tr>
+            <th></th><th>Gene</th><th>Feature</th><th>Alt. Class</th><th>Alt. Effect</th><th>Therapy</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</th><th>DOIs</th><th>Submitter</th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+        <tr id="row-{{row['assertion_id']}}">
+            <td>
+               <span class="input-group-btn">
+                    <button type="submit" class="btn btn-default btn-approve" data-id="{{row['assertion_id']}}" style="margin: auto;">Approve</button>
+               </span>
+            </td>
+            <td>
+                {% if row['gene_name'] %}
+                    {{row['gene_name']}}
+                {% endif %}</td>
+            <td>
+                {{row['feature'] if row['feature'] is not none}}
+            </td>
+            <td>
+                {{row['alt'] if row['alt'] is not none else '(any)'}}
+            </td>
+            <td>
+                {{row['alt_type'] if row['alt_type'] is not none}}
+            </td>
+            <td>
+                {% if row['therapy_name'] %}
+                    {{row['therapy_name']}}
+                {% endif %}
+            </td>
+            {% if row['therapy_sensitivity'] is not none %}
+                <td>
+                    {% if row['therapy_sensitivity'] == True %}
+                        Sensitivity
+                    {% elif row['therapy_sensitivity'] == False %}
+                        Resistance
+                    {% endif %}
+                </td>
+            {% elif row['favorable_prognosis'] is not none %}
+                <td>
+                    {% if row['favorable_prognosis'] == True %}
+                        Good prognosis
+                    {% elif row['favorable_prognosis'] == False %}
+                        Poor prognosis
+                    {% endif %}
+                </td>
+            {% else %}
+                <td>
+                </td>
+            {% endif %}
+            <td>
+                {% if row['disease'] %}
+                    {{row['disease']}}
+                {% endif %}
+            </td>
+            {%if row['predictive_implication'] is not none %}
+                <td data-order="{{pred_impl_orders[row['predictive_implication']]}}">
+                    {{row['predictive_implication']}}
+                </td>
+            {% else %}
+                <td>
+                </td>
+            {% endif %}
+            <td>
+                {% for source in row['sources'] %}
+                    <a href="https://doi.org/{{source.doi|urlencode}}">
+                        {{source.doi}}
+                    </a>
+                    <br>
+                {% endfor %}
+            </td>
+            <td>
+                {{row['submitter']}}
+            </td>
+            <td>
+                <button type="button" class="btn btn-delete btn-sm" data-id="{{row['assertion_id']}}" data-gene="{{row['gene_name']}}" data-disease="{{row['disease']}}">
+                    <span class="glyphicon glyphicon-trash">
+                    </span>
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{%- endblock %}
