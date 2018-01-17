@@ -254,14 +254,18 @@ def search():
         alts = db.session.query(Alteration).filter(Alteration.gene_name.like('%'+gene_needle+'%')).all()
         for alt in alts:
             for assertion in alt.assertions:
-                rows.append(_make_row(alt, assertion))
+                if assertion.validated is True:
+                    rows.append(_make_row(alt, assertion))
     elif cancer_needle or pred_impl_needle or therapy_needle:
         if cancer_needle:
-            assertions = db.session.query(Assertion).filter(Assertion.disease == cancer_needle).all()
+            assertions = db.session.query(Assertion).filter(Assertion.disease == cancer_needle,
+                                                            Assertion.validated is True).all()
         if pred_impl_needle:
-            assertions = db.session.query(Assertion).filter(Assertion.predictive_implication == pred_impl_needle).all()
+            assertions = db.session.query(Assertion).filter(Assertion.predictive_implication == pred_impl_needle,
+                                                            Assertion.validated is True).all()
         if therapy_needle:
-            assertions = db.session.query(Assertion).filter(Assertion.therapy_name == therapy_needle).all()
+            assertions = db.session.query(Assertion).filter(Assertion.therapy_name == therapy_needle,
+                                                            Assertion.validated is True).all()
 
         for assertion in assertions:
             for alt in assertion.alterations:
