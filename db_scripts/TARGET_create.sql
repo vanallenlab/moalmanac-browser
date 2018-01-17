@@ -25,7 +25,8 @@ CREATE TABLE Assertion (
     therapy_sensitivity boolean,
     predictive_implication text,
     favorable_prognosis boolean,
-    description text
+    description text,
+    validated boolean DEFAULT 0
 );
 
 -- Table: Assertion_To_Alteration

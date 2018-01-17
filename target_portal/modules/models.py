@@ -34,7 +34,7 @@ class Assertion(Base, db.Model):
     sources = orm.relationship('Source',
                                secondary='Assertion_To_Source', uselist=True,
                                )
-    validated = db.Column('validated', db.Boolean)
+    validated = db.Column('validated', db.Boolean, default=False)
 
 
 # feature = {Amplification, Biallelic Inactivation, Deletion, Mutation, Rearrangement}
