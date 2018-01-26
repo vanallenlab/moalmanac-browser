@@ -15,6 +15,7 @@
     var therapy_select = $('#therapy-select')[0];
     var class_select = $('#class-select')[0];
     var effect_select = $('#effect-select')[0];
+    var alteration_input = $('#alteration-input')[0];
     var source_input = $('#source-input')[0];
     var gene_input = $('#gene-input')[0];
     var email_input = $('#email-input')[0];
@@ -26,7 +27,8 @@
         var implication =  implication_select.value;
         var source = source_input.value;
         var gene = gene_input.value;
-        var _class = class_select.value;
+        var alt_class = class_select.value;
+        var alteration = alteration_input.value;
         var effect = effect_select.value;
         var email = email_input.value;
         $.ajax({
@@ -39,15 +41,26 @@
             'source': source,
             'gene': gene,
             'effect': effect,
-            'class': _class,
+            'class': alt_class,
+            'alteration': alteration,
             'email': email
           },
           success: function (response) {
             $('#success-panel').show();
-            $('#success-text').html("<b></br>Email: " + email + "</br>Therapy: " + therapy + "</br> Implication: " + implication + "</br> Gene: " + gene + "</br> Type: " + type + "</br> DOI: " + source + "</b>");
+            $('#success-text').html("<b></br>Email: " + email +
+                                    "</br>Therapy: " + therapy +
+                                    "</br> Implication: " + implication +
+                                    "</br> Gene: " + gene +
+                                    "</br> Type: " + type +
+                                    "</br> Class: " + alt_class +
+                                    "</br> Effect: " + effect +
+                                    "</br> Alteration: " + alteration +
+                                    "</br> DOI: " + source + "</b>");
+            $('#error-panel').hide();
           },
           error: function (response) {
-            alert("Please fill in all fields");
+            $('#error-panel').show();
+            $('#success-panel').hide();
           }
         });
     });
@@ -70,6 +83,16 @@
         </p>
     </div>
 </div>
+<div class="panel panel-default" id="error-panel" hidden>
+    <div class="panel-heading pink">
+        <h3 class="panel-title pink"><strong>Error</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            There was an error processing your submission: <span id="error-text"> please fill in all fields</span>
+        </p>
+    </div>
+</div>
 <div class="panel panel-default">
     <div class="panel-body">
         <div class="row">
@@ -88,10 +111,22 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <h3>Alteration Class</h3>
+                <h3>Cancer Type</h3>
+                <p>Select from <strong>{{diseases|length}}</strong> cancer types:</p>
+                <select id="type-select" name="d" class="form-control">
+                    <option selected disabled hidden>Select cancer type</option>
+                    {% for disease in diseases %}
+                    <option>{{disease}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Alteration Feature</h3>
                 <p>Class of Alteration</p>
                 <select id="class-select" name="d" class="form-control">
-                    <option selected disabled hidden>Select alteration class</option>
+                    <option selected disabled hidden>Select feature</option>
                     {% for at in alteration_classes %}
                     <option>{{at}}</option>
                     {% endfor %}
@@ -107,20 +142,16 @@
                     {% endfor %}
                 </select>
             </div>
+             <div class="col-md-4">
+                <h3>Alteration</h3>
+                <p>Specific Alteration, e.g. L702H </p>
+                <div class="input-group">
+                    <input id="alteration-input" name="a" type="text" placeholder="">
+                </div>
+            </div>
         </div>
         <div class="row">
-            <div class="col-md-4">
-                <h3>Cancer Type</h3>
-                <p>Select from <strong>{{diseases|length}}</strong> cancer types:</p>
-                <select id="type-select" name="d" class="form-control">
-                    <option selected disabled hidden>Select cancer type</option>
-                    {% for disease in diseases %}
-                    <option>{{disease}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <h3>Predictive Implication Level</h3>
                 <p>Select from <strong>{{pred_impls|length}}</strong> predictive implication levels</p>
                 <select id="implication-select" name="p" class="form-control">
@@ -131,7 +162,7 @@
                 </select>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <h3>Therapy</h3>
                 <p>Select from <strong>{{therapy_names|length}}</strong> therapies:</p>
                 <select id="therapy-select" name="t" class="form-control">

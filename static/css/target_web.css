@@ -63,6 +63,11 @@ a:hover {
     background-color: #85b785 !important;
 }
 
+.pink {
+    background: #bb5555;
+    background-color: #bb5555 !important;
+}
+
 /* front page gene search bar */
 #jumbo-gene-search-group {
 	margin: 0 auto;

@@ -6,7 +6,7 @@ from werkzeug.exceptions import BadRequest
 from db import db
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 from .helper_functions import get_unapproved_assertion_rows, make_row, http404response, http200response, \
-    query_distinct_column, filter_row_column
+    query_distinct_column, add_or_fetch_alteration, add_or_fetch_source
 
 portal = Blueprint('portal', __name__)
 
@@ -123,8 +123,9 @@ def submit():
     implication = submission.get('implication').strip()
     gene = submission.get('gene').strip()
     doi = submission.get('source').strip()
-    _class = submission.get('class').strip()
+    alt_class = submission.get('class').strip()
     effect = submission.get('effect').strip()
+    alt = submission.get('alteration').strip()
     email = submission.get('email').strip()
 
     if not therapy or therapy == 'Select therapy':
@@ -133,30 +134,11 @@ def submit():
         raise BadRequest("Please select a predictive implication level")
     if not cancer_type or cancer_type == 'Select a cancer type':
         raise BadRequest("Please select a cancer type")
-    if not (gene or doi or email):
+    if not (gene and doi and email):
         raise BadRequest("Missing gene, doi, or email")
 
-    existing_alteration = db.session.query(Alteration).filter(Alteration.gene_name == gene,
-                                                              Alteration.alt_type == effect,
-                                                              Alteration.feature == _class).all()
-
-    existing_source = db.session.query(Source).filter(Source.doi == doi).first()
-
-    if not existing_alteration:
-        alteration = Alteration()
-        alteration.feature = _class
-        alteration.alt_type = effect
-        alteration.gene_name = gene
-        db.session.add(alteration)
-        db.session.flush()
-
-    if existing_source:
-        source = existing_source
-    else:
-        source = Source()
-        source.doi = doi
-        db.session.add(source)
-        db.session.flush()
+    alteration = add_or_fetch_alteration(db, gene, effect, alt_class, alt)
+    source = add_or_fetch_source(db, doi)
 
     assertion = Assertion()
     assertion.validated = False
