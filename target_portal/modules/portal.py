@@ -5,6 +5,8 @@ from werkzeug.exceptions import BadRequest
 
 from db import db
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
+from .helper_functions import get_unapproved_assertion_rows, make_row, http404response, http200response, \
+    query_distinct_column, filter_row_column
 
 portal = Blueprint('portal', __name__)
 
@@ -35,28 +37,13 @@ pred_impl_orders = {
 }
 
 
-def http200response():
-    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
-
-
-def http404response():
-    return json.dumps({'success': False}), 404, {'ContentType': 'application/json'}
-
-def _filter_row_column(query_results, column):
-    return [getattr(row, column) for row in query_results if getattr(row, column) not in [None, '']]
-
-
-def _query_distinct_column(model, column):
-    query = db.session.query(getattr(model, column).distinct().label(column))
-    return _filter_row_column(query, column)
-
 
 @portal.route('/')
 def index():
-    typeahead_genes = _query_distinct_column(Alteration, 'gene_name')
-    diseases = _query_distinct_column(Assertion, 'disease')
-    pred_impls = _query_distinct_column(Assertion, 'predictive_implication')
-    therapy_names = _query_distinct_column(Assertion, 'therapy_name')
+    typeahead_genes = query_distinct_column(db, Alteration, 'gene_name')
+    diseases = query_distinct_column(db, Assertion, 'disease')
+    pred_impls = query_distinct_column(db, Assertion, 'predictive_implication')
+    therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
 
     num_genes = db.session.query(Alteration.gene_name).distinct().count()
     num_assertions = db.session.query(Assertion).count()
@@ -119,18 +106,9 @@ def delete_submission():
     return http404response()
 
 
-def _get_unapproved_assertion_rows():
-    unapproved_assertions = db.session.query(Assertion).filter(Assertion.validated == 0).all()
-    rows = []
-    for assertion in unapproved_assertions:
-        for alt in assertion.alterations:
-            rows.append(_make_row(alt, assertion))
-    return rows
-
-
 @portal.route('/approve')
 def approve():
-    rows = _get_unapproved_assertion_rows()
+    rows = get_unapproved_assertion_rows(db)
     return render_template('admin_approval.html',
                            nav_current_page='approve',
                            pred_impl_orders=pred_impl_orders,
@@ -155,12 +133,8 @@ def submit():
         raise BadRequest("Please select a predictive implication level")
     if not cancer_type or cancer_type == 'Select a cancer type':
         raise BadRequest("Please select a cancer type")
-    if not gene:
-        raise BadRequest("Please enter a valid HGNC gene symbol")
-    if not doi:
-        raise BadRequest("Please enter a valid source DOI")
-    if not email:
-        raise BadRequest("Please enter a valid email")
+    if not (gene or doi or email):
+        raise BadRequest("Missing gene, doi, or email")
 
     existing_alteration = db.session.query(Alteration).filter(Alteration.gene_name == gene,
                                                               Alteration.alt_type == effect,
@@ -202,10 +176,10 @@ def submit():
 
 @portal.route('/add')
 def add():
-    typeahead_genes = _query_distinct_column(Alteration, 'gene_name')
-    diseases = _query_distinct_column(Assertion, 'disease')
-    pred_impls = _query_distinct_column(Assertion, 'predictive_implication')
-    therapy_names = _query_distinct_column(Assertion, 'therapy_name')
+    typeahead_genes = query_distinct_column(db, Alteration, 'gene_name')
+    diseases = query_distinct_column(db, Assertion, 'disease')
+    pred_impls = query_distinct_column(db, Assertion, 'predictive_implication')
+    therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
 
     num_genes = db.session.query(Alteration.gene_name).distinct().count()
     num_assertions = db.session.query(Assertion).count()
@@ -223,26 +197,9 @@ def add():
                            )
 
 
-def _make_row(alt, assertion):
-    return {
-        'gene_name': alt.gene_name,
-        'feature': alt.feature,
-        'alt_type': alt.alt_type,
-        'alt': alt.alt,
-        'alt_id': alt.alt_id,
-        'therapy_name': assertion.therapy_name,
-        'therapy_sensitivity': assertion.therapy_sensitivity,
-        'disease': assertion.disease,
-        'submitter': assertion.submitted_by,
-        'predictive_implication': assertion.predictive_implication,
-        'assertion_id': assertion.assertion_id,
-        'sources': [s for s in assertion.sources]
-    }
-
-
 @portal.route('/search')
 def search():
-    typeahead_genes = _query_distinct_column(Alteration, 'gene_name')
+    typeahead_genes = query_distinct_column(db, Alteration, 'gene_name')
 
     gene_needle = request.args.get('g')
     cancer_needle = request.args.get('d')
@@ -255,8 +212,9 @@ def search():
         for alt in alts:
             for assertion in alt.assertions:
                 if assertion.validated is True:
-                    rows.append(_make_row(alt, assertion))
+                    rows.append(make_row(alt, assertion))
     elif cancer_needle or pred_impl_needle or therapy_needle:
+        assertions = []
         if cancer_needle:
             assertions = db.session.query(Assertion).filter(Assertion.disease == cancer_needle,
                                                             Assertion.validated is True).all()
@@ -269,7 +227,7 @@ def search():
 
         for assertion in assertions:
             for alt in assertion.alterations:
-                rows.append(_make_row(alt, assertion))
+                rows.append(make_row(alt, assertion))
 
     return render_template('portal_search_results.html',
                            typeahead_genes=typeahead_genes,
