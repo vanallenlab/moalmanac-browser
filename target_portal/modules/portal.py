@@ -6,7 +6,8 @@ from werkzeug.exceptions import BadRequest
 from db import db
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 from .helper_functions import get_unapproved_assertion_rows, make_row, http404response, http200response, \
-    query_distinct_column, add_or_fetch_alteration, add_or_fetch_source
+    query_distinct_column, add_or_fetch_alteration, add_or_fetch_source, delete_assertion, \
+    amend_alteration_for_assertion
 
 portal = Blueprint('portal', __name__)
 
@@ -67,13 +68,13 @@ def about():
 
 @portal.route('/approve_submission')
 def approve_submission():
+    """As an admin, approve a submission for inclusion in the searchable database"""
     assertion_id = int(request.args['assertion_id'])
     assertion_to_submit = db.session.query(Assertion).filter(Assertion.assertion_id == assertion_id,
                                                              Assertion.validated == 0).first()
     db.session.add(assertion_to_submit)
     assertion_to_submit.validated = True
     db.session.commit()
-
     return http200response()
 
 
@@ -84,30 +85,45 @@ def delete_submission():
                                                              Assertion.validated == 0).first()
 
     if assertion_to_delete:
-        # Before deleting the assertion, check whether deleting it would orphan any rows in the Source or Alteration
-        # tables, and delete these if so.
-        for alt in assertion_to_delete.alterations:
-            other_assertions_with_same_alteration = db.session.query(AssertionToAlteration)\
-                .filter(AssertionToAlteration.alt_id == alt.alt_id,
-                        AssertionToAlteration.assertion_id != assertion_to_delete.assertion_id).all()
-            if not other_assertions_with_same_alteration:
-                db.session.delete(alt)
-
-        for s in assertion_to_delete.sources:
-            other_assertions_with_same_source = db.session.query(AssertionToSource)\
-                .filter(AssertionToSource.source_id == s.source_id,
-                        AssertionToSource.assertion_id != assertion_to_delete.assertion_id).all()
-            if not other_assertions_with_same_source:
-                db.session.delete(s)
-
-        db.session.delete(assertion_to_delete)
-        db.session.commit()
+        delete_assertion(db, assertion_to_delete)
         return http200response()
     return http404response()
 
 
+@portal.route('/amend', methods=['POST'])
+def amend():
+    """As an admin, update the value for a submission before approving it"""
+    amendment = request.form
+    attribute_name = amendment.get('attribute_name').strip()
+    assertion_id = int(amendment.get('assertion_id'))
+    current_value = amendment.get('current_value').strip()
+    if current_value.lower() == 'none':
+        current_value = None
+    new_value = amendment.get('new_value').strip()
+
+    assertion = db.session.query(Assertion).get(assertion_id)
+    db.session.add(assertion)
+    if assertion.validated:
+        BadRequest("Cannot amend assertion {} as it is already validated".format(assertion_id))
+
+    editable_attrs = ['alt']
+    if attribute_name not in editable_attrs:
+        BadRequest('Attribute {} is not editable'.format(attribute_name))
+
+    if attribute_name == 'alt':
+        # Edit alteration. Doing this will mean that the assertion is tied to either a) a different Alteration that
+        # already exists using this newly specified alteration, or b) a brand new one that we create now if no existing
+        # Alterations would match this updated Alteration
+        new_alt_value = new_value
+        current_alt_value = current_value
+        amend_alteration_for_assertion(db, assertion, current_alt_value, new_alt_value)
+        db.session.commit()
+        return http200response()
+
+
 @portal.route('/approve')
 def approve():
+    """Render the page on which admnins can view submitted suggestions"""
     rows = get_unapproved_assertion_rows(db)
     return render_template('admin_approval.html',
                            nav_current_page='approve',
@@ -117,6 +133,7 @@ def approve():
 
 @portal.route('/submit', methods=['POST'])
 def submit():
+    """Submit an assertion for consideration for inclusion in the database"""
     submission = request.form
     therapy = submission.get('therapy').strip()
     cancer_type = submission.get('type').strip()
@@ -158,6 +175,7 @@ def submit():
 
 @portal.route('/add')
 def add():
+    """Render the page through which clients can submit Assertion suggestions"""
     typeahead_genes = query_distinct_column(db, Alteration, 'gene_name')
     diseases = query_distinct_column(db, Assertion, 'disease')
     pred_impls = query_distinct_column(db, Assertion, 'predictive_implication')

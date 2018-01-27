@@ -57,6 +57,11 @@ a:hover {
 	margin-top: 10px;
 }
 
+.editable {
+    cursor: pointer;
+    color: blue;
+
+}
 
 .green {
     background: #85b785;

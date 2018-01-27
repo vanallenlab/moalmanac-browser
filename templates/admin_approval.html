@@ -22,6 +22,7 @@
 
     renderTable();
 
+    // Approve the submission as it currently looks. This will lead to the submission appearing in search results.
     $('.btn-approve').click(function (e) {
         var button = $(e.currentTarget);
         var button_data = button.data();
@@ -36,6 +37,7 @@
         });
     });
 
+    // Delete the submission forever.
     $('.btn-delete').click(function (e) {
         var button = $(e.currentTarget);
         var button_data = button.data();
@@ -54,18 +56,58 @@
             });
         }
     });
+
+    // Enable editing of field upon click.
+    $('.editable').click(function (e) {
+        var td = $(e.currentTarget);
+        var currentValue = td.data().val;
+        var attr = td.data().attr;
+        var assertionId = td.data().assertion_id;
+        td.html('<input class="input" data-attr="' + attr + ' data-assertion_id="' + assertionId + '" type="text" placeholder="' + currentValue + '">');
+        td.removeClass('editable');
+
+        // Remove the click listener from this td so that we can type in the newly created input element at will
+        td.unbind('click');
+
+        // Put the cursor live on the input that just was created
+        $('.input').focus();
+
+        // An on-the-fly function to allow for submitting the input's contents to the backend upon hitting 'Enter'
+        $('.input').keyup(function (e) {
+            if (e.key == "Enter") {
+                var newValue = e.currentTarget.value;
+                $.ajax({
+                  type: "POST",
+                  url: '/amend',
+                  data: {
+                    'attribute_name': attr,
+                    'assertion_id': assertionId,
+                    'current_value': currentValue,
+                    'new_value': newValue
+                  },
+                  success: function (response) {
+                    // Reload page
+                    location.reload();
+                  },
+                  error: function (response) {
+                    alert("Update failed");
+                  }
+                });
+            }
+        });
+    });
 </script>
 {% endblock %}
 
 {% block page_content %}
 <h1>{{ config['APP_NAME'] }} Submission Approval </h1>
 
-<p class="text-muted">Approve and edit submissions.</p>
+<p class="text-muted">Approve and edit submissions. Click on blue links to make changes before approving.</p>
 
 <table class="results-table display compact">
     <thead>
         <tr>
-            <th></th><th>Gene</th><th>Feature</th><th>Alt. Class</th><th>Alt. Effect</th><th>Therapy</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</th><th>DOIs</th><th>Submitter</th><th></th>
+            <th></th><th>Gene</th><th>Feature</th><th>Alt</th><th>Effect</th><th>Therapy</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</th><th>DOIs</th><th>Submitter</th><th></th>
         </tr>
     </thead>
     <tbody>
@@ -79,19 +121,22 @@
             <td>
                 {% if row['gene_name'] %}
                     {{row['gene_name']}}
-                {% endif %}</td>
+                {% endif %}
+            </td>
             <td>
                 {{row['feature'] if row['feature'] is not none}}
             </td>
-            <td>
+            <td class="editable" data-assertion_id="{{row['assertion_id']}}" data-attr="alt" data-val="{{row['alt']}}">
                 {{row['alt'] if row['alt'] is not none else '(any)'}}
             </td>
             <td>
                 {{row['alt_type'] if row['alt_type'] is not none}}
             </td>
-            <td>
+            <td class="editable" data-id="therapy_name">
                 {% if row['therapy_name'] %}
                     {{row['therapy_name']}}
+                {% else %}
+                    <span class="glyphicon glyphicon-edit">
                 {% endif %}
             </td>
             {% if row['therapy_sensitivity'] is not none %}
