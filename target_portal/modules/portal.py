@@ -106,7 +106,7 @@ def amend():
     if assertion.validated:
         BadRequest("Cannot amend assertion {} as it is already validated".format(assertion_id))
 
-    editable_attrs = ['alt']
+    editable_attrs = ['alt', 'therapy_name']
     if attribute_name not in editable_attrs:
         BadRequest('Attribute {} is not editable'.format(attribute_name))
 
@@ -119,7 +119,11 @@ def amend():
         amend_alteration_for_assertion(db, assertion, current_alt_value, new_alt_value)
         db.session.commit()
         return http200response()
-
+    elif attribute_name == 'therapy_name':
+        # Edit the therapy name.
+        assertion.therapy_name = new_value
+        db.session.commit()
+        return http200response()
 
 @portal.route('/approve')
 def approve():

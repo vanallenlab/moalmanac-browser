@@ -132,7 +132,7 @@
             <td>
                 {{row['alt_type'] if row['alt_type'] is not none}}
             </td>
-            <td class="editable" data-id="therapy_name">
+            <td class="editable" data-assertion_id="{{row['assertion_id']}}" data-attr="therapy_name" data-val="{{row['therapy_name']}}">
                 {% if row['therapy_name'] %}
                     {{row['therapy_name']}}
                 {% else %}
