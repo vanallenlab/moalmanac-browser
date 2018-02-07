@@ -119,7 +119,7 @@
 <table class="results-table display compact">
     <thead>
         <tr>
-            <th></th><th>Gene</th><th>Feature</th><th>Alt</th><th>Effect</th><th>Therapy</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</th><th>DOIs</th><th>Citation</th><th>Submitter</th><th></th>
+            <th></th><th>Gene</th><th>Feature</th><th>Alt</th><th>Effect</th><th>Therapy</th><th>Sensitivity</th><th>Prognosis</th><th>Cancer Type</th><th>Predictive Level</th><th>DOIs</th><th>Citation</th><th>Submitter</th><th></th>
         </tr>
     </thead>
     <tbody>
@@ -151,26 +151,20 @@
                     <span class="glyphicon glyphicon-edit"></span>
                 {% endif %}
             </td>
-            {% if row['therapy_sensitivity'] is not none %}
-                <td>
-                    {% if row['therapy_sensitivity'] == True %}
-                        Sensitivity
-                    {% elif row['therapy_sensitivity'] == False %}
-                        Resistance
-                    {% endif %}
-                </td>
-            {% elif row['favorable_prognosis'] is not none %}
-                <td>
-                    {% if row['favorable_prognosis'] == True %}
-                        Good prognosis
-                    {% elif row['favorable_prognosis'] == False %}
-                        Poor prognosis
-                    {% endif %}
-                </td>
-            {% else %}
-                <td>
-                </td>
-            {% endif %}
+            <td class="editable" data-type="text" data-assertion_id="{{row['assertion_id']}}" data-attr="therapy_sensitivity" data-val="{{row['therapy_sensitivity']}}">
+                {% if row['therapy_sensitivity'] == True %}
+                    Sensitivity
+                {% elif row['therapy_sensitivity'] == False %}
+                    Resistance
+                {% endif %}
+            </td>
+            <td class="editable" data-type="text" data-assertion_id="{{row['assertion_id']}}" data-attr="favorable_prognosis" data-val="{{row['favorable_prognosis']}}">
+                {% if row['favorable_prognosis'] == True %}
+                    Good prognosis
+                {% elif row['favorable_prognosis'] == False %}
+                    Poor prognosis
+                {% endif %}
+            </td>
             <td>
                 {% if row['disease'] %}
                     {{row['disease']}}
