@@ -63,10 +63,15 @@
         var currentValue = td.data().val;
         var attr = td.data().attr;
         var assertionId = td.data().assertion_id;
-        td.html('<input class="input" data-attr="' + attr + ' data-assertion_id="' + assertionId + '" type="text" placeholder="' + currentValue + '">');
-        td.removeClass('editable');
+        var textFieldType = td.data().type == 'text'? 'input' : 'textarea rows="5"';
+        var optionalDoi = td.data().doi? td.data().doi: null;
+
+        // Replace the td's contents with a newly created input element
+        var html_input_element = '<' + textFieldType + ' class="input" data-attr="' + attr + ' data-assertion_id="' + assertionId + '" type="text" placeholder="' + currentValue + '">'
+        td.html(html_input_element);
 
         // Remove the click listener from this td so that we can type in the newly created input element at will
+        td.removeClass('editable');
         td.unbind('click');
 
         // Put the cursor live on the input that just was created
@@ -75,6 +80,7 @@
         // An on-the-fly function to allow for submitting the input's contents to the backend upon hitting 'Enter'
         $('.input').keyup(function (e) {
             if (e.key == "Enter") {
+                e.preventDefault();
                 var newValue = e.currentTarget.value;
                 $.ajax({
                   type: "POST",
@@ -83,7 +89,8 @@
                     'attribute_name': attr,
                     'assertion_id': assertionId,
                     'current_value': currentValue,
-                    'new_value': newValue
+                    'new_value': newValue,
+                    'doi': optionalDoi
                   },
                   success: function (response) {
                     // Reload page
@@ -94,6 +101,11 @@
                   }
                 });
             }
+        });
+
+        $('.input').blur(function (e) {
+            // Clear any edits if the user clicks or tabs away from the text field without hitting enter
+            location.reload();
         });
     });
 </script>
@@ -107,7 +119,7 @@
 <table class="results-table display compact">
     <thead>
         <tr>
-            <th></th><th>Gene</th><th>Feature</th><th>Alt</th><th>Effect</th><th>Therapy</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</th><th>DOIs</th><th>Submitter</th><th></th>
+            <th></th><th>Gene</th><th>Feature</th><th>Alt</th><th>Effect</th><th>Therapy</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</th><th>DOIs</th><th>Citation</th><th>Submitter</th><th></th>
         </tr>
     </thead>
     <tbody>
@@ -126,17 +138,17 @@
             <td>
                 {{row['feature'] if row['feature'] is not none}}
             </td>
-            <td class="editable" data-assertion_id="{{row['assertion_id']}}" data-attr="alt" data-val="{{row['alt']}}">
+            <td class="editable" data-type="text" data-assertion_id="{{row['assertion_id']}}" data-attr="alt" data-val="{{row['alt']}}">
                 {{row['alt'] if row['alt'] is not none else '(any)'}}
             </td>
             <td>
                 {{row['alt_type'] if row['alt_type'] is not none}}
             </td>
-            <td class="editable" data-assertion_id="{{row['assertion_id']}}" data-attr="therapy_name" data-val="{{row['therapy_name']}}">
+            <td class="editable" data-type="text" data-assertion_id="{{row['assertion_id']}}" data-attr="therapy_name" data-val="{{row['therapy_name']}}">
                 {% if row['therapy_name'] %}
                     {{row['therapy_name']}}
                 {% else %}
-                    <span class="glyphicon glyphicon-edit">
+                    <span class="glyphicon glyphicon-edit"></span>
                 {% endif %}
             </td>
             {% if row['therapy_sensitivity'] is not none %}
@@ -173,12 +185,16 @@
                 </td>
             {% endif %}
             <td>
-                {% for source in row['sources'] %}
-                    <a href="https://doi.org/{{source.doi|urlencode}}">
-                        {{source.doi}}
-                    </a>
-                    <br>
-                {% endfor %}
+                <a href="https://doi.org/{{row['sources'][0].doi|urlencode}}">
+                    {{row['sources'][0].doi}}
+                </a>
+            </td>
+            <td class="editable" data-type="textarea" data-doi="{{row['sources'][0].doi}}" data-assertion_id="{{row['assertion_id']}}" data-attr="cite_text" data-val="{{row['sources'][0].cite_text}}">
+                {% if row['sources'][0].cite_text %}
+                    {{row['sources'][0].cite_text}}
+                {% else %}
+                    <span class="glyphicon glyphicon-edit"></span>
+                {% endif %}
             </td>
             <td>
                 {{row['submitter']}}

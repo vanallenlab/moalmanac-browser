@@ -7,7 +7,7 @@ from db import db
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 from .helper_functions import get_unapproved_assertion_rows, make_row, http404response, http200response, \
     query_distinct_column, add_or_fetch_alteration, add_or_fetch_source, delete_assertion, \
-    amend_alteration_for_assertion
+    amend_alteration_for_assertion, amend_cite_text_for_assertion
 
 portal = Blueprint('portal', __name__)
 
@@ -97,6 +97,8 @@ def amend():
     attribute_name = amendment.get('attribute_name').strip()
     assertion_id = int(amendment.get('assertion_id'))
     current_value = amendment.get('current_value').strip()
+    doi = amendment.get('doi').strip()
+
     if current_value.lower() == 'none':
         current_value = None
     new_value = amendment.get('new_value').strip()
@@ -106,7 +108,7 @@ def amend():
     if assertion.validated:
         BadRequest("Cannot amend assertion {} as it is already validated".format(assertion_id))
 
-    editable_attrs = ['alt', 'therapy_name']
+    editable_attrs = ['alt', 'therapy_name', 'cite_text']
     if attribute_name not in editable_attrs:
         BadRequest('Attribute {} is not editable'.format(attribute_name))
 
@@ -124,6 +126,12 @@ def amend():
         assertion.therapy_name = new_value
         db.session.commit()
         return http200response()
+    elif attribute_name == 'cite_text':
+        # Edit the source citation text
+        amend_cite_text_for_assertion(db, assertion, doi, new_value)
+        db.session.commit()
+        return http200response()
+
 
 @portal.route('/approve')
 def approve():
