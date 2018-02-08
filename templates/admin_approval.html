@@ -65,9 +65,10 @@
         var assertionId = td.data().assertion_id;
         var textFieldType = td.data().type == 'text'? 'input' : 'textarea rows="5"';
         var optionalDoi = td.data().doi? td.data().doi: null;
+        var placeholder = td.data().placeholder? td.data().placeholder : currentValue;
 
         // Replace the td's contents with a newly created input element
-        var html_input_element = '<' + textFieldType + ' class="input" data-attr="' + attr + ' data-assertion_id="' + assertionId + '" type="text" placeholder="' + currentValue + '">'
+        var html_input_element = '<' + textFieldType + ' class="input" data-attr="' + attr + ' data-assertion_id="' + assertionId + '" type="text" placeholder="' + placeholder + '">'
         td.html(html_input_element);
 
         // Remove the click listener from this td so that we can type in the newly created input element at will
@@ -151,18 +152,22 @@
                     <span class="glyphicon glyphicon-edit"></span>
                 {% endif %}
             </td>
-            <td class="editable" data-type="text" data-assertion_id="{{row['assertion_id']}}" data-attr="therapy_sensitivity" data-val="{{row['therapy_sensitivity']}}">
+            <td class="editable" data-type="textarea" data-assertion_id="{{row['assertion_id']}}" data-placeholder="Sensitivity, Resistance, or None" data-attr="therapy_sensitivity" data-val="{{row['therapy_sensitivity']}}">
                 {% if row['therapy_sensitivity'] == True %}
                     Sensitivity
                 {% elif row['therapy_sensitivity'] == False %}
                     Resistance
+                {% else %}
+                    <span class="glyphicon glyphicon-edit"></span>
                 {% endif %}
             </td>
-            <td class="editable" data-type="text" data-assertion_id="{{row['assertion_id']}}" data-attr="favorable_prognosis" data-val="{{row['favorable_prognosis']}}">
+            <td class="editable" data-type="textarea" data-assertion_id="{{row['assertion_id']}}" data-placeholder="Good, Poor, or None" data-attr="favorable_prognosis" data-val="{{row['favorable_prognosis']}}">
                 {% if row['favorable_prognosis'] == True %}
-                    Good prognosis
+                    Good
                 {% elif row['favorable_prognosis'] == False %}
-                    Poor prognosis
+                    Poor
+                {% else %}
+                    <span class="glyphicon glyphicon-edit"></span>
                 {% endif %}
             </td>
             <td>

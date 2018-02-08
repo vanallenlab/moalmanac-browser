@@ -108,7 +108,7 @@ def amend():
     if assertion.validated:
         BadRequest("Cannot amend assertion {} as it is already validated".format(assertion_id))
 
-    editable_attrs = ['alt', 'therapy_name', 'cite_text']
+    editable_attrs = ['alt', 'therapy_name', 'cite_text', 'therapy_sensitivity', 'favorable_prognosis']
     if attribute_name not in editable_attrs:
         BadRequest('Attribute {} is not editable'.format(attribute_name))
 
@@ -129,6 +129,35 @@ def amend():
     elif attribute_name == 'cite_text':
         # Edit the source citation text
         amend_cite_text_for_assertion(db, assertion, doi, new_value)
+        db.session.commit()
+        return http200response()
+    elif attribute_name == 'therapy_sensitivity':
+        sensitivity_transformation = {
+            'sensitivity': True,
+            'sensitive': True,
+            'resistance': False,
+            'resistant': False,
+            'none': None
+        }
+
+        if new_value.lower() not in sensitivity_transformation:
+            BadRequest("{} not one of Sensitivity, Resistance, None".format(new_value))
+
+        assertion.therapy_sensitivity = sensitivity_transformation.get(new_value.lower(), None)
+        db.session.commit()
+        return http200response()
+    elif attribute_name == 'favorable_prognosis':
+        prognosis_transformation = {
+            'good': True,
+            'poor': False,
+            'bad': False,
+            'none': None
+        }
+
+        if new_value.lower() not in prognosis_transformation:
+            BadRequest("{} not one of Good, Bad, None".format(new_value))
+
+        assertion.favorable_prognosis = prognosis_transformation.get(new_value.lower(), None)
         db.session.commit()
         return http200response()
 
