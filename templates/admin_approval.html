@@ -140,7 +140,11 @@
                 {{row['feature'] if row['feature'] is not none}}
             </td>
             <td class="editable" data-type="text" data-assertion_id="{{row['assertion_id']}}" data-attr="alt" data-val="{{row['alt']}}">
-                {{row['alt'] if row['alt'] is not none else '(any)'}}
+                {% if row['alt'] %}
+                    {{row['alt'] if row['alt'] is not none else '(any)'}}
+                {% else %}
+                    <span class="glyphicon glyphicon-edit"></span>
+                {% endif %}
             </td>
             <td>
                 {{row['alt_type'] if row['alt_type'] is not none}}

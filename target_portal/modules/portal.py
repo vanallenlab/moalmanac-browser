@@ -86,6 +86,7 @@ def delete_submission():
 
     if assertion_to_delete:
         delete_assertion(db, assertion_to_delete)
+        db.session.commit()
         return http200response()
     return http404response()
 

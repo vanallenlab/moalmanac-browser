@@ -56,7 +56,19 @@ class Alteration(Base, db.Model):
     alt = db.Column('alt', db.Text)
     gene_name = db.Column('gene_name', db.Text)
 
-    assertions = orm.relationship('Assertion', secondary='Assertion_To_Alteration')
+    assertions = orm.relationship('Assertion',  passive_deletes=True, secondary='Assertion_To_Alteration')
+
+
+class AssertionToSource(Base, db.Model):
+    __tablename__ = 'Assertion_To_Source'
+
+    ats_id = db.Column('ats_id', db.Integer, primary_key=True)
+    assertion_id = db.Column('assertion_id', db.Integer, db.ForeignKey('Assertion.assertion_id'))
+    source_id = db.Column('source_id', db.Integer, db.ForeignKey('Source.source_id'))
+    db.UniqueConstraint('source_id', 'assertion_id', name='UC_source_id_assertion_id')
+
+    assertion = orm.relationship('Assertion', foreign_keys=assertion_id)
+    source = orm.relationship('Source', foreign_keys=source_id)
 
 
 class Source(Base, db.Model):
@@ -67,18 +79,7 @@ class Source(Base, db.Model):
     cite_text = db.Column('cite_text', db.Text)
     source_type = db.Column('source_type', db.Text)
 
-    assertions = orm.relationship('Assertion', secondary='Assertion_To_Source')
-
-
-class AssertionToSource(Base, db.Model):
-    __tablename__ = 'Assertion_To_Source'
-
-    ats_id = db.Column('ats_id', db.Integer, primary_key=True)
-    assertion_id = db.Column('assertion_id', db.Integer, db.ForeignKey('Assertion.assertion_id'))
-    source_id = db.Column('source_id', db.Integer, db.ForeignKey('Source.source_id'))
-
-    assertion = orm.relationship('Assertion', foreign_keys=assertion_id)
-    source = orm.relationship('Source', foreign_keys=source_id)
+    assertions = orm.relationship('Assertion',  passive_deletes=True, secondary='Assertion_To_Source')
 
 
 class AssertionToAlteration(Base, db.Model):
