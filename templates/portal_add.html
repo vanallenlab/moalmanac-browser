@@ -47,19 +47,21 @@
           },
           success: function (response) {
             $('#success-panel').show();
-            $('#success-text').html("<b></br>Email: " + email +
-                                    "</br>Therapy: " + therapy +
-                                    "</br> Implication: " + implication +
-                                    "</br> Gene: " + gene +
-                                    "</br> Type: " + type +
-                                    "</br> Class: " + alt_class +
-                                    "</br> Effect: " + effect +
-                                    "</br> Alteration: " + alteration +
-                                    "</br> DOI: " + source + "</b>");
+            dict = JSON.parse(JSON.parse(response ).message);
+            $('#success-text').html("<b></br>Email: " + dict.email +
+                                    "</br>Therapy: " + dict.therapy +
+                                    "</br> Implication: " + dict.implication +
+                                    "</br> Gene: " + dict.gene +
+                                    "</br> Type: " + dict.type +
+                                    "</br> Class: " + dict.alt_class +
+                                    "</br> Effect: " + dict.effect +
+                                    "</br> Alteration: " + dict.alteration +
+                                    "</br> DOI: " + dict.source + "</b>");
             $('#error-panel').hide();
           },
           error: function (response) {
             $('#error-panel').show();
+            $('#error-text').html(JSON.parse(response.responseText).message);
             $('#success-panel').hide();
           }
         });
@@ -97,21 +99,21 @@
     <div class="panel-body">
         <div class="row">
             <div class="col-md-8">
-                <h3>Source</h3>
+                <h3>Source*</h3>
                 <p>DOI, e.g. 10.1126/science.1062538</p>
                 <input id="source-input" name="g" type="text" class="form-control" placeholder="">
             </div>
         </div>
         <div class="row">
             <div class="col-md-4">
-                <h3>Gene</h3>
+                <h3>Gene*</h3>
                 <p>HGNC Gene Symbol</p>
                 <div class="input-group">
                     <input id="gene-input" name="g" type="text" class="form-control typeahead" placeholder="">
                 </div>
             </div>
             <div class="col-md-4">
-                <h3>Cancer Type</h3>
+                <h3>Cancer Type*</h3>
                 <p>Select from <strong>{{diseases|length}}</strong> cancer types:</p>
                 <select id="type-select" name="d" class="form-control">
                     <option selected disabled hidden>Select cancer type</option>
@@ -123,7 +125,7 @@
         </div>
         <div class="row">
             <div class="col-md-4">
-                <h3>Alteration Feature</h3>
+                <h3>Alteration Feature*</h3>
                 <p>Class of Alteration</p>
                 <select id="class-select" name="d" class="form-control">
                     <option selected disabled hidden>Select feature</option>
@@ -133,7 +135,7 @@
                 </select>
             </div>
              <div class="col-md-4">
-                <h3>Alteration Effect</h3>
+                <h3>Alteration Effect*</h3>
                 <p>Effect of Alteration</p>
                 <select id="effect-select" name="d" class="form-control">
                     <option selected disabled hidden>Select effect</option>
@@ -175,7 +177,7 @@
         </div>
         <div class="row">
             <div class="col-md-8">
-                <h3>Email Address</h3>
+                <h3>Email Address*</h3>
                 <p>We may contact you to ask you about your experience with this portal.</p>
                 <input id="email-input" name="e" type="text" class="form-control" placeholder="">
             </div>

@@ -7,7 +7,7 @@ from db import db
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 from .helper_functions import get_unapproved_assertion_rows, make_row, http404response, http200response, \
     query_distinct_column, add_or_fetch_alteration, add_or_fetch_source, delete_assertion, \
-    amend_alteration_for_assertion, amend_cite_text_for_assertion
+    amend_alteration_for_assertion, amend_cite_text_for_assertion, http400response
 
 portal = Blueprint('portal', __name__)
 
@@ -188,14 +188,16 @@ def submit():
     alt = submission.get('alteration').strip()
     email = submission.get('email').strip()
 
-    if not therapy or therapy == 'Select therapy':
-        raise BadRequest("Please select a therapy")
-    if not implication or implication == 'Select predictive implication level':
-        raise BadRequest("Please select a predictive implication level")
-    if not cancer_type or cancer_type == 'Select a cancer type':
-        raise BadRequest("Please select a cancer type")
     if not (gene and doi and email):
-        raise BadRequest("Missing gene, doi, or email")
+        return http400response("Please fill in gene symbol, DOI, and email fields")
+    if not effect or effect not in EFFECTS:
+        return http400response("Please select an effect type")
+    if not alt_class or alt_class not in ALTERATION_CLASSES:
+        return http400response("Please select an alteration feature")
+    if not implication or implication not in IMPLICATION_LEVELS:
+        implication = None
+    if not cancer_type or cancer_type == 'Select a cancer type':
+        return http400response("Please select a cancer type")
 
     alteration = add_or_fetch_alteration(db, gene, effect, alt_class, alt)
     source = add_or_fetch_source(db, doi)
@@ -212,8 +214,15 @@ def submit():
     db.session.add(assertion)
     db.session.commit()
 
-    return render_template('portal_add.html',
-                           nav_current_page='add')
+    return http200response(message={'email': email,
+                                    'therapy': therapy or 'None',
+                                    'implication': implication or 'None',
+                                    'gene': gene,
+                                    'type': cancer_type,
+                                    'alt_class': alt_class or 'None',
+                                    'effect': effect or 'None',
+                                    'alteration': alt or 'None',
+                                    'source': doi})
 
 
 @portal.route('/add')
