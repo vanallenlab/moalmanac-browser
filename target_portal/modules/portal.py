@@ -41,9 +41,9 @@ pred_impl_orders = {
 
 @portal.route('/')
 def index():
-    typeahead_genes = query_distinct_column(db, Alteration, 'gene_name')
+    alterations = db.session.query(Alteration).all()
+    typeahead_genes = [a.gene_name for a in alterations if all([assertion.validated == 1 for assertion in a.assertions])]
     diseases = query_distinct_column(db, Assertion, 'disease')
-    pred_impls = query_distinct_column(db, Assertion, 'predictive_implication')
     therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
 
     num_genes = db.session.query(Alteration.gene_name).distinct().count()
@@ -252,7 +252,8 @@ def add():
 
 @portal.route('/search')
 def search():
-    typeahead_genes = query_distinct_column(db, Alteration, 'gene_name')
+    alterations = db.session.query(Alteration).all()
+    typeahead_genes = [a.gene_name for a in alterations if all([assertion.validated == 1 for assertion in a.assertions])]
 
     gene_needle = request.args.get('g')
     cancer_needle = request.args.get('d')
