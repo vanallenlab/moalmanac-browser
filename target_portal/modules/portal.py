@@ -137,7 +137,8 @@ def amend():
             'sensitive': True,
             'resistance': False,
             'resistant': False,
-            'none': None
+            'none': None,
+            'null': None
         }
 
         if new_value.lower() not in sensitivity_transformation:
@@ -151,7 +152,8 @@ def amend():
             'good': True,
             'poor': False,
             'bad': False,
-            'none': None
+            'none': None,
+            'null': None
         }
 
         if new_value.lower() not in prognosis_transformation:
