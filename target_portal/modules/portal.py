@@ -3,6 +3,8 @@ import simplejson as json
 
 from werkzeug.exceptions import BadRequest
 
+import urllib
+
 from db import db
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 from .helper_functions import get_unapproved_assertion_rows, make_row, http404response, http200response, \

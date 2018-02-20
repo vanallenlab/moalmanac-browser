@@ -39,19 +39,19 @@
             'type': type,
             'implication': implication,
             'source': source,
-            'gene': gene,
+            'gene': encodeURIComponent(gene),
             'effect': effect,
             'class': alt_class,
             'alteration': alteration,
-            'email': email
+            'email': encodeURIComponent(email)
           },
           success: function (response) {
             $('#success-panel').show();
             dict = JSON.parse(JSON.parse(response ).message);
-            $('#success-text').html("<b></br>Email: " + dict.email +
+            $('#success-text').html("<b></br>Email: " + decodeURIComponent(dict.email) +
                                     "</br>Therapy: " + dict.therapy +
                                     "</br> Implication: " + dict.implication +
-                                    "</br> Gene: " + dict.gene +
+                                    "</br> Gene: " + decodeURIComponent(dict.gene) +
                                     "</br> Type: " + dict.type +
                                     "</br> Class: " + dict.alt_class +
                                     "</br> Effect: " + dict.effect +

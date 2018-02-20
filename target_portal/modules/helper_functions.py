@@ -4,7 +4,7 @@ Functions that abstract away basic operations with and maninpulations of models,
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 import simplejson as json
 from werkzeug.exceptions import BadRequest
-
+import urllib
 
 def add_or_fetch_alteration(db, gene=None, effect=None, feature=None, alt=None):
     """Given a gene, effect, and class of alteration, either fetch an existing corresponding alteration, or create a
@@ -118,7 +118,7 @@ def get_unapproved_assertion_rows(db):
 
 def make_row(alt, assertion):
     return {
-        'gene_name': alt.gene_name,
+        'gene_name': urllib.parse.unquote(alt.gene_name) if alt.gene_name else None,
         'feature': alt.feature,
         'alt_type': alt.alt_type,
         'alt': alt.alt,
@@ -127,7 +127,7 @@ def make_row(alt, assertion):
         'therapy_sensitivity': assertion.therapy_sensitivity,
         'favorable_prognosis': assertion.favorable_prognosis,
         'disease': assertion.disease,
-        'submitter': assertion.submitted_by,
+        'submitter': urllib.parse.unquote(assertion.submitted_by) if assertion.submitted_by else None,
         'predictive_implication': assertion.predictive_implication,
         'assertion_id': assertion.assertion_id,
         'sources': [s for s in assertion.sources]
