@@ -7,7 +7,7 @@ from db import db
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 from .helper_functions import get_unapproved_assertion_rows, make_row, http404response, http200response, \
     query_distinct_column, add_or_fetch_alteration, add_or_fetch_source, delete_assertion, \
-    amend_alteration_for_assertion, amend_cite_text_for_assertion, http400response
+    amend_alteration_for_assertion, amend_cite_text_for_assertion, http400response, get_typeahead_genes
 
 portal = Blueprint('portal', __name__)
 
@@ -38,11 +38,9 @@ pred_impl_orders = {
 }
 
 
-
 @portal.route('/')
 def index():
-    alterations = db.session.query(Alteration).all()
-    typeahead_genes = [a.gene_name for a in alterations if all([assertion.validated == 1 for assertion in a.assertions])]
+    typeahead_genes = get_typeahead_genes(db)
     diseases = query_distinct_column(db, Assertion, 'disease')
     therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
 
@@ -225,11 +223,10 @@ def submit():
                                     'alteration': alt or 'None',
                                     'source': doi})
 
-
 @portal.route('/add')
 def add():
     """Render the page through which clients can submit Assertion suggestions"""
-    typeahead_genes = query_distinct_column(db, Alteration, 'gene_name')
+    typeahead_genes = get_typeahead_genes(db)
     diseases = query_distinct_column(db, Assertion, 'disease')
     pred_impls = query_distinct_column(db, Assertion, 'predictive_implication')
     therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
@@ -252,9 +249,7 @@ def add():
 
 @portal.route('/search')
 def search():
-    alterations = db.session.query(Alteration).all()
-    typeahead_genes = [a.gene_name for a in alterations if all([assertion.validated == 1 for assertion in a.assertions])]
-
+    typeahead_genes = get_typeahead_genes(db)
     gene_needle = request.args.get('g')
     cancer_needle = request.args.get('d')
     pred_impl_needle = request.args.get('p')

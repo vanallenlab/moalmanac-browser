@@ -153,3 +153,10 @@ def filter_row_column(query_results, column):
 def query_distinct_column(db, model, column):
     query = db.session.query(getattr(model, column).distinct().label(column))
     return filter_row_column(query, column)
+
+
+def get_typeahead_genes(db):
+    alterations = db.session.query(Alteration).all()
+    typeahead_genes = list(set([a.gene_name for a in alterations if all([assertion.validated == 1 for assertion in a.assertions])]))
+    return typeahead_genes
+
