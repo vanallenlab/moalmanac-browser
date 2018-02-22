@@ -1,0 +1,192 @@
+{%- extends 'base.html' %}
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='js/underscore-min.js')}}"></script>
+<script type="text/javascript">
+    var typeahead_genes = [
+    {% for gene in typeahead_genes %}
+    '{{gene}}',
+    {% endfor %}
+    ];
+
+    // Selectors
+    var implication_select = $('#implication-select')[0];
+    var type_select = $('#type-select')[0];
+    var therapy_select = $('#therapy-select')[0];
+    var class_select = $('#class-select')[0];
+    var effect_select = $('#effect-select')[0];
+    var alteration_input = $('#alteration-input')[0];
+    var source_input = $('#source-input')[0];
+    var gene_input = $('#gene-input')[0];
+    var email_input = $('#email-input')[0];
+
+    // Reactions
+    $('#btn-sub').click(function () {
+        var therapy = therapy_select.value;
+        var type =  type_select.value;
+        var implication =  implication_select.value;
+        var source = source_input.value;
+        var gene = gene_input.value;
+        var alt_class = class_select.value;
+        var alteration = alteration_input.value;
+        var effect = effect_select.value;
+        var email = email_input.value;
+        $.ajax({
+          type: "POST",
+          url: '/submit',
+          data: {
+            'therapy': therapy,
+            'type': type,
+            'implication': implication,
+            'source': source,
+            'gene': encodeURIComponent(gene),
+            'effect': effect,
+            'class': alt_class,
+            'alteration': alteration,
+            'email': encodeURIComponent(email)
+          },
+          success: function (response) {
+            $('#success-panel').show();
+            dict = JSON.parse(JSON.parse(response ).message);
+            $('#success-text').html("<b></br>Email: " + decodeURIComponent(dict.email) +
+                                    "</br>Therapy: " + dict.therapy +
+                                    "</br> Implication: " + dict.implication +
+                                    "</br> Gene: " + decodeURIComponent(dict.gene) +
+                                    "</br> Type: " + dict.type +
+                                    "</br> Class: " + dict.alt_class +
+                                    "</br> Effect: " + dict.effect +
+                                    "</br> Alteration: " + dict.alteration +
+                                    "</br> DOI: " + dict.source + "</b>");
+            $('#error-panel').hide();
+          },
+          error: function (response) {
+            $('#error-panel').show();
+            $('#error-text').html(JSON.parse(response.responseText).message);
+            $('#success-panel').hide();
+          }
+        });
+    });
+</script>
+<script src="{{url_for('static', filename='js/typeahead.bundle.js')}}"></script>
+<script src="{{url_for('static', filename='js/portal.js')}}"></script>
+{% endblock %}
+
+{% block title %}{{ config['APP_NAME'] }}: Suggest addition{% endblock %}
+
+{% block page_content %}
+<h1>Submit Entry to {{ config['APP_NAME'] }}</h1>
+<div class="panel panel-default" id="success-panel" hidden>
+    <div class="panel-heading green">
+        <h3 class="panel-title green"><strong>Success</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            Entry was submitted for review: <span id="success-text"></span>
+        </p>
+    </div>
+</div>
+<div class="panel panel-default" id="error-panel" hidden>
+    <div class="panel-heading pink">
+        <h3 class="panel-title pink"><strong>Error</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            There was an error processing your submission: <span id="error-text"> please fill in all fields</span>
+        </p>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-8">
+                <h3>Source*</h3>
+                <p>DOI, e.g. 10.1126/science.1062538</p>
+                <input id="source-input" name="g" type="text" class="form-control" placeholder="">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Gene*</h3>
+                <p>HGNC Gene Symbol</p>
+                <div class="input-group">
+                    <input id="gene-input" name="g" type="text" class="form-control typeahead" placeholder="">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h3>Cancer Type*</h3>
+                <p>Select from <strong>{{diseases|length}}</strong> cancer types:</p>
+                <select id="type-select" name="d" class="form-control">
+                    <option selected disabled hidden>Select cancer type</option>
+                    {% for disease in diseases %}
+                    <option>{{disease}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Alteration Feature*</h3>
+                <p>Class of Alteration</p>
+                <select id="class-select" name="d" class="form-control">
+                    <option selected disabled hidden>Select feature</option>
+                    {% for at in alteration_classes %}
+                    <option>{{at}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+             <div class="col-md-4">
+                <h3>Alteration Effect*</h3>
+                <p>Effect of Alteration</p>
+                <select id="effect-select" name="d" class="form-control">
+                    <option selected disabled hidden>Select effect</option>
+                    {% for e in effects %}
+                    <option>{{e}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+             <div class="col-md-4">
+                <h3>Alteration</h3>
+                <p>Specific Alteration, e.g. L702H </p>
+                <div class="input-group">
+                    <input id="alteration-input" name="a" type="text" placeholder="">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Predictive Implication Level</h3>
+                <p>Select from <strong>{{pred_impls|length}}</strong> predictive implication levels</p>
+                <select id="implication-select" name="p" class="form-control">
+                    <option selected disabled hidden>Select predictive implication level</option>
+                    {% for pred_impl in pred_impls %}
+                    <option>{{pred_impl}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <h3>Therapy</h3>
+                <p>Select from <strong>{{therapy_names|length}}</strong> therapies:</p>
+                <select id="therapy-select" name="t" class="form-control">
+                    <option selected disabled hidden>Select therapy</option>
+                    {% for therapy_name in therapy_names %}
+                    <option>{{therapy_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <h3>Email Address*</h3>
+                <p>We may contact you to ask you about your experience with this portal.</p>
+                <input id="email-input" name="e" type="text" class="form-control" placeholder="">
+            </div>
+        </div>
+        <div>
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-default" id="btn-sub" style="float:right; margin-top: 10px;">Submit</button>
+            </span>
+        </div>
+    </div>
+</div>
+{%- endblock %}
