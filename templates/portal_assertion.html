@@ -77,13 +77,17 @@
         {% for source in assertion.sources %}
 			<li>
 				{% if source.doi is not none %}
-				{% if source.source_type == 'Journal' %}
-				<a href="https://doi.org/{{source.doi|urlencode}}">{{source.cite_text}}</a>
-				{% elif source.source_type == 'Clinical Trial' %}
-				<a href="https://clinicaltrials.gov/ct2/show/{{source.doi|urlencode}}">{{source.cite_text}}</a>
-				{% endif %}
+                    {% if source.source_type == 'Journal' %}
+                        <a href="https://doi.org/{{source.doi|urlencode}}">
+                            {{source.cite_text}}
+                        </a>
+                    {% elif source.source_type == 'Clinical Trial' %}
+                        <a href="https://clinicaltrials.gov/ct2/show/{{source.doi|urlencode}}">
+                            {{source.cite_text}}
+                        </a>
+                    {% endif %}
 				{% else %}
-				{{source.cite_text}}
+				    {{source.cite_text}}
 				{% endif %}
 			</li>
         {% endfor %}

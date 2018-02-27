@@ -51,6 +51,28 @@ a:hover {
 	padding-bottom: 1em;
 }
 
+/* Submit entry page */
+#btn-sub {
+    float: right;
+	margin-top: 10px;
+}
+
+.editable {
+    cursor: pointer;
+    color: blue;
+
+}
+
+.green {
+    background: #85b785;
+    background-color: #85b785 !important;
+}
+
+.pink {
+    background: #bb5555;
+    background-color: #bb5555 !important;
+}
+
 /* front page gene search bar */
 #jumbo-gene-search-group {
 	margin: 0 auto;
@@ -65,6 +87,11 @@ a:hover {
 .btn {
 	background-color: #FF4444;
 	color: #FFFFFF;
+}
+
+.btn-delete {
+    background-color: black;
+    color: white;
 }
 
 .btn-alt-search {
@@ -98,16 +125,6 @@ table.target-browse-table td a {
 	h1 .relationship-count {
 		display: block;
 	}
-}
-
-/* suggestion google form */
-#google-form-suggest {
-	width: 100%;
-	height: 1200px;
-}
-
-#google-form-container {
-	padding-top: 1em;
 }
 
 /* navbar */
