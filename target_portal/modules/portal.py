@@ -225,6 +225,7 @@ def submit():
                                     'alteration': alt or 'None',
                                     'source': doi})
 
+
 @portal.route('/add')
 def add():
     """Render the page through which clients can submit Assertion suggestions"""
@@ -268,13 +269,13 @@ def search():
         assertions = []
         if cancer_needle:
             assertions = db.session.query(Assertion).filter(Assertion.disease == cancer_needle,
-                                                            Assertion.validated is True).all()
+                                                            Assertion.validated.is_(True)).all()
         if pred_impl_needle:
             assertions = db.session.query(Assertion).filter(Assertion.predictive_implication == pred_impl_needle,
-                                                            Assertion.validated is True).all()
+                                                            Assertion.validated.is_(True)).all()
         if therapy_needle:
             assertions = db.session.query(Assertion).filter(Assertion.therapy_name == therapy_needle,
-                                                            Assertion.validated is True).all()
+                                                            Assertion.validated.is_(True)).all()
 
         for assertion in assertions:
             for alt in assertion.alterations:
