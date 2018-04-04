@@ -6,6 +6,7 @@ import simplejson as json
 from werkzeug.exceptions import BadRequest
 import urllib
 
+
 def add_or_fetch_alteration(db, gene=None, effect=None, feature=None, alt=None):
     """Given a gene, effect, and class of alteration, either fetch an existing corresponding alteration, or create a
     new one if none exists with the given attributes."""
