@@ -94,8 +94,8 @@ class AssertionToAlteration(Base, db.Model):
 
 
 class Version(Base, db.Model):
-	__tablename__ = 'Version'
+    __tablename__ = 'Version'
 
-	major = db.Column('major', db.Integer, primary_key=True)
-	minor = db.Column('minor', db.Integer)
-	patch = db.Column('patch', db.Integer)
+    major = db.Column('major', db.Integer, primary_key=True)
+    minor = db.Column('minor', db.Integer)
+    patch = db.Column('patch', db.Integer)
