@@ -1,10 +1,10 @@
 from flask_sqlalchemy import orm, declarative_base
-from target_portal import db
+from target_portal import db, ma
+
 from datetime import datetime
 from flask import url_for
 
 Base = declarative_base()
-
 
 class Assertion(Base, db.Model):
     __tablename__ = 'Assertion'
@@ -34,7 +34,7 @@ class Assertion(Base, db.Model):
                                    )
 
     sources = orm.relationship('Source',
-                               secondary='Assertion_To_Source', uselist=True,
+                               secondary='Assertion_To_Source', uselist=True,  #means many-to-many?
                                )
     validated = db.Column('validated', db.Boolean, default=False)
     submitted_by = db.Column('submitted_by', db.Text)
@@ -129,6 +129,7 @@ class Source(Base, db.Model):
         }
         return data
 
+
 class AssertionToAlteration(Base, db.Model):
     __tablename__ = 'Assertion_To_Alteration'
 
@@ -146,3 +147,18 @@ class Version(Base, db.Model):
     major = db.Column('major', db.Integer, primary_key=True)
     minor = db.Column('minor', db.Integer)
     patch = db.Column('patch', db.Integer)
+
+
+class AssertionSchema(ma.ModelSchema):
+    class Meta:
+        model = Assertion
+
+
+class AlterationSchema(ma.ModelSchema):
+    class Meta:
+        model = Alteration
+
+
+class SourceSchema(ma.ModelSchema):
+    class Meta:
+        model = Source

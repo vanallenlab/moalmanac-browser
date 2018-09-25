@@ -1,11 +1,13 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
 
-from db import db
+from db import db, ma
+
 from .modules.api import api
 from .modules.editor import editor
 from .modules.portal import portal
 
+ma = Marshmallow()
 
 def create_app(name=__name__):
     app = Flask(name)
@@ -17,6 +19,7 @@ def create_app(name=__name__):
     app.register_blueprint(portal)
 
     db.init_app(app)
+    ma.init_app(app) #must initialize after SQLAlchemy
 
     return app
 
