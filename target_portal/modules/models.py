@@ -35,7 +35,7 @@ class Assertion(Base, db.Model):
                                    )
 
     sources = db.relationship('Source',
-                               secondary='Assertion_To_Source', uselist=True,  #means many-to-many?
+                               secondary='Assertion_To_Source', uselist=True,
                                )
     validated = db.Column('validated', db.Boolean, default=False)
     submitted_by = db.Column('submitted_by', db.Text)

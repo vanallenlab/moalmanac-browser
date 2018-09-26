@@ -6,8 +6,8 @@ from .auth import token_auth
 from app.modules.api import api
 
 
+"""Everything below taken from microblog tutorial"""
 
-#from microblog tutorial
 @api.route('/users/<int:id>', methods=['GET', 'PUT'])
 @token_auth.login_required
 def get_user(id):
@@ -25,7 +25,6 @@ def get_user(id):
         return jsonify(user.to_dict())
     elif request.method == 'GET':
         return jsonify(User.query.get_or_404(id).to_dict())
-
 
 
 @api.route('/users', methods=['GET', 'POST'])

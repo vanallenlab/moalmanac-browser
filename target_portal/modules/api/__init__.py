@@ -1,9 +1,14 @@
 from flask import Blueprint
 from flask import jsonify, request, url_for
 from target_portal.modules.models import Assertion, Alteration, Source, AssertionSchema, AlterationSchema, SourceSchema
+from target_portal.modules.helper_functions import add_or_fetch_alteration, add_or_fetch_source
+from .errors import bad_request, error_response
+from target_portal.modules.portal import IMPLICATION_LEVELS, ALTERATION_CLASSES, EFFECTS, pred_impl_orders
+from db import db
 
 api = Blueprint('api', __name__)
 
+from target_portal.modules.api import errors
 
 assertion_schema = AssertionSchema()
 assertions_schema = AssertionSchema(many=True)
@@ -12,6 +17,8 @@ alterations_schema = AlterationSchema(many=True)
 source_schema = SourceSchema()
 sources_schema = SourceSchema(many=True)
 
+
+#TODO authentication for all API calls
 
 @api.route('/assertions/<int:assertion_id>', methods=['GET'])
 def get_assertion(assertion_id):
@@ -23,18 +30,9 @@ def get_assertion(assertion_id):
 
 
 @api.route('/assertions', methods=['GET'])
-def assertions():
-    if request.method == 'GET':
-        data = Assertion.query.all()
-        return assertions_schema.jsonify(data)
-
-# @api.route('new_assertion', methods=['POST'])
-#     if request.method == 'POST':
-#         data = request.get_json() or {}
-#         #test extra
-#         return
-
-
+def get_assertions():
+    data = Assertion.query.all()
+    return assertions_schema.jsonify(data)
 
 
 @api.route('/alterations/<int:alt_id>', methods=['GET'])
@@ -67,3 +65,47 @@ def get_sources():
     if request.method == 'GET':
         data = Source.query.all()
         return sources_schema.jsonify(data)
+
+
+
+@api.route('/submit', methods=['POST'])
+def submit():
+    """Submit an assertion for consideration for inclusion in the database"""
+    data = request.get_json() or {}
+    if 'gene' not in data or 'doi' not in data or 'email' not in data:
+        return bad_request("Please submit gene symbol, DOI, and email fields")
+    if 'effect' not in data or data['effect'] not in EFFECTS:
+        return bad_request("Please select a valid effect type")
+    if 'alt_class' not in data or data['alt_class'] not in ALTERATION_CLASSES:
+        return bad_request("Please select a valid alteration feature")
+    if 'implication' not in data or data['implication'] not in IMPLICATION_LEVELS:
+        data['implication'] = None
+    if 'cancer_type' not in data:
+        return bad_request("Please select a cancer type")
+
+    #alt and therapy are optional
+    if 'alt' not in data:
+        data['alt'] = ""
+    if 'therapy' not in data:
+        data['therapy'] = ""
+
+    alteration = add_or_fetch_alteration(db, data['gene'], data['effect'], data['alt_class'], data['alt'])
+    source = add_or_fetch_source(db, data['doi'])
+
+    assertion = Assertion()
+    assertion.validated = False
+    assertion.alterations.append(alteration)
+    assertion.predictive_implication = data['implication']
+    assertion.therapy_type = data['therapy']
+    assertion.disease = data['cancer_type']
+    assertion.old_disease = data['cancer_type']
+    assertion.sources.append(source)
+    assertion.submitted_by = data['email']
+    db.session.add(assertion)
+    db.session.commit()
+
+    response = assertion_schema.jsonify(assertion)
+    response.status_code = 201
+    response.headers['Location'] = url_for('api.get_assertion', assertion_id=assertion.assertion_id)
+
+    return response
