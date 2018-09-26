@@ -28,9 +28,11 @@ def assertions():
         data = Assertion.query.all()
         return assertions_schema.jsonify(data)
 
-@api.route('new_assertion', methods=['POST'])
-    if request.method == 'POST':
-        data = request.get_json() or {}
+# @api.route('new_assertion', methods=['POST'])
+#     if request.method == 'POST':
+#         data = request.get_json() or {}
+#         #test extra
+#         return
 
 
 
