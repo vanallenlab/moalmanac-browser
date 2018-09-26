@@ -23,10 +23,16 @@ def get_assertion(assertion_id):
 
 
 @api.route('/assertions', methods=['GET'])
-def get_assertions():
+def assertions():
     if request.method == 'GET':
         data = Assertion.query.all()
         return assertions_schema.jsonify(data)
+
+@api.route('new_assertion', methods=['POST'])
+    if request.method == 'POST':
+        data = request.get_json() or {}
+
+
 
 
 @api.route('/alterations/<int:alt_id>', methods=['GET'])
