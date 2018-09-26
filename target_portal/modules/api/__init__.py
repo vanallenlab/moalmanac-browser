@@ -29,7 +29,6 @@ def get_assertions():
         return assertions_schema.jsonify(data)
 
 
-
 @api.route('/alterations/<int:alt_id>', methods=['GET'])
 def get_alteration(alt_id):
     alteration = Alteration.query.get_or_404(alt_id)
@@ -39,6 +38,13 @@ def get_alteration(alt_id):
         # return jsonify(Alteration.query.get_or_404(alt_id).to_dict())
 
 
+@api.route('/alterations', methods=['GET'])
+def get_alterations():
+    if request.method == 'GET':
+        data = Alteration.query.all()
+        return alterations_schema.jsonify(data)
+
+
 @api.route('/sources/<int:source_id>', methods=['GET'])
 def get_source(source_id):
     source = Source.query.get_or_404(source_id)
@@ -46,3 +52,10 @@ def get_source(source_id):
 
         # pre-Marshmallow
         # return jsonify(Source.query.get_or_404(source_id).to_dict())
+
+
+@api.route('/sources', methods=['GET'])
+def get_sources():
+    if request.method == 'GET':
+        data = Source.query.all()
+        return sources_schema.jsonify(data)
