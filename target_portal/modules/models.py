@@ -1,10 +1,11 @@
-from flask_sqlalchemy import orm, declarative_base
+from flask_sqlalchemy import declarative_base
 from target_portal import db, ma
 
 from datetime import datetime
 from flask import url_for
 
 Base = declarative_base()
+
 
 class Assertion(Base, db.Model):
     __tablename__ = 'Assertion'
@@ -29,11 +30,11 @@ class Assertion(Base, db.Model):
     favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
     description = db.Column('description', db.Text)
 
-    alterations = orm.relationship('Alteration',
+    alterations = db.relationship('Alteration',
                                    secondary='Assertion_To_Alteration',
                                    )
 
-    sources = orm.relationship('Source',
+    sources = db.relationship('Source',
                                secondary='Assertion_To_Source', uselist=True,  #means many-to-many?
                                )
     validated = db.Column('validated', db.Boolean, default=False)
@@ -81,7 +82,7 @@ class Alteration(Base, db.Model):
     alt = db.Column('alt', db.Text)
     gene_name = db.Column('gene_name', db.Text)
 
-    assertions = orm.relationship('Assertion',  passive_deletes=True, secondary='Assertion_To_Alteration')
+    assertions = db.relationship('Assertion',  passive_deletes=True, secondary='Assertion_To_Alteration')
 
     def to_dict(self):
         data = {
@@ -104,8 +105,8 @@ class AssertionToSource(Base, db.Model):
     source_id = db.Column('source_id', db.Integer, db.ForeignKey('Source.source_id'))
     db.UniqueConstraint('source_id', 'assertion_id', name='UC_source_id_assertion_id')
 
-    assertion = orm.relationship('Assertion', foreign_keys=assertion_id)
-    source = orm.relationship('Source', foreign_keys=source_id)
+    assertion = db.relationship('Assertion', foreign_keys=assertion_id)
+    source = db.relationship('Source', foreign_keys=source_id)
 
 
 class Source(Base, db.Model):
@@ -116,7 +117,7 @@ class Source(Base, db.Model):
     cite_text = db.Column('cite_text', db.Text)
     source_type = db.Column('source_type', db.Text)
 
-    assertions = orm.relationship('Assertion',  passive_deletes=True, secondary='Assertion_To_Source')
+    assertions = db.relationship('Assertion',  passive_deletes=True, secondary='Assertion_To_Source')
 
     def to_dict(self):
         data = {
@@ -137,8 +138,8 @@ class AssertionToAlteration(Base, db.Model):
     assertion_id = db.Column('assertion_id', db.Integer, db.ForeignKey('Assertion.assertion_id'))
     alt_id = db.Column('alt_id', db.Integer, db.ForeignKey('Alteration.alt_id'))
 
-    assertion = orm.relationship('Assertion', foreign_keys=assertion_id)
-    alteration = orm.relationship('Alteration', foreign_keys=alt_id)
+    assertion = db.relationship('Assertion', foreign_keys=assertion_id)
+    alteration = db.relationship('Alteration', foreign_keys=alt_id)
 
 
 class Version(Base, db.Model):

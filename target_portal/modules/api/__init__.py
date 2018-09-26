@@ -1,27 +1,48 @@
 from flask import Blueprint
-from target_portal.modules.helper_functions import get_unapproved_assertion_rows, make_row, http404response, \
-    http200response, \
-    query_distinct_column, add_or_fetch_alteration, add_or_fetch_source, delete_assertion, \
-    amend_alteration_for_assertion, amend_cite_text_for_assertion, http400response, get_typeahead_genes
 from flask import jsonify, request, url_for
-from target_portal.modules.models import Assertion, Alteration, Source
+from target_portal.modules.models import Assertion, Alteration, Source, AssertionSchema, AlterationSchema, SourceSchema
 
 api = Blueprint('api', __name__)
 
 
+assertion_schema = AssertionSchema()
+assertions_schema = AssertionSchema(many=True)
+alteration_schema = AlterationSchema()
+alterations_schema = AlterationSchema(many=True)
+source_schema = SourceSchema()
+sources_schema = SourceSchema(many=True)
+
+
 @api.route('/assertions/<int:assertion_id>', methods=['GET'])
 def get_assertion(assertion_id):
+    assertion = Assertion.query.get_or_404(assertion_id)
+    return assertion_schema.jsonify(assertion)
+
+        # pre-Marshmallow:
+        #  return jsonify(Assertion.query.get_or_404(assertion_id).to_dict())
+
+
+@api.route('/assertions', methods=['GET'])
+def get_assertions():
     if request.method == 'GET':
-        return jsonify(Assertion.query.get_or_404(assertion_id).to_dict())
+        data = Assertion.query.all()
+        return assertions_schema.jsonify(data)
+
 
 
 @api.route('/alterations/<int:alt_id>', methods=['GET'])
 def get_alteration(alt_id):
-    if request.method == 'GET':
-        return jsonify(Alteration.query.get_or_404(alt_id).to_dict())
+    alteration = Alteration.query.get_or_404(alt_id)
+    return alteration_schema.jsonify(alteration)
+
+        # pre-Marshmallow
+        # return jsonify(Alteration.query.get_or_404(alt_id).to_dict())
 
 
 @api.route('/sources/<int:source_id>', methods=['GET'])
 def get_source(source_id):
-    if request.method == 'GET':
-        return jsonify(Source.query.get_or_404(source_id).to_dict())
+    source = Source.query.get_or_404(source_id)
+    return source_schema.jsonify(source)
+
+        # pre-Marshmallow
+        # return jsonify(Source.query.get_or_404(source_id).to_dict())

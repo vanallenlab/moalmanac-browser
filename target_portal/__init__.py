@@ -7,7 +7,6 @@ from .modules.api import api
 from .modules.editor import editor
 from .modules.portal import portal
 
-ma = Marshmallow()
 
 def create_app(name=__name__):
     app = Flask(name)
