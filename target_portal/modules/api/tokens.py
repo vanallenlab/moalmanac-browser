@@ -3,6 +3,8 @@ from app import db
 from app.api import bp
 from app.api.auth import basic_auth
 
+#TODO implement with auth. Copied from microblog tutorial
+
 
 @bp.route('/tokens', method=['POST'])
 @basic_auth.login_required

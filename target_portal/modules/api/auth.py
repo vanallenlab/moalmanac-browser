@@ -6,6 +6,8 @@ from app.api.errors import error_response
 basic_auth = HTTPBasicAuth()
 token_auth = HTTPTokenAuth()
 
+#TODO decide upon and implement API auth. Copied from microblog tutorial
+
 @basic_auth.verify_password
 def verify_password(username, password):
     user = User.query.filter_by(username=username).first()
