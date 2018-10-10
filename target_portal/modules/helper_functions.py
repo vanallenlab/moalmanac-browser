@@ -5,6 +5,8 @@ from .models import Alteration, Assertion, Source, AssertionToAlteration, Assert
 import simplejson as json
 from werkzeug.exceptions import BadRequest
 import urllib
+from flask import request
+from target_portal.modules.api.errors import error_response as api_error_response
 
 
 def add_or_fetch_alteration(db, gene=None, effect=None, feature=None, alt=None):
@@ -27,7 +29,7 @@ def add_or_fetch_alteration(db, gene=None, effect=None, feature=None, alt=None):
     return alteration
 
 
-def add_or_fetch_source(db, doi):
+def add_or_fetch_source(db, doi, cite_text=""):
     """Given a DOI, either fetch an exisiting corresponding source, or create a new one if none exists yet with the
     given attributes"""
     source = db.session.query(Source).filter(Source.doi == doi).first()
@@ -35,6 +37,7 @@ def add_or_fetch_source(db, doi):
         source = Source()
         source.doi = doi
         source.source_type = 'Journal'
+        source.cite_text = cite_text
         db.session.add(source)
         db.session.flush()
 
@@ -134,6 +137,11 @@ def make_row(alt, assertion):
         'sources': [s for s in assertion.sources]
     }
 
+
+# TODO html error pages
+# def wants_json_response():
+#     return request.accept_mimetypes['application/json'] >= \
+#             request.accept_mimetypes['text/html']
 
 def http200response(message=None):
     return json.dumps({'success': True, 'message': '{}'.format(json.dumps(message))}), 200, {'ContentType': 'application/json'}

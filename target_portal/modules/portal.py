@@ -59,7 +59,6 @@ def index():
                            therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name']
                            )
 
-
 @portal.route('/about')
 def about():
     return render_template('portal_about.html',
