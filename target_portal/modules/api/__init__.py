@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask import jsonify, request, url_for
 from target_portal.modules.models import Assertion, Alteration, Source, AssertionSchema, AlterationSchema, SourceSchema
-from target_portal.modules.helper_functions import add_or_fetch_alteration, add_or_fetch_source
+from target_portal.modules.helper_functions import add_or_fetch_alteration, add_or_fetch_source, get_typeahead_genes
 from .errors import bad_request, error_response
 from target_portal.modules.portal import IMPLICATION_LEVELS, ALTERATION_CLASSES, EFFECTS, pred_impl_orders
 from db import db
@@ -101,5 +101,5 @@ def submit():
 
 @api.route('/genes', methods=['GET'])
 def get_genes():
-    data = Alteration.query.with_entities(Alteration.gene_name).distinct().all()
+    data = get_typeahead_genes(db)
     return jsonify(data)
