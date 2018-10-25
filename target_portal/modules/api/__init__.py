@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask import jsonify, request, url_for
 from target_portal.modules.models import Assertion, Alteration, Source, AssertionSchema, AlterationSchema, SourceSchema
-from target_portal.modules.helper_functions import add_or_fetch_alteration, add_or_fetch_source, get_typeahead_genes
+from target_portal.modules.helper_functions import add_or_fetch_alteration, add_or_fetch_source, get_typeahead_genes, query_distinct_column
 from .errors import bad_request, error_response
 from target_portal.modules.portal import IMPLICATION_LEVELS, ALTERATION_CLASSES, EFFECTS, pred_impl_orders
 from db import db
@@ -103,3 +103,26 @@ def submit():
 def get_genes():
     data = get_typeahead_genes(db)
     return jsonify(data)
+
+
+@api.route('/extension', methods=['GET'])
+def populate_ext():
+    """Provide fields for populating the extension popup through which clients can submit Assertion suggestions"""
+    typeahead_genes = get_typeahead_genes(db)
+    diseases = query_distinct_column(db, Assertion, 'disease')
+    pred_impls = query_distinct_column(db, Assertion, 'predictive_implication')
+    therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
+
+    num_genes = db.session.query(Alteration.gene_name).distinct().count()
+    num_assertions = db.session.query(Assertion).count()
+
+    return jsonify(num_genes=num_genes,
+                   num_assertions=num_assertions,
+                   typeahead_genes=typeahead_genes,
+                   diseases=[d for d in sorted(diseases) if not d == 'Oncotree Term'],
+                   pred_impls=IMPLICATION_LEVELS,
+                   alteration_classes=ALTERATION_CLASSES,
+                   effects=EFFECTS,
+                   therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name']
+                   )
+

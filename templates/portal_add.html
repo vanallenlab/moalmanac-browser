@@ -3,6 +3,7 @@
 {{super()}}
 <script src="{{url_for('static', filename='js/underscore-min.js')}}"></script>
 <script type="text/javascript">
+    "use strict";
     var typeahead_genes = [
     {% for gene in typeahead_genes %}
     '{{gene}}',
