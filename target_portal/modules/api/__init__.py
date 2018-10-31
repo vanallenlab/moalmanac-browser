@@ -1,8 +1,9 @@
 from flask import Blueprint
 from flask import jsonify, request, url_for
 from target_portal.modules.models import Assertion, Alteration, Source, AssertionSchema, AlterationSchema, SourceSchema
-from target_portal.modules.helper_functions import add_or_fetch_alteration, add_or_fetch_source, get_typeahead_genes, query_distinct_column
-from .errors import bad_request, error_response
+from target_portal.modules.helper_functions import (add_or_fetch_alteration, add_or_fetch_source, get_typeahead_genes,
+    query_distinct_column, http200response, http404response, http400response)
+from .errors import bad_request
 from target_portal.modules.portal import IMPLICATION_LEVELS, ALTERATION_CLASSES, EFFECTS, pred_impl_orders
 from db import db
 
@@ -24,7 +25,6 @@ def get_assertion(assertion_id):
     return assertion_schema.jsonify(assertion)
 
 
-
 @api.route('/assertions', methods=['GET'])
 def get_assertions():
     data = Assertion.query.all()
@@ -35,7 +35,6 @@ def get_assertions():
 def get_alteration(alt_id):
     alteration = Alteration.query.get_or_404(alt_id)
     return alteration_schema.jsonify(alteration)
-
 
 
 @api.route('/alterations', methods=['GET'])
@@ -95,6 +94,7 @@ def submit():
     response = assertion_schema.jsonify(assertion)
     response.status_code = 201
     response.headers['Location'] = url_for('api.get_assertion', assertion_id=assertion.assertion_id)
+    response.headers.add('Access-Control-Allow-Origin', '*')
 
     return response
 
@@ -125,4 +125,3 @@ def populate_ext():
                    effects=EFFECTS,
                    therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name']
                    )
-

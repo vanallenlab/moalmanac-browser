@@ -137,12 +137,6 @@ def make_row(alt, assertion):
         'sources': [s for s in assertion.sources]
     }
 
-
-# TODO html error pages
-# def wants_json_response():
-#     return request.accept_mimetypes['application/json'] >= \
-#             request.accept_mimetypes['text/html']
-
 def http200response(message=None):
     return json.dumps({'success': True, 'message': '{}'.format(json.dumps(message))}), 200, {'ContentType': 'application/json'}
 
