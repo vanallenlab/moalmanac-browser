@@ -55,7 +55,7 @@ def get_sources():
     return sources_schema.jsonify(data)
 
 
-@api.route('/submit', methods=['POST'])
+@api.route('/new_assertion', methods=['POST'])
 def submit():
     """Submit an assertion for consideration for inclusion in the database"""
     data = request.get_json() or {}
