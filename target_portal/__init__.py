@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_bootstrap import Bootstrap
+from flask_cors import CORS
 
 from db import db, ma
 
@@ -19,6 +20,8 @@ def create_app(name=__name__):
 
     db.init_app(app)
     ma.init_app(app) #must initialize after SQLAlchemy
+
+    CORS(app)
 
     return app
 
