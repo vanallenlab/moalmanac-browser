@@ -129,6 +129,7 @@ def make_row(alt, assertion):
         'alt_id': alt.alt_id,
         'therapy_name': assertion.therapy_name,
         'therapy_sensitivity': assertion.therapy_sensitivity,
+        'therapy_resistance': assertion.therapy_resistance,
         'favorable_prognosis': assertion.favorable_prognosis,
         'disease': assertion.disease,
         'submitter': urllib.parse.unquote(assertion.submitted_by) if assertion.submitted_by else None,

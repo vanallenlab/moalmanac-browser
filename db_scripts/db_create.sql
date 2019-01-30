@@ -23,6 +23,7 @@ CREATE TABLE Assertion (
     therapy_name text,
     therapy_type text,
     therapy_sensitivity boolean,
+    therapy_resistance boolean,
     predictive_implication text,
     favorable_prognosis boolean,
     description text,

@@ -119,7 +119,7 @@ for index in df.index:
         #therapy_class=series.loc[therapy_class],
         therapy_type=series.loc[therapy_type],
         therapy_sensitivity=series.loc[sensitivity],
-        #therapy_resistance=series.loc[resistance],
+        therapy_resistance=series.loc[resistance],
         favorable_prognosis=series.loc[favorable_prognosis],
         predictive_implication=series.loc[predictive_implication],
         description=series.loc[description],
