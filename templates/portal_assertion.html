@@ -15,18 +15,20 @@
         <h3 class="panel-title">
             <strong>Assertion:</strong>
             {% if assertion.therapy_sensitivity is not none %}
-            {% if assertion.therapy_sensitivity %}Sensitivity{% else %}Resistance{% endif %} to {{assertion.therapy_name}}
+            {% if assertion.therapy_sensitivity %}Sensitivity{% else %}Not sensitive{% endif %} to {{assertion.therapy_name}}
+            {% elif assertion.therapy_resistance is not none %}
+            {% if assertion.therapy_resistance %}Resistance{% else %}Not resistance{% endif %} to {{assertion.therapy_name}}
             {% elif assertion.favorable_prognosis is not none %}
             {% if assertion.favorable_prognosis %}a favorable{% else %}an unfavorable{% endif %} prognosis
             {% endif %}
             {% if assertion.disease is not none %} (in {{assertion.disease}}){% endif %}
             {% if assertion.predictive_implication is not none %}
             <span class="gene-panel-level label
-{% if assertion.predictive_implication=='FDA-Approved' %}label-success
-{% elif assertion.predictive_implication=='Level A' %}label-primary
-{% elif assertion.predictive_implication=='Level B' %}label-info
-{% elif assertion.predictive_implication=='Level C' %}label-warning
-{% elif assertion.predictive_implication=='Level D' %}label-danger{%endif%}">
+                {% if assertion.predictive_implication=='FDA-Approved' %}label-success
+                {% elif assertion.predictive_implication=='Level A' %}label-primary
+                {% elif assertion.predictive_implication=='Level B' %}label-info
+                {% elif assertion.predictive_implication=='Level D' %}label-warning
+                {% elif assertion.predictive_implication=='Level E' %}label-danger{%endif%}">
                 <h3 class="panel-title">{{assertion.predictive_implication}}</h3>
             </span>
             {% endif %}
@@ -43,10 +45,12 @@
                     <th>Feature</th>
                     <th>Alt. type</th>
                     <th>Alteration</th>
-                    {% if assertion.therapy_sensitivity is not none %}
+                    {% if assertion.favorable_prognosis is none %}
                     <th>Therapy</th>
+                    <th>Therapy class</th>
+                    <th>Therapy type</th>
                     <th>Response</th>
-                    {% elif assertion.favorable_prognosis is not none %}
+                    {% else %}
                     <th>Prognosis</th>
                     {% endif %}
                     <th>Cancer type</th>
@@ -59,11 +63,25 @@
                     <td>{% if alt.feature is not none %}{{alt.feature}}{% endif %}</td>
                     <td>{% if alt.alt_type is not none %}{{alt.alt_type}}{% endif %}</td>
                     <td>{% if alt.alt is not none %}{{alt.alt}}{% endif %}</td>
-                    {% if assertion.therapy_sensitivity is not none %}
+                    {% if assertion.favorable_prognosis is none %}
                     <td>{{assertion.therapy_name}}</td>
-                    <td>{% if assertion.therapy_sensitivity %}Sensitivity{% else %}Resistance{% endif %}</td>
-                    {% elif assertion.favorable_prognosis is not none %}
-                    <td>{% if assertion.favorable_prognosis %}Favorable{% else %}Unfavorable{% endif %}</td>
+                    <td>{{assertion.therapy_class}}</td>
+                    <td>{{assertion.therapy_type}}</td>
+                    <td>
+                        {% if assertion.therapy_sensitivity == 1 %}
+                            Sensitivity
+                        {% elif assertion.therapy_sensitivity == 0 %}
+                            Not sensitive
+                        {% elif assertion.therapy_resistance == 1 %}
+                            Resistance
+                        {% elif assertion.therapy_resistance == 0 %}
+                            Not resistance
+                        {% endif %}
+                    </td>
+                    {% else %}
+                    <td>
+                        {% if assertion.favorable_prognosis %}Favorable{% else %}Unfavorable{% endif %}
+                    </td>
                     {% endif %}
                     <td>{% if assertion.disease is not none %}{{assertion.disease}}{% endif %}</td>
                 </tr>
