@@ -15,7 +15,9 @@
         <h3 class="panel-title">
             <strong>Assertion:</strong>
             {% if assertion.therapy_sensitivity is not none %}
-            {% if assertion.therapy_sensitivity %}Sensitivity{% else %}Resistance{% endif %} to {{assertion.therapy_name}}
+            {% if assertion.therapy_sensitivity %}Sensitivity{% else %}Not Sensitive{% endif %} to {{assertion.therapy_name}}
+            {% elif assertion.therapy_resistance is not none %}
+            {% if assertion.therapy_resistance %}Resistance{% else %}Not Resistance{% endif %} to {{assertion.therapy_name}}
             {% elif assertion.favorable_prognosis is not none %}
             {% if assertion.favorable_prognosis %}a favorable{% else %}an unfavorable{% endif %} prognosis
             {% endif %}
