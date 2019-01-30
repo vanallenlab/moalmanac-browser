@@ -55,8 +55,8 @@ CREATE TABLE Assertion_To_Source (
 -- Table: Source
 CREATE TABLE Source (
     source_id integer NOT NULL CONSTRAINT Source_pk PRIMARY KEY,
-    created_on NOT NULL,
-    modified_on NOT NULL,
+    created_on NOT NULL DEFAULT CURRENT_DATE,
+    modified_on NOT NULL DEFAULT CURRENT_DATE,
     source_type text NOT NULL,
     cite_text text NOT NULL,
     doi text

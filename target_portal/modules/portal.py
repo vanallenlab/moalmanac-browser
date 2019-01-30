@@ -14,7 +14,9 @@ from .helper_functions import get_unapproved_assertion_rows, make_row, http404re
 portal = Blueprint('portal', __name__)
 
 IMPLICATION_LEVELS = ['FDA-Approved', 'Level A', 'Level B', 'Level C', 'Level D', 'Level E']
-ALTERATION_CLASSES = ['Rearrangement', 'Mutation', 'CNV', 'Germline Mutation', 'Knockout', 'Silencing', 'MSI']
+ALTERATION_CLASSES = ['Aneuploidy', 'CopyNumber', 'Germline', 'Knockout', 'MicrosatelliteStability',
+                      'Mutation', 'MutationalBurden', 'MutationalSignature', 'NeoantigenBurden',
+                      'Rearrangement', 'Silencing']
 EFFECTS = [
  'Missense',
  'Amplification',
@@ -37,6 +39,7 @@ pred_impl_orders = {
     'Level B': 3,
     'Level C': 2,
     'Level D': 1,
+    'Level E': 0
 }
 
 
@@ -58,6 +61,7 @@ def index():
                            pred_impls=IMPLICATION_LEVELS,
                            therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name']
                            )
+
 
 @portal.route('/about')
 def about():

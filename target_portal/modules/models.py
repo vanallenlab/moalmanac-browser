@@ -2,7 +2,6 @@ from flask_sqlalchemy import declarative_base
 from target_portal import db, ma
 
 from datetime import datetime
-from flask import url_for
 
 Base = declarative_base()
 
@@ -30,73 +29,34 @@ class Assertion(Base, db.Model):
     favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
     description = db.Column('description', db.Text)
 
-    alterations = db.relationship('Alteration',
-                                   secondary='Assertion_To_Alteration',
-                                   )
+    alterations = db.relationship('Alteration', secondary='Assertion_To_Alteration')
 
-    sources = db.relationship('Source',
-                               secondary='Assertion_To_Source', uselist=True,
-                               )
+    sources = db.relationship('Source', secondary='Assertion_To_Source', uselist=True,
+                              )
     validated = db.Column('validated', db.Boolean, default=False)
     submitted_by = db.Column('submitted_by', db.Text)
-
-
-# feature = {Amplification, Biallelic Inactivation, Deletion, Mutation, Rearrangement}
-# alt = Alteration specified using HGVS notation (http://varnomen.hgvs.org/recommendations/)
-
-    # deprecated since now using marshmallow:
-    # def to_dict(self):
-    #     data = {
-    #         'assertion_id': self.assertion_id,
-    #         'created_on': self.created_on,
-    #         'last_updated': self.last_updated,
-    #         'disease': self.disease,
-    #         'old_disease': self.old_disease,
-    #         'oncotree_code': self.oncotree_code,
-    #         'stage': self.stage,
-    #         'therapy_name': self.therapy_name,
-    #         'therapy_type': self.therapy_type,
-    #         'therapy_sensitivity': self.therapy_sensitivity,
-    #         'predictive_implication': self.predictive_implication,
-    #         'favorable_prognosis': self.favorable_prognosis,
-    #         'description': self.description,
-    #         # 'alterations': self.alterations,
-    #         # 'sources': self.sources,
-    #         'validated': self.validated,
-    #         'submitted_by': self.submitted_by
-    #     }
-    #     return data
 
 
 class Alteration(Base, db.Model):
     __tablename__ = 'Alteration'
 
     alt_id = db.Column('alt_id', db.Integer, primary_key=True)
-    feature = db.Column('feature', db.Enum('Rearrangement',
-                                           'Mutation',
-                                           'CNV',
-                                           'Germline Mutation',
+    feature = db.Column('feature', db.Enum('Aneuploidy',
+                                           'CopyNumber',
+                                           'Germline',
                                            'Knockout',
-                                           'Silencing',
-                                           'MSI'))
+                                           'MicrosatelliteStability',
+                                           'Mutation',
+                                           'MutationalBurden',
+                                           'MutationalSignature',
+                                           'NeoantigenBurden',
+                                           'Rearrangement',
+                                           'Silencing'))
+
     alt_type = db.Column('alt_type', db.Text)
     alt = db.Column('alt', db.Text)
     gene_name = db.Column('gene_name', db.Text)
-
     assertions = db.relationship('Assertion',  passive_deletes=True, secondary='Assertion_To_Alteration')
-
-    # deprecated since now using marshmallow:
-    # def to_dict(self):
-    #     data = {
-    #         'alt_id': self.alt_id,
-    #         'feature': self.feature,
-    #         'alt_type': self.alt_type,
-    #         'alt': self.alt,
-    #         'gene_name': self.gene_name,
-    #
-    #         # 'assertions': self.assertions,
-    #     }
-    #     return data
 
 
 class AssertionToSource(Base, db.Model):
@@ -120,18 +80,6 @@ class Source(Base, db.Model):
     source_type = db.Column('source_type', db.Text)
 
     assertions = db.relationship('Assertion',  passive_deletes=True, secondary='Assertion_To_Source')
-
-    # deprecated since now using marshmallow:
-    # def to_dict(self):
-    #     data = {
-    #         'source_id': self.source_id,
-    #         'doi': self.doi,
-    #         'cite_text': self.cite_text,
-    #         'source_type': self.source_type,
-    #
-    #         # 'assertions': self.assertions,
-    #     }
-    #     return data
 
 
 class AssertionToAlteration(Base, db.Model):
