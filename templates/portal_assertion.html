@@ -22,11 +22,11 @@
             {% if assertion.disease is not none %} (in {{assertion.disease}}){% endif %}
             {% if assertion.predictive_implication is not none %}
             <span class="gene-panel-level label
-{% if assertion.predictive_implication=='FDA-Approved' %}label-success
-{% elif assertion.predictive_implication=='Level A' %}label-primary
-{% elif assertion.predictive_implication=='Level B' %}label-info
-{% elif assertion.predictive_implication=='Level C' %}label-warning
-{% elif assertion.predictive_implication=='Level D' %}label-danger{%endif%}">
+                {% if assertion.predictive_implication=='FDA-Approved' %}label-success
+                {% elif assertion.predictive_implication=='Level A' %}label-primary
+                {% elif assertion.predictive_implication=='Level B' %}label-info
+                {% elif assertion.predictive_implication=='Level D' %}label-warning
+                {% elif assertion.predictive_implication=='Level E' %}label-danger{%endif%}">
                 <h3 class="panel-title">{{assertion.predictive_implication}}</h3>
             </span>
             {% endif %}
