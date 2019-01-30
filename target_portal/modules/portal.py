@@ -13,7 +13,8 @@ from .helper_functions import get_unapproved_assertion_rows, make_row, http404re
 
 portal = Blueprint('portal', __name__)
 
-IMPLICATION_LEVELS = ['FDA-Approved', 'Level A', 'Level B', 'Level C', 'Level D', 'Level E']
+IMPLICATION_LEVELS = ['FDA-Approved', 'Level A', 'Level B', #'Level C',
+                      'Level D', 'Level E']
 ALTERATION_CLASSES = [
     'Aneuploidy', 'CopyNumber', 'Germline', 'Knockout', 'MicrosatelliteStability',
     'Mutation', 'MutationalBurden', 'MutationalSignature', 'NeoantigenBurden',
@@ -39,7 +40,7 @@ pred_impl_orders = {
     'FDA-Approved': 5,
     'Level A': 4,
     'Level B': 3,
-    'Level C': 2,
+    #'Level C': 2,
     'Level D': 1,
     'Level E': 0
 }
