@@ -116,7 +116,7 @@ for index in df.index:
 
     new_assert = Assertion(
         therapy_name=series.loc[therapy],
-        #therapy_class=series.loc[therapy_class],
+        therapy_class=series.loc[therapy_class],
         therapy_type=series.loc[therapy_type],
         therapy_sensitivity=series.loc[sensitivity],
         therapy_resistance=series.loc[resistance],

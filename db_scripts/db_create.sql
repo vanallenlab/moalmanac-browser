@@ -21,6 +21,7 @@ CREATE TABLE Assertion (
     oncotree_code,
     stage integer,
     therapy_name text,
+    therapy_class text,
     therapy_type text,
     therapy_sensitivity boolean,
     therapy_resistance boolean,
