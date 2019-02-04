@@ -41,7 +41,7 @@ var typeahead_genes = [
 
 <table class="results-table display compact">
     <thead>
-    <tr><th>Gene</th><th>Feature</th><th>Alt. type</th><th>Alteration</th><th>Therapy</th><th>Therapy type</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</tr>
+    <tr><th>Gene</th><th>Feature</th><th>Alt. type</th><th>Alteration</th><th>Therapy</th><th>Therapy class</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</tr>
     </thead>
     <tbody>
     {% for row in rows %}
@@ -51,7 +51,7 @@ var typeahead_genes = [
         <td>{{row['alt_type'] if row['alt_type'] is not none}}</td>
         <td><a href="assertion/{{row['assertion_id']|urlencode}}">{{row['alt'] if row['alt'] is not none else '(any)'}}</a></td>
         <td>{% if row['therapy_name'] %}<a href="search?t={{row['therapy_name']|urlencode}}">{{row['therapy_name']}}</a>{% endif %}</td>
-        <td>{% if row['therapy_type'] %}{{row['therapy_type']}}{% endif %}</td>
+        <td>{% if row['therapy_class'] %}{{row['therapy_class']}}{% endif %}</td>
         {% if row['therapy_sensitivity'] != None %}
         <td>{% if row['therapy_sensitivity'] == 1 %}Sensitivity{% elif row['therapy_sensitivity'] == 0 %}Not sensitive{% endif %}</td>
         {% elif row['therapy_resistance'] != None %}

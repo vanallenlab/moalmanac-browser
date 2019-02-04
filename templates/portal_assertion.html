@@ -62,7 +62,7 @@
                     {% if assertion.favorable_prognosis is none %}
                     <th>Therapy</th>
                     <th>Therapy class</th>
-                    <th>Therapy type</th>
+                    <!--<th>Therapy type</th>-->
                     <th>Response</th>
                     {% else %}
                     <th>Prognosis</th>
@@ -80,7 +80,7 @@
                     {% if assertion.favorable_prognosis is none %}
                     <td>{{assertion.therapy_name}}</td>
                     <td>{{assertion.therapy_class}}</td>
-                    <td>{{assertion.therapy_type}}</td>
+                    <!-- <td>{{assertion.therapy_type}}</td> -->
                     <td>
                         {% if assertion.therapy_sensitivity == 1 %}
                             Sensitivity
