@@ -70,7 +70,7 @@ def submit():
     if 'cancer_type' not in data:
         return bad_request("Please select a cancer type")
 
-    #alt and therapy are optional
+    #some fields are optional
     if 'alt' not in data:
         data['alt'] = ""
     if 'therapy' not in data:
