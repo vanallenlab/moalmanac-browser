@@ -28,7 +28,7 @@ var typeahead_genes = [
     <div class="col-md-5">
         <form action="search" method="get">
             <div class="input-group">
-                <input id="gene-input" type="text" name="g" class="form-control typeahead" placeholder="Gene name">
+                <input id="gene-input" type="text" name="g" class="form-control typeahead" placeholder="Feature name">
                 <span class="input-group-btn">
                         <button type="submit" class="btn btn-default btn-search" type="button">Search</button>
                     </span>
@@ -41,7 +41,7 @@ var typeahead_genes = [
 
 <table class="results-table display compact">
     <thead>
-    <tr><th>Gene</th><th>Feature</th><th>Alt. type</th><th>Alteration</th><th>Therapy</th><th>Therapy class</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</tr>
+    <tr><th>Feature</th><th>Feature type</th><th>Alt. type</th><th>Alteration</th><th>Therapy</th><th>Therapy class</th><th>Response</th><th>Cancer Type</th><th>Predictive Level</tr>
     </thead>
     <tbody>
     {% for row in rows %}
