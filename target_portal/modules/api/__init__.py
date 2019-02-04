@@ -99,7 +99,7 @@ def submit():
     return response
 
 
-@api.route('/genes', methods=['GET'])
+@api.route('/features', methods=['GET'])
 def get_genes():
     data = get_typeahead_genes(db)
     return jsonify(data)
