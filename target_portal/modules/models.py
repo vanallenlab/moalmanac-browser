@@ -44,14 +44,14 @@ class Alteration(Base, db.Model):
 
     alt_id = db.Column('alt_id', db.Integer, primary_key=True)
     feature = db.Column('feature', db.Enum('Aneuploidy',
-                                           'CopyNumber',
+                                           'Copy Number',
                                            'Germline',
                                            'Knockout',
-                                           'MicrosatelliteStability',
+                                           'Microsatellite Stability',
                                            'Mutation',
-                                           'MutationalBurden',
-                                           'MutationalSignature',
-                                           'NeoantigenBurden',
+                                           'Mutational Burden',
+                                           'Mutational Signature',
+                                           'Neoantigen Burden',
                                            'Rearrangement',
                                            'Silencing'))
 

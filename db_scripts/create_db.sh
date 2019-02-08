@@ -20,7 +20,7 @@ INSERT_SCRIPT="$SCRIPT_DIR/db_insert.py"
 if [[ "$#" -ne 5 ]]; then
 	echo 'Usage:'
 	echo 'create_db.sh <input filename> <db name> <major version> <minor version> <patch version>'
-	echo 'Example: create_db.sh import_file.tsv new_db.sqlite3 1 2 3'
+	echo 'Example: create_db.sh import_file.tsv new_db 1 2 3'
 	exit 1
 fi
 
@@ -48,6 +48,6 @@ python "$INSERT_SCRIPT" "$IMPORT_FILE" "$DB_NAME" "$V_MAJOR" "$V_MINOR" "$V_PATC
 
 OUTPUT_FILE=${DB_NAME}.${V_MAJOR}.${V_MINOR}.${V_PATCH}.sqlite3
 mv ${DB_NAME} ${OUTPUT_FILE}
-cp ${OUTPUT_FILE} db_versions/
+mv ${OUTPUT_FILE} db_versions/
 
 echo "Finished."
