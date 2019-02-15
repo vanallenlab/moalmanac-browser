@@ -6,6 +6,7 @@ from werkzeug.exceptions import BadRequest
 import urllib
 
 from db import db
+from auth import basic_auth
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 from .helper_functions import get_unapproved_assertion_rows, make_row, http404response, http200response, \
     query_distinct_column, add_or_fetch_alteration, add_or_fetch_source, delete_assertion, \
@@ -172,6 +173,7 @@ def amend():
 
 
 @portal.route('/approve')
+@basic_auth.required
 def approve():
     """Render the page on which admnins can view submitted suggestions"""
     rows = get_unapproved_assertion_rows(db)
