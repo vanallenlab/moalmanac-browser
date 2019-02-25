@@ -3,6 +3,7 @@ from flask_bootstrap import Bootstrap
 from flask_cors import CORS
 
 from db import db, ma
+from auth import basic_auth
 
 from .modules.api import api
 from .modules.editor import editor
@@ -22,6 +23,12 @@ def create_app(name=__name__):
     ma.init_app(app) #must initialize after SQLAlchemy
 
     CORS(app)
+
+    #for password protecting certain pages with sensitive data
+    app.config['BASIC_AUTH_USERNAME'] = 'valab'
+    app.config['BASIC_AUTH_PASSWORD'] = 'kingjames'
+
+    basic_auth.init_app(app)
 
     return app
 
