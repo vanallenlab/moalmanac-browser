@@ -1,5 +1,6 @@
 from flask import Blueprint, request, render_template, flash, redirect, url_for, make_response
 import simplejson as json
+import pandas as pd
 
 from werkzeug.exceptions import BadRequest
 
@@ -287,6 +288,8 @@ def search():
         for assertion in assertions:
             for alt in assertion.alterations:
                 rows.append(make_row(alt, assertion))
+
+    rows.sort(key=lambda x: (x['predictive_implication'], x['gene_name']))
 
     return render_template('portal_search_results.html',
                            typeahead_genes=typeahead_genes,
