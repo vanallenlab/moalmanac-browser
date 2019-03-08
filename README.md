@@ -5,6 +5,8 @@ The Molecular Oncology Almanac captures the current body of knowledge on how gen
 To run the Molecular Oncology Almanac browser, a new file named `secret_key.py` must be added and it must contain:
 
     GCP_SECRET_KEY='<a secret key>'
+    USERNAME='<any username>'
+    PASSWORD='<any password>'
 
 You can generate a secret key using:
 
