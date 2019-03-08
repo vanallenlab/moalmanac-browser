@@ -24,10 +24,6 @@ def create_app(name=__name__):
 
     CORS(app)
 
-    #for password protecting certain pages with sensitive data
-    app.config['BASIC_AUTH_USERNAME'] = 'valab'
-    app.config['BASIC_AUTH_PASSWORD'] = 'kingjames'
-
     basic_auth.init_app(app)
 
     return app
