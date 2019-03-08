@@ -1,6 +1,6 @@
 # These are development settings only. Security risk if deployed without modification.
 
-from secret_key import GCP_SECRET_KEY
+from secret_key import GCP_SECRET_KEY, USERNAME, PASSWORD
 
 DEBUG = False
 SQLALCHEMY_DATABASE_URI = 'sqlite:///db_versions/almanac.0.2.13.sqlite3'
@@ -12,5 +12,5 @@ APP_NAME = 'The Molecular Oncology Almanac'
 APP_NAME_SHORT = 'Molecular Oncology Almanac'
 
 #for password protecting certain pages with sensitive data (emails)
-app.config['BASIC_AUTH_USERNAME'] = 'valab'
-app.config['BASIC_AUTH_PASSWORD'] = 'lakers'
+BASIC_AUTH_USERNAME = USERNAME
+BASIC_AUTH_PASSWORD = PASSWORD
