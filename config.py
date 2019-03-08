@@ -10,3 +10,7 @@ BOOTSTRAP_SERVE_LOCAL = True
 
 APP_NAME = 'The Molecular Oncology Almanac'
 APP_NAME_SHORT = 'Molecular Oncology Almanac'
+
+#for password protecting certain pages with sensitive data (emails)
+app.config['BASIC_AUTH_USERNAME'] = 'valab'
+app.config['BASIC_AUTH_PASSWORD'] = 'lakers'
