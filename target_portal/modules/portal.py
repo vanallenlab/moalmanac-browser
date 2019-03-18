@@ -291,8 +291,6 @@ def search():
             for alt in assertion.alterations:
                 rows.append(make_row(alt, assertion))
 
-    rows.sort(key=lambda x: (x['predictive_implication'], x['gene_name']))
-
     return render_template('portal_search_results.html',
                            typeahead_genes=typeahead_genes,
                            pred_impl_orders=pred_impl_orders,

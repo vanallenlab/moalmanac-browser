@@ -24,6 +24,15 @@ v_patch = sys.argv[5]
 engine = create_engine('sqlite:///%s' % db_name)
 session = sessionmaker(bind=engine)()
 
+pred_impl_orders = {
+    'FDA-Approved': 5,
+    'Level A': 4,
+    'Level B': 3,
+    #'Level C': 2,
+    'Level D': 1,
+    'Level E': 0
+}
+
 
 def insert_if_new(model, **kwargs):
     """
@@ -73,6 +82,7 @@ sensitivity = 'sensitivity'
 resistance = 'resistance'
 favorable_prognosis = 'favorable_prognosis'
 predictive_implication = 'predictive_implication'
+predictive_implication_sort = 'predictive_implication_sort'
 description = 'description'
 connections = 'connections'
 ctrpv2_therapy = 'ctrpv2_therapy'
@@ -84,7 +94,10 @@ pubmed_id = 'pubmed_id'
 df = read_table(import_file)
 for information in [sensitivity, resistance, favorable_prognosis]:
     df.loc[:, information].astype(float).replace({1.0: True, 0.0: False})
-df = df.where(df.notnull(), None)
+df[predictive_implication_sort] = df[predictive_implication].replace(pred_impl_orders)
+df.fillna('', inplace=True)
+df.sort_values([predictive_implication_sort, feature, therapy],
+               ascending=[False, True, True], inplace=True)
 
 for index in df.index:
     new_alterations = []
