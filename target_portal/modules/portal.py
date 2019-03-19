@@ -23,7 +23,7 @@ IMPLICATION_LEVELS_SORT = {
     'Preclinical': 1,
     'Inferential': 0
 }
-IMPLICATION_LEVELS = IMPLICATION_LEVELS_SORT.keys()
+IMPLICATION_LEVELS = ['FDA-Approved', 'Guideline', 'Clinical trial', 'Clinical evidence', 'Preclinical', 'Inferential']
 
 ALTERATION_CLASSES = [
     'Aneuploidy', 'Copy Number', 'Germline', 'Knockout', 'Microsatellite Stability',
@@ -45,6 +45,7 @@ EFFECTS = [
  'CRSPR-Cas9',
  'MSI-High'
 ]
+
 
 @portal.route('/')
 def index():
