@@ -4,7 +4,7 @@ from target_portal.modules.models import Assertion, Alteration, Source, Assertio
 from target_portal.modules.helper_functions import (add_or_fetch_alteration, add_or_fetch_source, get_typeahead_genes,
     query_distinct_column, http200response, http404response, http400response)
 from .errors import bad_request
-from target_portal.modules.portal import IMPLICATION_LEVELS, ALTERATION_CLASSES, EFFECTS, IMPLICATION_LEVELS_SORT
+from target_portal.modules.portal import IMPLICATION_LEVELS, ALTERATION_CLASSES, EFFECTS
 from db import db
 
 api = Blueprint('api', __name__)
