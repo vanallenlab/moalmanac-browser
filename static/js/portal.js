@@ -41,7 +41,12 @@ $(document).ready(function(){
         $('.results-table').DataTable({
             ordering: true,
             paging: true,
-            searching: false
+            searching: false,
+            "order": [[ 0, "desc" ]],
+            "columnDefs": [{
+                "targets": [ 0 ],
+                "visible": false
+            }]
         });
     }
 });

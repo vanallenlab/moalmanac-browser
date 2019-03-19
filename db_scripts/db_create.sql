@@ -8,7 +8,8 @@ CREATE TABLE Alteration (
     feature text NOT NULL,
     alt_type text,
     alt text,
-    gene_name text
+    gene_name text,
+    display_string text
 );
 
 -- Table: Assertion
@@ -21,7 +22,6 @@ CREATE TABLE Assertion (
     oncotree_code,
     stage integer,
     therapy_name text,
-    therapy_class text,
     therapy_type text,
     therapy_sensitivity boolean,
     therapy_resistance boolean,

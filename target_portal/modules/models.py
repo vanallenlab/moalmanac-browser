@@ -17,24 +17,23 @@ class Assertion(Base, db.Model):
     oncotree_code = db.Column('oncotree_code', db.Text)
     stage = db.Column('stage', db.Integer)
     therapy_name = db.Column('therapy_name', db.Text)
-    therapy_class = db.Column('therapy_class', db.Text)
+    #therapy_class = db.Column('therapy_class', db.Text)
     therapy_type = db.Column('therapy_type', db.Text)
     therapy_sensitivity = db.Column('therapy_sensitivity', db.Boolean)
     therapy_resistance = db.Column('therapy_resistance', db.Boolean)
     predictive_implication = db.Column('predictive_implication', db.Enum('FDA-Approved',
-                                                                         'Level A',
-                                                                         'Level B',
-                                                                         'Level C',
-                                                                         'Level D',
-                                                                         'Level E',
+                                                                         'Guideline',
+                                                                         'Clinical trial',
+                                                                         'Clinical evidence',
+                                                                         'Preclinical',
+                                                                         'Inferential',
                                                                          'Predictive implication'))
     favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
     description = db.Column('description', db.Text)
 
     alterations = db.relationship('Alteration', secondary='Assertion_To_Alteration')
 
-    sources = db.relationship('Source', secondary='Assertion_To_Source', uselist=True,
-                              )
+    sources = db.relationship('Source', secondary='Assertion_To_Source', uselist=True)
     validated = db.Column('validated', db.Boolean, default=False)
     submitted_by = db.Column('submitted_by', db.Text)
 
@@ -58,6 +57,7 @@ class Alteration(Base, db.Model):
     alt_type = db.Column('alt_type', db.Text)
     alt = db.Column('alt', db.Text)
     gene_name = db.Column('gene_name', db.Text)
+    display_string = db.Column('display_string', db.Text)
     assertions = db.relationship('Assertion',  passive_deletes=True, secondary='Assertion_To_Alteration')
 
 

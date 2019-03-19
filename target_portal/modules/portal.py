@@ -15,11 +15,19 @@ from .helper_functions import get_unapproved_assertion_rows, make_row, http404re
 
 portal = Blueprint('portal', __name__)
 
-IMPLICATION_LEVELS = ['FDA-Approved', 'Level A', 'Level B', #'Level C',
-                      'Level D', 'Level E']
+IMPLICATION_LEVELS_SORT = {
+    'FDA-Approved': 5,
+    'Guideline': 4,
+    'Clinical trial': 3,
+    'Clinical evidence': 2,
+    'Preclinical': 1,
+    'Inferential': 0
+}
+IMPLICATION_LEVELS = IMPLICATION_LEVELS_SORT.keys()
+
 ALTERATION_CLASSES = [
-    'Aneuploidy', 'CopyNumber', 'Germline', 'Knockout', 'MicrosatelliteStability',
-    'Mutation', 'MutationalBurden', 'MutationalSignature', 'NeoantigenBurden',
+    'Aneuploidy', 'Copy Number', 'Germline', 'Knockout', 'Microsatellite Stability',
+    'Mutation', 'Mutational Burden', 'Mutational Signature', 'Neoantigen Burden',
     'Rearrangement', 'Silencing']
 
 EFFECTS = [
@@ -37,16 +45,6 @@ EFFECTS = [
  'CRSPR-Cas9',
  'MSI-High'
 ]
-
-pred_impl_orders = {
-    'FDA-Approved': 5,
-    'Level A': 4,
-    'Level B': 3,
-    #'Level C': 2,
-    'Level D': 1,
-    'Level E': 0
-}
-
 
 @portal.route('/')
 def index():
@@ -180,7 +178,7 @@ def approve():
     rows = get_unapproved_assertion_rows(db)
     return render_template('admin_approval.html',
                            nav_current_page='approve',
-                           pred_impl_orders=pred_impl_orders,
+                           pred_impl_orders=IMPLICATION_LEVELS_SORT,
                            rows=rows)
 
 
@@ -293,7 +291,6 @@ def search():
 
     return render_template('portal_search_results.html',
                            typeahead_genes=typeahead_genes,
-                           pred_impl_orders=pred_impl_orders,
                            rows=rows)
 
 

@@ -128,7 +128,7 @@ def make_row(alt, assertion):
         'alt': alt.alt,
         'alt_id': alt.alt_id,
         'therapy_name': assertion.therapy_name,
-        'therapy_class': assertion.therapy_class,
+        #'therapy_class': assertion.therapy_class,
         'therapy_type': assertion.therapy_type,
         'therapy_sensitivity': assertion.therapy_sensitivity,
         'therapy_resistance': assertion.therapy_resistance,
@@ -137,8 +137,10 @@ def make_row(alt, assertion):
         'submitter': urllib.parse.unquote(assertion.submitted_by) if assertion.submitted_by else None,
         'predictive_implication': assertion.predictive_implication,
         'assertion_id': assertion.assertion_id,
-        'sources': [s for s in assertion.sources]
+        'sources': [s for s in assertion.sources],
+        'display_string': alt.display_string
     }
+
 
 def http200response(message=None):
     return json.dumps({'success': True, 'message': '{}'.format(json.dumps(message))}), 200, {'ContentType': 'application/json'}
