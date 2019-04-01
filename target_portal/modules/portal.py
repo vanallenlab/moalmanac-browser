@@ -266,29 +266,36 @@ def search():
     pred_impl_needle = request.args.get('p')
     therapy_needle = request.args.get('t')
 
-    rows = []
+    # filter_components aggregates the filters we will apply to Assertion. No matter the search, we will always join
+    # the Assertion, AssertionToAlteration, and Alteration tables together, and we will always include the assertion
+    # "validated=True" filter.
+    filter_components = [
+        Assertion.assertion_id == AssertionToAlteration.assertion_id,
+        Alteration.alt_id == AssertionToAlteration.alt_id,
+        Assertion.validated.is_(True)
+    ]
+
     if gene_needle:
-        alts = db.session.query(Alteration).filter(Alteration.gene_name.like('%'+gene_needle+'%')).all()
-        for alt in alts:
-            for assertion in alt.assertions:
-                if assertion.validated is True:
-                    rows.append(make_row(alt, assertion))
+        filter_components.append(Alteration.gene_name.like('%' + gene_needle + '%'))
+    if cancer_needle:
+        filter_components.append(Assertion.disease == cancer_needle)
+    if pred_impl_needle:
+        filter_components.append(Assertion.predictive_implication == pred_impl_needle)
+    if therapy_needle:
+        filter_components.append(Assertion.therapy_name == therapy_needle)
 
-    elif cancer_needle or pred_impl_needle or therapy_needle:
-        assertions = []
-        if cancer_needle:
-            assertions = db.session.query(Assertion).filter(Assertion.disease == cancer_needle,
-                                                            Assertion.validated.is_(True)).all()
-        if pred_impl_needle:
-            assertions = db.session.query(Assertion).filter(Assertion.predictive_implication == pred_impl_needle,
-                                                            Assertion.validated.is_(True)).all()
-        if therapy_needle:
-            assertions = db.session.query(Assertion).filter(Assertion.therapy_name == therapy_needle,
-                                                            Assertion.validated.is_(True)).all()
+    # The following produces a list of tuples, where each tuple contains the following table objects:
+    # (Assertion, AssertionToAlteration, Alteration)
+    results = (db.session.query(Assertion, AssertionToAlteration, Alteration)
+               .filter(Assertion.assertion_id == AssertionToAlteration.assertion_id)
+               .filter(Alteration.alt_id == AssertionToAlteration.alt_id)
+               .filter(Assertion.validated.is_(True))
+               .filter(*filter_components).all())
 
-        for assertion in assertions:
-            for alt in assertion.alterations:
-                rows.append(make_row(alt, assertion))
+    # In below, result[0] = Assertion; result[2] = Alteration
+    rows = []
+    for result in results:
+        rows.append(make_row(result[2], result[0]))
 
     return render_template('portal_search_results.html',
                            typeahead_genes=typeahead_genes,
