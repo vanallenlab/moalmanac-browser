@@ -5,6 +5,7 @@ from .models import Alteration, Assertion, Source, AssertionToAlteration, Assert
 import simplejson as json
 from werkzeug.exceptions import BadRequest
 import urllib
+import re
 from flask import request
 from target_portal.modules.api.errors import error_response as api_error_response
 
@@ -168,3 +169,58 @@ def get_typeahead_genes(db):
     typeahead_genes = list(set([a.gene_name for a in alterations if all([assertion.validated == 1 for assertion in a.assertions])]))
     return typeahead_genes
 
+
+def check_row_exists(db, table, assertion):
+    """
+    Returns True if the given assertion holds true for the given column.
+    E.g.: check_row_exists(Alteration, Alteration.gene_name == KRAS)
+
+    :param db: Database connection.
+    :param table: Table to search within.
+    :param assertion: Assertion to test for.
+    :return: True if assertion holds within the table; False otherwise.
+    """
+
+    return db.session.query((db.session.query(table).filter(assertion)).exists()).scalar()
+
+
+def interpret_unified_search_string(db, search_str):
+    """
+    Converts a raw (user-provided) search string into a dictionary describing the specific entities in a query.
+    Example:
+    Raw search string: PIK3CA "Invasive Breast Carcinoma"[disease] Preclinical[pred]
+    Query dictionary: {'genes': 'PIK3CA', 'diseases': 'Invasive Breast Carcinoma', 'preds': 'Preclinical'}
+
+    :param db: Database connection.
+    :param search_str: Raw unified search string.
+    :return: Dictionary representing query in a structured format.
+    """
+
+    # The 3 regex groups below are mutually exclusive due to the OR operators; only one of the groups will ever contain
+    # data. We thus collapse the groups after matching so that our list of tokens doesn't contain empty groups.
+    re_groups = re.findall(r'\"([^\"]+)\"|\'([^\']+)\'|(\S+)', search_str)
+    tokens = []
+    for group in re_groups:
+        token = group[0] or group[1] or group[2]
+        tokens.append(token.strip())
+
+    query = {
+        'genes': [],
+        'diseases': [],
+        'preds': [],
+        'therapies': [],
+        'unknown': [],
+    }
+    for token in tokens:
+        if check_row_exists(db, Alteration, Alteration.gene_name.ilike(token)):
+            query['genes'].append(token)
+        elif check_row_exists(db, Assertion, Assertion.disease.ilike(token)):
+            query['diseases'].append(token)
+        elif check_row_exists(db, Assertion, Assertion.predictive_implication.ilike(token)):
+            query['preds'].append(token)
+        elif check_row_exists(db, Assertion, Assertion.therapy_name.ilike(token)):
+            query['therapies'].append(token)
+        else:
+            query['unknown'].append(token)
+
+    return query
