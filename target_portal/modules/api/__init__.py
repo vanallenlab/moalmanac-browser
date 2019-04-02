@@ -17,12 +17,10 @@ source_schema = SourceSchema()
 sources_schema = SourceSchema(many=True)
 
 
-def get_all_features(db):
-    alterations = db.session.query(Alteration).all()
+def flatten_sqlalchemy_singlets(l):
+    "In some uses cases, SQLAlchemy returns a list of 1-tuples. This function flattens these lists."
 
-    return list(set([
-        a.gene_name for a in alterations if all([assertion.validated == 1 for assertion in a.assertions])
-    ]))
+    return [item[0] for item in l]
 
 
 #TODO authentication for all API calls
@@ -107,9 +105,42 @@ def submit():
     return response
 
 
+def get_all_features(db):
+    return flatten_sqlalchemy_singlets(
+        db.session.query(Alteration.gene_name).filter(Assertion.validated.is_(True)).distinct().all()
+    )
+
+
 @api.route('/features', methods=['GET'])
 def get_genes():
     data = get_all_features(db)
+    return jsonify(data)
+
+
+@api.route('/diseases', methods=['GET'])
+def get_diseases():
+    data = flatten_sqlalchemy_singlets(
+        db.session.query(Assertion.disease).distinct()
+    )
+
+    return jsonify(data)
+
+
+@api.route('/predictive_implications', methods=['GET'])
+def get_predictive_implications():
+    data = flatten_sqlalchemy_singlets(
+        db.session.query(Assertion.predictive_implication).distinct()
+    )
+
+    return jsonify(data)
+
+
+@api.route('/therapies', methods=['GET'])
+def get_therapies():
+    data = flatten_sqlalchemy_singlets(
+        db.session.query(Assertion.therapy_name).distinct()
+    )
+
     return jsonify(data)
 
 

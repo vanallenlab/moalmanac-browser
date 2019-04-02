@@ -312,9 +312,6 @@ def search():
         # The following produces a list of tuples, where each tuple contains the following table objects:
         # (Assertion, AssertionToAlteration, Alteration)
         results = (db.session.query(Assertion, AssertionToAlteration, Alteration)
-                   .filter(Assertion.assertion_id == AssertionToAlteration.assertion_id)
-                   .filter(Alteration.alt_id == AssertionToAlteration.alt_id)
-                   .filter(Assertion.validated.is_(True))
                    .filter(*filter_components).all())
 
         # In below, result[0] = Assertion; result[2] = Alteration

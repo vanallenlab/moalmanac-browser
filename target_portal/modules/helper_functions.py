@@ -164,12 +164,6 @@ def query_distinct_column(db, model, column):
     return filter_row_column(query, column)
 
 
-def get_typeahead_genes(db):
-    alterations = db.session.query(Alteration).all()
-    typeahead_genes = list(set([a.gene_name for a in alterations if all([assertion.validated == 1 for assertion in a.assertions])]))
-    return typeahead_genes
-
-
 def check_row_exists(db, table, assertion):
     """
     Returns True if the given assertion holds true for the given column.
@@ -182,6 +176,7 @@ def check_row_exists(db, table, assertion):
     """
 
     return db.session.query((db.session.query(table).filter(assertion)).exists()).scalar()
+
 
 check_row_exists.query_exists_assertions = {
     'gene': (Alteration, Alteration.gene_name),
