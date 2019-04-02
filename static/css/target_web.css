@@ -1,5 +1,5 @@
 .title {
-    color: #A70C36
+    color: #A70C36;
 }
 
 .jumbotron {
@@ -171,4 +171,13 @@ table.target-browse-table td a {
 
 .tt-suggestion p {
 	margin: 0;
+}
+
+h3.typeahead-category {
+	color: #A70C36;
+	text-align: left;
+	font-size: 12pt;
+	font-style: italic;
+	font-weight: bold;
+	margin: 0.5em 0em 0.25em 0.5em;
 }

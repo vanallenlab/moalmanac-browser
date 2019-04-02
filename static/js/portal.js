@@ -4,10 +4,28 @@ $(document).ready(function() {
 });
 
 if ($('.typeahead')) {
-    var typeahead_features = new Bloodhound({
+    const typeahead_features = new Bloodhound({
         datumTokenizer: Bloodhound.tokenizers.whitespace,
         queryTokenizer: Bloodhound.tokenizers.whitespace,
         prefetch: 'api/features'
+    });
+
+    const typeahead_diseases = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch: 'api/diseases'
+    });
+
+    const typeahead_preds = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch: 'api/predictive_implications'
+    });
+
+    const typeahead_therapies = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch: 'api/therapies'
     });
 
     $('.typeahead').typeahead({
@@ -16,13 +34,41 @@ if ($('.typeahead')) {
         minLength: 1,
     },
     {
-        name: 'typeahead_features',
-        source: typeahead_features
-    });
+        name: 'features',
+        source: typeahead_features,
+        limit: 3,
+        templates: {
+            header: '<h3 class="typeahead-category">Features</h3>'
+        }
+    },
+    {
+        name: 'diseases',
+        source: typeahead_diseases,
+        limit: 3,
+        templates: {
+            header: '<h3 class="typeahead-category">Diseases</h3>'
+        }
+    },
+    {
+        name: 'therapies',
+        source: typeahead_therapies,
+        limit: 3,
+        templates: {
+            header: '<h3 class="typeahead-category">Therapies</h3>'
+        }
+    },
+    {
+        name: 'preds',
+        source: typeahead_preds,
+        limit: 3,
+        templates: {
+            header: '<h3 class="typeahead-category">Predictive Implication Levels</h3>'
+        }
+    }
+    );
 
     $('#feature-input').bind('typeahead:select', function(ev, suggestion) {
-        $('#feature-input').value = suggestion;
-        this.form.submit();
+        $('#feature-input').value += suggestion;
     });
 }
 
