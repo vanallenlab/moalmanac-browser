@@ -272,16 +272,17 @@ def search():
     be every assertion about Uterine Leiomyoma that references either the PTEN or POLE genes.
     """
 
-    needles = {'genes': [], 'diseases': [], 'preds': [], 'therapies': []}
+    needles = {'gene': [], 'disease': [], 'pred': [], 'therapy': []}
     unified_search_string = request.args.get('s')
     if unified_search_string:
         # Note that we skip the 'unknown' needles in the interpreted query
         query = interpret_unified_search_string(db, unified_search_string)
+
         for key in needles.keys():
             needles[key] = query[key]
     else:
         # Fallback to individually specified needles, of which multiples may be separated by commas
-        for get_key, needle_key in {'g': 'genes', 'd': 'diseases', 'p': 'preds', 't': 'therapies'}.items():
+        for get_key, needle_key in {'g': 'gene', 'd': 'disease', 'p': 'pred', 't': 'therapy'}.items():
             get_value = request.args.get(get_key)
             if get_value:
                 needles[needle_key] = [value.strip() for value in get_value.split(',')]
@@ -297,20 +298,20 @@ def search():
             Assertion.validated.is_(True)
         ]
 
-        if needles['genes']:
-            or_stmt = [Alteration.gene_name.ilike(gene) for gene in needles['genes']]
+        if needles['gene']:
+            or_stmt = [Alteration.gene_name.ilike(gene) for gene in needles['gene']]
             filter_components.append(or_(*or_stmt))
 
-        if needles['diseases']:
-            or_stmt = [Assertion.disease.ilike(cancer) for cancer in needles['diseases']]
+        if needles['disease']:
+            or_stmt = [Assertion.disease.ilike(cancer) for cancer in needles['disease']]
             filter_components.append(or_(*or_stmt))
 
-        if needles['preds']:
-            or_stmt = [Assertion.predictive_implication.ilike(pred) for pred in needles['preds']]
+        if needles['pred']:
+            or_stmt = [Assertion.predictive_implication.ilike(pred) for pred in needles['pred']]
             filter_components.append(or_(*or_stmt))
 
-        if needles['therapies']:
-            or_stmt = [Assertion.therapy_name.ilike(therapy) for therapy in needles['therapies']]
+        if needles['therapy']:
+            or_stmt = [Assertion.therapy_name.ilike(therapy) for therapy in needles['therapy']]
             filter_components.append(or_(*or_stmt))
 
         # The following produces a list of tuples, where each tuple contains the following table objects:

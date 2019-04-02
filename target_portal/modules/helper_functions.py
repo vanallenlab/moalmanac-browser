@@ -183,18 +183,16 @@ def check_row_exists(db, table, assertion):
 
     return db.session.query((db.session.query(table).filter(assertion)).exists()).scalar()
 
+check_row_exists.query_exists_assertions = {
+    'gene': (Alteration, Alteration.gene_name),
+    'disease': (Assertion, Assertion.disease),
+    'pred': (Assertion, Assertion.predictive_implication),
+    'therapy': (Assertion, Assertion.therapy_name),
+}
 
-def interpret_unified_search_string(db, search_str):
-    """
-    Converts a raw (user-provided) search string into a dictionary describing the specific entities in a query.
-    Example:
-    Raw search string: PIK3CA "Invasive Breast Carcinoma"[disease] Preclinical[pred]
-    Query dictionary: {'genes': 'PIK3CA', 'diseases': 'Invasive Breast Carcinoma', 'preds': 'Preclinical'}
 
-    :param db: Database connection.
-    :param search_str: Raw unified search string.
-    :return: Dictionary representing query in a structured format.
-    """
+def interpret_unified_search_string_informal_substr(db, search_str):
+    query = {'gene': [], 'disease': [], 'pred': [], 'therapy': [], 'unknown': []}
 
     # The 3 regex groups below are mutually exclusive due to the OR operators; only one of the groups will ever contain
     # data. We thus collapse the groups after matching so that our list of tokens doesn't contain empty groups.
@@ -204,23 +202,129 @@ def interpret_unified_search_string(db, search_str):
         token = group[0] or group[1] or group[2]
         tokens.append(token.strip())
 
-    query = {
-        'genes': [],
-        'diseases': [],
-        'preds': [],
-        'therapies': [],
-        'unknown': [],
-    }
+    aggregate_token = []
     for token in tokens:
-        if check_row_exists(db, Alteration, Alteration.gene_name.ilike(token)):
-            query['genes'].append(token)
-        elif check_row_exists(db, Assertion, Assertion.disease.ilike(token)):
-            query['diseases'].append(token)
-        elif check_row_exists(db, Assertion, Assertion.predictive_implication.ilike(token)):
-            query['preds'].append(token)
-        elif check_row_exists(db, Assertion, Assertion.therapy_name.ilike(token)):
-            query['therapies'].append(token)
-        else:
-            query['unknown'].append(token)
+        new_aggregate_token = aggregate_token + [token]
+        new_aggregate_token_str = ' '.join(new_aggregate_token)
+
+        for category, assertion in check_row_exists.query_exists_assertions.items():
+            tag_match = re.match(r'\[([^\[]*)]', token)
+            if tag_match:
+                # If the aggregate token is empty, we already assigned the token based on a DB lookup
+                if aggregate_token:
+                    category = tag_match.group(1)
+                    if category not in check_row_exists.query_exists_assertions.keys():
+                        category = 'unknown'
+
+                    query[category].append(' '.join(aggregate_token))
+
+                new_aggregate_token = []
+                break
+            elif check_row_exists(db, assertion[0], assertion[1].ilike(new_aggregate_token_str)):
+                query[category].append(new_aggregate_token_str)
+                new_aggregate_token = []
+                break
+            elif check_row_exists(db, assertion[0], assertion[1].ilike(token)):
+                query[category].append(token)
+                query['unknown'].extend(aggregate_token)
+                new_aggregate_token = []
+                break
+
+        aggregate_token = new_aggregate_token
+
+    # Any left-over data in aggregate token indicates the last token was not matched to a category
+    if aggregate_token:
+        query['unknown'].extend(aggregate_token)
+
+    return query
+
+
+def union_dictionaries(d1, d2):
+    new_dict = {}
+    [new_dict.setdefault(k, []).extend(v) for k, v in d1.items()]
+    [new_dict.setdefault(k, []).extend(v) for k, v in d2.items()]
+
+    return new_dict
+
+
+def interpret_unified_search_string(db, search_str):
+    """
+    Converts a raw (user-provided) search string into a dictionary describing the specific entities in a query.
+    Tokenization mimics the "PubMed style." Formally, each token is followed by a bracketed category identifier, and
+    tokens containing whitespace are quoted. E.g., a query for clinical trials would be "Clinical trial"[pred].
+    However, we attempt to resolve less formally specified queries. Traversing the search string from left to right,
+    we build an "aggregate token" combining all tokens seen so far. At each step, the current aggregate token is checked
+    against all categories (gene, disease, etc.); if a match is found, the token is added to the query and the aggregate
+    token is reset. If no match is found, the current individual token is checked against all categories; if a match is
+    found, the current aggregate token (not including the current individual token) is added to the query as an
+    "unknown" token and the current individual token is added separately.
+
+    Example:
+    Raw search string: PIK3CA "Invasive Breast Carcinoma"[disease] Preclinical
+    Query dictionary: {'genes': 'PIK3CA', 'diseases': 'Invasive Breast Carcinoma', 'preds': 'Preclinical'}
+
+    :param db: Database connection.
+    :param search_str: Raw unified search string.
+    :return: Dictionary representing query in a structured format.
+    """
+
+    query = {'gene': [], 'disease': [], 'pred': [], 'therapy': [], 'unknown': []}
+
+    # Initially assume search string is formally specified (with [category] tags).
+    tag_iter = re.finditer(r'\[([^\[]*)\]', search_str)
+    last_pos = 0
+    for match in tag_iter:
+        tag_interval = match.span(1)
+
+        # If the token corresponding to this tag is quoted, the user may have intended the tokens to the left of the
+        # quoted token to be interpreted informally (e.g.: erlotinib "Clinical trial"[pred] is likely intended to
+        # find uses of erlotinib in clinical trials, not a predictive level named "erlotinib Clinical trial."
+        # Find the left-most quote to the left of this category tag; interpret everything to the left of it informally.
+        left_quotes = re.finditer(r'["\']', search_str[last_pos:tag_interval[0] - 1])
+        quote_idxs = [quote.span(0)[0] for quote in left_quotes]
+        if len(quote_idxs) > 1:
+            opening_quote_pos = quote_idxs[-2]
+            informal_query = interpret_unified_search_string_informal_substr(
+                db, search_str[last_pos:last_pos + opening_quote_pos]
+            )
+            query = union_dictionaries(query, informal_query)
+            last_pos += opening_quote_pos
+
+        # March right-to-left from the category tag, until either the aggregated token matches a DB row or we run out of
+        # search string. If we hit a DB match, informally evaluate the remainder of the string.
+        category = search_str[tag_interval[0]:tag_interval[1]].strip()
+        if category not in query.keys():
+            category = 'unknown'
+
+        search_substr = search_str[last_pos:tag_interval[0] - 1]
+        search_substr_tokens = search_substr.split()
+        aggregate_token = []
+        formal_token = None
+        for i in range(len(search_substr_tokens)-1, -1, -1):
+            aggregate_token.insert(0, search_substr_tokens[i])
+            if check_row_exists(
+                    db,
+                    check_row_exists.query_exists_assertions[category][0],
+                    check_row_exists.query_exists_assertions[category][1].ilike(' '.join(aggregate_token))
+            ):
+                formal_token = ' '.join(aggregate_token)
+                informal_query = interpret_unified_search_string_informal_substr(db, ' '.join(search_substr_tokens[:i]))
+                query = union_dictionaries(query, informal_query)
+                break
+
+        # If formal_token was never assigned, we never found a DB match. Assign the entire putative token string as the
+        # formal token anyway.
+        if not formal_token:
+            formal_token = ' '.join(aggregate_token)
+
+        # remove quotes - they are not necessary when using category tags
+        formal_token = re.sub(r'["\']', '', formal_token)
+        query[category].append(formal_token)
+
+        last_pos = tag_interval[1] + 1
+
+    # Remainder of search string is informally specified (no further [category] tags).
+    informal_query = interpret_unified_search_string_informal_substr(db, search_str[last_pos:])
+    query = union_dictionaries(query, informal_query)
 
     return query
