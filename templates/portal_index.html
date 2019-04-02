@@ -2,13 +2,6 @@
 
 {% block scripts %}
 {{super()}}
-<script type="text/javascript">
-var typeahead_genes = [
-{% for gene in typeahead_genes %}
-'{{gene}}',
-{% endfor %}
-];
-</script>
 <script src="{{url_for('static', filename='js/typeahead.bundle.js')}}"></script>
 <script src="{{url_for('static', filename='js/portal.js')}}"></script>
 {% endblock %}
@@ -27,7 +20,7 @@ var typeahead_genes = [
     <p class="lead text-muted" style="font-size: 12pt;">Search {{num_genes}} molecular features associated with {{num_assertions}} clinical assertions.</p>
     <form action="search" method="get">
         <div id="jumbo-gene-search-group" class="input-group">
-            <input id="gene-input" name="g" type="text" class="form-control typeahead" placeholder="Feature name">
+            <input id="feature-input" name="g" type="text" class="form-control typeahead" placeholder="Feature name">
             <span class="input-group-btn">
                             <button type="submit" class="btn btn-default btn-search" type="button">Search</button>
                         </span>

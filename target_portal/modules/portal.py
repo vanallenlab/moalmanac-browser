@@ -12,8 +12,7 @@ from sqlalchemy import or_
 from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
 from .helper_functions import get_unapproved_assertion_rows, make_row, http404response, http200response, \
     query_distinct_column, add_or_fetch_alteration, add_or_fetch_source, delete_assertion, \
-    amend_alteration_for_assertion, amend_cite_text_for_assertion, http400response, get_typeahead_genes, \
-    interpret_unified_search_string
+    amend_alteration_for_assertion, amend_cite_text_for_assertion, http400response, interpret_unified_search_string
 
 portal = Blueprint('portal', __name__)
 
@@ -51,7 +50,6 @@ EFFECTS = [
 
 @portal.route('/')
 def index():
-    typeahead_genes = get_typeahead_genes(db)
     diseases = query_distinct_column(db, Assertion, 'disease')
     therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
 
@@ -62,7 +60,6 @@ def index():
                            nav_current_page='index',
                            num_genes=num_genes,
                            num_assertions=num_assertions,
-                           typeahead_genes=typeahead_genes,
                            diseases=[d for d in sorted(diseases) if not d == 'Oncotree Term'],
                            pred_impls=IMPLICATION_LEVELS,
                            therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name']
@@ -239,7 +236,6 @@ def submit():
 @portal.route('/add')
 def add():
     """Render the page through which clients can submit Assertion suggestions"""
-    typeahead_genes = get_typeahead_genes(db)
     diseases = query_distinct_column(db, Assertion, 'disease')
     pred_impls = query_distinct_column(db, Assertion, 'predictive_implication')
     therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
@@ -251,7 +247,6 @@ def add():
                            nav_current_page='add',
                            num_genes=num_genes,
                            num_assertions=num_assertions,
-                           typeahead_genes=typeahead_genes,
                            diseases=[d for d in sorted(diseases) if not d == 'Oncotree Term'],
                            pred_impls=IMPLICATION_LEVELS,
                            alteration_classes=ALTERATION_CLASSES,
@@ -326,9 +321,7 @@ def search():
         for result in results:
             rows.append(make_row(result[2], result[0]))
 
-    return render_template('portal_search_results.html',
-                           typeahead_genes=get_typeahead_genes(db),
-                           rows=rows)
+    return render_template('portal_search_results.html', rows=rows)
 
 
 @portal.route('/assertion/<int:assertion_id>')

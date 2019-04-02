@@ -3,38 +3,28 @@ $(document).ready(function() {
 	$('.browse-dropdown').on('change', function() { this.form.submit() })
 });
 
-var substring_matcher = function(strs) {
-  return function findMatches(q, cb) {
-    var matches, substringRegex;
-
-    matches = [];
-    substrRegex = new RegExp(q, 'i');
-    $.each(strs, function(i, str) {
-      if (substrRegex.test(str)) {
-        matches.push(str);
-      }
+if ($('.typeahead')) {
+    var typeahead_features = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.whitespace,
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        prefetch: 'api/features'
     });
 
-    cb(matches);
-  };
-};
-
-if ($('.typeahead')) {
     $('.typeahead').typeahead({
         hint: true,
         highlight: true,
-        minLength: 1
+        minLength: 1,
     },
     {
-        name: 'typeahead_genes',
-        source: substring_matcher(typeahead_genes)
+        name: 'typeahead_features',
+        source: typeahead_features
+    });
+
+    $('#feature-input').bind('typeahead:select', function(ev, suggestion) {
+        $('#feature-input').value = suggestion;
+        this.form.submit();
     });
 }
-
-$('#gene-input').bind('typeahead:select', function(ev, suggestion) {
-    $('#gene-input').value = suggestion;
-    this.form.submit();
-});
 
 $(document).ready(function(){
     if ($('.results-table').DataTable) {
