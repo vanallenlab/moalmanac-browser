@@ -268,10 +268,11 @@ def search():
     """
 
     needles = {'gene': [], 'disease': [], 'pred': [], 'therapy': []}
-    unified_search_string = request.args.get('s')
-    if unified_search_string:
+    unified_search_args = request.args.getlist('s')
+    if unified_search_args:
+        unified_search_str = ' '.join(unified_search_args)
         # Note that we skip the 'unknown' needles in the interpreted query
-        query = interpret_unified_search_string(db, unified_search_string)
+        query = interpret_unified_search_string(db, unified_search_str)
 
         for key in needles.keys():
             needles[key] = query[key]

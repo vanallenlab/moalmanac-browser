@@ -20,7 +20,7 @@ sources_schema = SourceSchema(many=True)
 def flatten_sqlalchemy_singlets(l):
     "In some uses cases, SQLAlchemy returns a list of 1-tuples. This function flattens these lists."
 
-    return [item[0] for item in l]
+    return [item[0] for item in l if item[0]]
 
 
 #TODO authentication for all API calls

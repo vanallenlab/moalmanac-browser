@@ -1,74 +1,18 @@
 {%- extends 'base.html' %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/select2.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/select2-bootstrap.min.css')}}">
+{% endblock %}
+
 {% block scripts %}
 {{super()}}
 <script src="{{url_for('static', filename='js/underscore-min.js')}}"></script>
-<script type="text/javascript">
-    var typeahead_genes = [
-    {% for gene in typeahead_genes %}
-    '{{gene}}',
-    {% endfor %}
-    ];
-
-    // Selectors
-    var implication_select = $('#implication-select')[0];
-    var type_select = $('#type-select')[0];
-    var therapy_select = $('#therapy-select')[0];
-    var class_select = $('#class-select')[0];
-    var effect_select = $('#effect-select')[0];
-    var alteration_input = $('#alteration-input')[0];
-    var source_input = $('#source-input')[0];
-    var gene_input = $('#gene-input')[0];
-    var email_input = $('#email-input')[0];
-
-    // Reactions
-    $('#btn-sub').click(function () {
-        var therapy = therapy_select.value;
-        var type =  type_select.value;
-        var implication =  implication_select.value;
-        var source = source_input.value;
-        var gene = gene_input.value;
-        var alt_class = class_select.value;
-        var alteration = alteration_input.value;
-        var effect = effect_select.value;
-        var email = email_input.value;
-        $.ajax({
-          type: "POST",
-          url: '/submit',
-          data: {
-            'therapy': therapy,
-            'type': type,
-            'implication': implication,
-            'source': source,
-            'gene': encodeURIComponent(gene),
-            'effect': effect,
-            'class': alt_class,
-            'alteration': alteration,
-            'email': encodeURIComponent(email)
-          },
-          success: function (response) {
-            $('#success-panel').show();
-            dict = JSON.parse(JSON.parse(response ).message);
-            $('#success-text').html("<b></br>Email: " + decodeURIComponent(dict.email) +
-                                    "</br>Therapy: " + dict.therapy +
-                                    "</br> Implication: " + dict.implication +
-                                    "</br> Gene: " + decodeURIComponent(dict.gene) +
-                                    "</br> Type: " + dict.type +
-                                    "</br> Class: " + dict.alt_class +
-                                    "</br> Effect: " + dict.effect +
-                                    "</br> Alteration: " + dict.alteration +
-                                    "</br> DOI: " + dict.source + "</b>");
-            $('#error-panel').hide();
-          },
-          error: function (response) {
-            $('#error-panel').show();
-            $('#error-text').html(JSON.parse(response.responseText).message);
-            $('#success-panel').hide();
-          }
-        });
-    });
-</script>
-<script src="{{url_for('static', filename='js/typeahead.bundle.js')}}"></script>
+<script src="{{url_for('static', filename='js/select2.full.min.js')}}"></script>
 <script src="{{url_for('static', filename='js/portal.js')}}"></script>
+<script src="{{url_for('static', filename='js/portal-add.js')}}"></script>
+<script type="text/javascript"></script>
 {% endblock %}
 
 {% block title %}{{ config['APP_NAME'] }}: Suggest addition{% endblock %}
@@ -109,7 +53,7 @@
                 <h3>Gene*</h3>
                 <p>HGNC Gene Symbol</p>
                 <div class="input-group">
-                    <input id="gene-input" name="g" type="text" class="form-control typeahead" placeholder="">
+                    <select id="gene-input" name="g"></select>
                 </div>
             </div>
             <div class="col-md-4">

@@ -5,12 +5,15 @@
 {% block styles %}
 {{super()}}
 <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/jquery.dataTables.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/select2.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/select2-bootstrap.min.css')}}">
 {% endblock %}
 
 {% block scripts %}
 {{super()}}
-<script src="{{url_for('static', filename='js/typeahead.bundle.js')}}"></script>
+<script src="{{url_for('static', filename='js/select2.full.min.js')}}"></script>
 <script src="{{url_for('static', filename='js/portal.js')}}"></script>
+<script src="{{url_for('static', filename='js/portal-select2.js')}}"></script>
 <script src="{{url_for('static', filename='js/jquery.dataTables.min.js')}}"></script>
 {% endblock %}
 
@@ -21,7 +24,7 @@
     <div class="col-md-5">
         <form action="search" method="get">
             <div class="input-group">
-                <input id="feature-input" type="text" name="g" class="form-control typeahead" placeholder="Feature name">
+                <select class="search" name="s" multiple="multiple"></select>
                 <span class="input-group-btn">
                         <button type="submit" class="btn btn-default btn-search" type="button">Search</button>
                     </span>
