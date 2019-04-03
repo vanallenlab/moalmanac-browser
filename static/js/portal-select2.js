@@ -1,9 +1,16 @@
+function escapeRegexStr(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // check if a given token is in the ?s= or &s= search parameters
 function tokenInSearchParams(token) {
-    token = encodeURIComponent(token);
-    token = token.replace(/%20/g, '\\+'); // spaces are converted to + signs in URLs
-    const search_regex = new RegExp('s=' + token + '(?:&|\\?|$)');
-    return !(window.location.search.match(search_regex) == null);
+    let search_str = window.location.search;
+    search_str = search_str.replace(/\+/g, ' ');
+    search_str = decodeURIComponent(search_str);
+    search_str = search_str.replace(/(?:"|')/g, '');
+
+    const search_regex = new RegExp('s=' + escapeRegexStr(token) + '(?:&|\\?|$)');
+    return !(search_str.match(search_regex) == null);
 }
 
 // load data objects from remote JSON
@@ -13,10 +20,10 @@ function getJSONSearchSet(url, category, callback) {
         search_set = [];
         $.each(data, function(index, value) {
             let new_datum = Object();
-            new_datum.id = value;
+            new_datum.id = '"' + value + '"';
             new_datum.text = value;
-            new_datum.selected = tokenInSearchParams(value);
             new_datum.category = category;
+            new_datum.selected = tokenInSearchParams(value);
 
             search_set.push(new_datum);
         });
@@ -25,7 +32,7 @@ function getJSONSearchSet(url, category, callback) {
     });
 }
 
-let search_space = []
+let search_space = [];
 
 let features = Object();
 features.text = 'Features';
@@ -56,14 +63,15 @@ function addCategoryClass(data, container) {
     return data.text;
 }
 
+$('.search').select2({
+    theme: 'bootstrap',
+    multiple: true,
+    containerCssClass: 'select2-font',
+});
+
 $(document).ajaxStop(function() {
     $('.search').select2({
-        theme: 'bootstrap',
-        multiple: true,
-        containerCssClass: 'select2-font',
-        data: search_space,
-        templateSelection: addCategoryClass
+        'data': search_space,
+        'templateSelection': addCategoryClass
     });
-
-    $('.search').style.display = 'block';
-})
+});
