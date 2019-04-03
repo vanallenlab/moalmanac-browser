@@ -64,5 +64,6 @@ $(document).ajaxStop(function() {
         data: search_space,
         templateSelection: addCategoryClass
     });
-})
 
+    $('.search').style.display = 'block';
+})

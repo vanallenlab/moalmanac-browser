@@ -83,6 +83,7 @@ a:hover {
 }
 
 .search {
+	display: none;
 	width: 100%;
 }
 
