@@ -16,6 +16,7 @@ function getJSONSearchSet(url, category, callback) {
             new_datum.id = value;
             new_datum.text = value;
             new_datum.selected = tokenInSearchParams(value);
+            new_datum.category = category;
 
             search_set.push(new_datum);
         });
@@ -43,16 +44,25 @@ search_space.push(therapies);
 
 let preds = Object();
 preds.text = 'Predictive Implications';
-getJSONSearchSet('api/predictive_implications', 'pred. implication',
+getJSONSearchSet('api/predictive_implications', 'pred',
     function(data) {preds.children = data;});
 search_space.push(preds);
+
+function addCategoryClass(data, container) {
+    if (data.category) {
+        $(container).addClass('select2-category-' + data.category);
+    }
+
+    return data.text;
+}
 
 $(document).ajaxStop(function() {
     $('.search').select2({
         theme: 'bootstrap',
         multiple: true,
         containerCssClass: 'select2-font',
-        data: search_space
+        data: search_space,
+        templateSelection: addCategoryClass
     });
 })
 

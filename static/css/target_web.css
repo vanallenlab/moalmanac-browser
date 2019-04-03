@@ -90,6 +90,22 @@ a:hover {
 	font-weight: bold;
 }
 
+.select2-category-feature {
+	background-color: #DAE7F8 !important;
+}
+
+.select2-category-disease {
+	background-color: #FFF2DD !important;
+}
+
+.select2-category-therapy {
+	background-color: #F6FEDC !important;
+}
+
+.select2-category-pred {
+	background-color: #DFDCF9 !important;
+}
+
 @media (min-width: 768px) {
 	#jumbo-gene-search-group {
 		width: 60%;
