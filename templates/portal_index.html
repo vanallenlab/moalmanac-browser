@@ -44,10 +44,10 @@
         <h3>Cancer Type</h3>
         <p>Select from <strong>{{diseases|length}}</strong> cancer types:</p>
         <form action="search" method="get">
-            <select name="d" class="form-control browse-dropdown">
+            <select name="s" class="form-control browse-dropdown">
                 <option selected disabled hidden>Select cancer type</option>
                 {% for disease in diseases %}
-                <option>{{disease}}</option>
+                <option value="&quot;{{disease}}&quot;[disease]">{{disease}}</option>
                 {% endfor %}
             </select>
             <noscript><button type="submit" class="btn btn-default btn-alt-search" type="button">Search by cancer type</button></noscript>
@@ -58,10 +58,10 @@
         <h3>Predictive Implication Level</h3>
         <p>Select from <strong>{{pred_impls|length}}</strong> predictive implication levels</p>
         <form action="search" method="get">
-            <select name="p" class="form-control browse-dropdown">
+            <select name="s" class="form-control browse-dropdown">
                 <option selected disabled hidden>Select predictive implication level</option>
                 {% for pred_impl in pred_impls %}
-                <option>{{pred_impl}}</option>
+                <option value="&quot;{{pred_impl}}&quot;[pred]">{{pred_impl}}</option>
                 {% endfor %}
             </select>
             <noscript><button type="submit" class="btn btn-default btn-alt-search" type="button">Search by predictive implication level</button></noscript>
@@ -72,10 +72,10 @@
         <h3>Therapy</h3>
         <p>Select from <strong>{{therapy_names|length}}</strong> therapies:</p>
         <form action="search" method="get">
-            <select name="t" class="form-control browse-dropdown">
+            <select name="s" class="form-control browse-dropdown">
                 <option selected disabled hidden>Select therapy</option>
                 {% for therapy_name in therapy_names %}
-                <option>{{therapy_name}}</option>
+                <option value="&quot;{{therapy_name}}&quot;[therapy]">{{therapy_name}}</option>
                 {% endfor %}
             </select>
             <noscript><button type="submit" class="btn btn-default btn-alt-search" type="button">Search by therapy</button></noscript>

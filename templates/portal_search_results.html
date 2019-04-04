@@ -49,14 +49,14 @@
     <tr>
         <td>{{ row['predictive_implication_sort'] }}</td>
         <td>{% if row['gene_name'] %}
-            <a href="search?g={{row['gene_name']|urlencode}}">{{row['gene_name']}}</a>
+            <a href="search?s=&quot;{{row['gene_name']|urlencode}}&quot;[feature]">{{row['gene_name']}}</a>
             {% endif %}
         </td>
         <td>
             {{row['display_string'] if row['display_string'] is not none}}</td>
         </td>
         <td>{% if row['therapy_name'] %}
-            <a href="search?t={{row['therapy_name']|urlencode}}">
+            <a href="search?s=&quot;{{row['therapy_name']|urlencode}}&quot;[therapy]">
                 {{row['therapy_name']}}
             </a>
             {% endif %}
@@ -71,13 +71,13 @@
         {% endif %}
 
         <td>{% if row['disease'] %}
-            <a href="search?d={{row['disease']|urlencode}}">
+            <a href="search?s=&quot;{{row['disease']|urlencode}}&quot;[disease]">
                 {{row['disease']}}
             </a>
             {% endif %}
         </td>
         <td>
-            <a href="search?p={{row['predictive_implication']|urlencode}}">
+            <a href="search?s=&quot;{{row['predictive_implication']|urlencode}}&quot;[pred]">
                 {{ row['predictive_implication'] }}
             </a>
         </td>

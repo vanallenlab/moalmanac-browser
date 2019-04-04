@@ -179,7 +179,7 @@ def check_row_exists(db, table, assertion):
 
 
 check_row_exists.query_exists_assertions = {
-    'gene': (Alteration, Alteration.gene_name),
+    'feature': (Alteration, Alteration.gene_name),
     'disease': (Assertion, Assertion.disease),
     'pred': (Assertion, Assertion.predictive_implication),
     'therapy': (Assertion, Assertion.therapy_name),
@@ -187,7 +187,7 @@ check_row_exists.query_exists_assertions = {
 
 
 def interpret_unified_search_string_informal_substr(db, search_str):
-    query = {'gene': [], 'disease': [], 'pred': [], 'therapy': [], 'unknown': []}
+    query = {'feature': [], 'disease': [], 'pred': [], 'therapy': [], 'unknown': []}
 
     # The 3 regex groups below are mutually exclusive due to the OR operators; only one of the groups will ever contain
     # data. We thus collapse the groups after matching so that our list of tokens doesn't contain empty groups.
@@ -249,21 +249,21 @@ def interpret_unified_search_string(db, search_str):
     tokens containing whitespace are quoted. E.g., a query for clinical trials would be "Clinical trial"[pred].
     However, we attempt to resolve less formally specified queries. Traversing the search string from left to right,
     we build an "aggregate token" combining all tokens seen so far. At each step, the current aggregate token is checked
-    against all categories (gene, disease, etc.); if a match is found, the token is added to the query and the aggregate
+    against all categories (feature, disease, etc.); if a match is found, the token is added to the query and the aggregate
     token is reset. If no match is found, the current individual token is checked against all categories; if a match is
     found, the current aggregate token (not including the current individual token) is added to the query as an
     "unknown" token and the current individual token is added separately.
 
     Example:
     Raw search string: PIK3CA "Invasive Breast Carcinoma"[disease] Preclinical
-    Query dictionary: {'genes': 'PIK3CA', 'diseases': 'Invasive Breast Carcinoma', 'preds': 'Preclinical'}
+    Query dictionary: {'feature': 'PIK3CA', 'disease': 'Invasive Breast Carcinoma', 'pred': 'Preclinical'}
 
     :param db: Database connection.
     :param search_str: Raw unified search string.
     :return: Dictionary representing query in a structured format.
     """
 
-    query = {'gene': [], 'disease': [], 'pred': [], 'therapy': [], 'unknown': []}
+    query = {'feature': [], 'disease': [], 'pred': [], 'therapy': [], 'unknown': []}
 
     # Initially assume search string is formally specified (with [category] tags).
     tag_iter = re.finditer(r'\[([^\[]*)\]', search_str)
@@ -288,24 +288,30 @@ def interpret_unified_search_string(db, search_str):
         # March right-to-left from the category tag, until either the aggregated token matches a DB row or we run out of
         # search string. If we hit a DB match, informally evaluate the remainder of the string.
         category = search_str[tag_interval[0]:tag_interval[1]].strip()
-        if category not in query.keys():
-            category = 'unknown'
-
+        formal_token = None
         search_substr = search_str[last_pos:tag_interval[0] - 1]
         search_substr_tokens = search_substr.split()
         aggregate_token = []
-        formal_token = None
-        for i in range(len(search_substr_tokens)-1, -1, -1):
-            aggregate_token.insert(0, search_substr_tokens[i])
-            if check_row_exists(
-                    db,
-                    check_row_exists.query_exists_assertions[category][0],
-                    check_row_exists.query_exists_assertions[category][1].ilike(' '.join(aggregate_token))
-            ):
-                formal_token = ' '.join(aggregate_token)
-                informal_query = interpret_unified_search_string_informal_substr(db, ' '.join(search_substr_tokens[:i]))
-                query = union_dictionaries(query, informal_query)
-                break
+
+        if category not in query.keys():
+            category = 'unknown'
+            # If an incorrect category tag is given, we cannot resolve any part of the token in the DB, and therefore
+            # cannot determine a left-sided end point after which to try interpreting new tokens.
+            aggregate_token = search_substr_tokens
+        else:
+            for i in range(len(search_substr_tokens)-1, -1, -1):
+                aggregate_token.insert(0, search_substr_tokens[i])
+                if check_row_exists(
+                        db,
+                        check_row_exists.query_exists_assertions[category][0],
+                        check_row_exists.query_exists_assertions[category][1].ilike(' '.join(aggregate_token))
+                ):
+                    formal_token = ' '.join(aggregate_token)
+                    informal_query = interpret_unified_search_string_informal_substr(
+                        db, ' '.join(search_substr_tokens[:i])
+                    )
+                    query = union_dictionaries(query, informal_query)
+                    break
 
         # If formal_token was never assigned, we never found a DB match. Assign the entire putative token string as the
         # formal token anyway.

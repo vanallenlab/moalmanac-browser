@@ -267,7 +267,7 @@ def search():
     be every assertion about Uterine Leiomyoma that references either the PTEN or POLE genes.
     """
 
-    needles = {'gene': [], 'disease': [], 'pred': [], 'therapy': []}
+    needles = {'feature': [], 'disease': [], 'pred': [], 'therapy': []}
     unified_search_args = request.args.getlist('s')
     if unified_search_args:
         unified_search_str = ' '.join(unified_search_args)
@@ -276,12 +276,6 @@ def search():
 
         for key in needles.keys():
             needles[key] = query[key]
-    else:
-        # Fallback to individually specified needles, of which multiples may be separated by commas
-        for get_key, needle_key in {'g': 'gene', 'd': 'disease', 'p': 'pred', 't': 'therapy'}.items():
-            get_value = request.args.get(get_key)
-            if get_value:
-                needles[needle_key] = [value.strip() for value in get_value.split(',')]
 
     rows = []
     if any(needles.values()):
@@ -294,8 +288,8 @@ def search():
             Assertion.validated.is_(True)
         ]
 
-        if needles['gene']:
-            or_stmt = [Alteration.gene_name.ilike(gene) for gene in needles['gene']]
+        if needles['feature']:
+            or_stmt = [Alteration.gene_name.ilike(gene) for gene in needles['feature']]
             filter_components.append(or_(*or_stmt))
 
         if needles['disease']:

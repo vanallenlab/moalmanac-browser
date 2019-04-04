@@ -19,7 +19,8 @@ function tokenInSearchParams(token) {
     search_str = decodeURIComponent(search_str);
     search_str = search_str.replace(/(?:"|')/g, '');
 
-    const search_regex = new RegExp('s=' + escapeRegexStr(token) + '(?:&|\\?|$)');
+    console.log(search_str);
+    const search_regex = new RegExp('s=' + escapeRegexStr(token) + '(?:&|\\?|\\s*\\[|$)');
     return !(search_str.match(search_regex) == null);
 }
 
