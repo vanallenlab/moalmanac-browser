@@ -1,6 +1,5 @@
 $(document).ready(function() {
 	$('[data-toggle="tooltip"]').tooltip();
-	$('.browse-dropdown').on('change', function() { this.form.submit() })
 
     if ($('.results-table').DataTable) {
         $('.results-table').DataTable({
