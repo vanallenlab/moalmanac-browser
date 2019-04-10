@@ -6,21 +6,22 @@
 # Example: bash create_db.sh import_file.tsv db_name 1 2 3
 # Set create/drop locations below
 
-IMPORT_FILE="$1"
-DB_NAME="$2"
-V_MAJOR="$3"
-V_MINOR="$4"
-V_PATCH="$5"
+FEATURES_FILE="$1"
+ASSERTIONS_FILE="$2"
+DB_NAME="$3"
+V_MAJOR="$4"
+V_MINOR="$5"
+V_PATCH="$6"
 
 SCRIPT_DIR="db_scripts"
 DROP_SCRIPT="$SCRIPT_DIR/db_drop.sql"
 CREATE_SCRIPT="$SCRIPT_DIR/db_create.sql"
 INSERT_SCRIPT="$SCRIPT_DIR/db_insert.py"
 
-if [[ "$#" -ne 5 ]]; then
+if [[ "$#" -ne 6 ]]; then
 	echo 'Usage:'
-	echo 'create_db.sh <input filename> <db name> <major version> <minor version> <patch version>'
-	echo 'Example: create_db.sh import_file.tsv new_db 1 2 3'
+	echo 'create_db.sh <feature definitions file> <assertions file> <db name> <major version> <minor version> <patch version>'
+	echo 'Example: create_db.sh features_file.tsv assertions_file.tsv new_db 1 2 3'
 	exit 1
 fi
 
@@ -37,14 +38,17 @@ if [[ -e "$DB_NAME" ]]; then
 fi
 
 echo "Dropping tables..."
-cat "$DROP_SCRIPT" | sqlite3 "$DB_NAME"
+cat "$DROP_SCRIPT" |
+    sqlite3 "$DB_NAME" 2>&1 |
+    sed -r 's/^Error: near line ([[:digit:]]+): no such table: (.*)/\tTable \2 does not exist, skipping (line \1)./g'
 echo "Creating tables..."
 cat "$CREATE_SCRIPT" | sqlite3 "$DB_NAME"
 echo 'Importing data:'
-echo -e "\tImport file    : ${IMPORT_FILE}"
+echo -e "\tFeatures file  : ${FEATURES_FILE}"
+echo -e "\tAssertions file: ${ASSERTIONS_FILE}"
 echo -e "\tOutput database: ${DB_NAME}"
 echo -e "\tVersion        : ${V_MAJOR}.${V_MINOR}.${V_PATCH}"
-python "$INSERT_SCRIPT" "$IMPORT_FILE" "$DB_NAME" "$V_MAJOR" "$V_MINOR" "$V_PATCH"
+python "$INSERT_SCRIPT" "$FEATURES_FILE" "$ASSERTIONS_FILE" "$DB_NAME" "$V_MAJOR" "$V_MINOR" "$V_PATCH"
 
 OUTPUT_FILE=${DB_NAME}.${V_MAJOR}.${V_MINOR}.${V_PATCH}.sqlite3
 mv ${DB_NAME} ${OUTPUT_FILE}
