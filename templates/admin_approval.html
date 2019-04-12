@@ -21,7 +21,7 @@
 <table class="results-table display compact">
     <thead>
         <tr>
-            <th></th><th>Gene</th><th>Feature</th><th>Alt</th><th>Effect</th><th>Therapy</th><th>Sensitivity</th><th>Prognosis</th><th>Cancer Type</th><th>Predictive Level</th><th>DOIs</th><th>Citation</th><th>Submitter</th><th></th>
+            <th></th><th>Feature</th><th>Attributes</th></th><th>Therapy</th><th>Sensitivity</th><th>Prognosis</th><th>Cancer Type</th><th>Predictive Level</th><th>DOIs</th><th>Citation</th><th>Submitter</th><th></th>
         </tr>
     </thead>
     <tbody>
@@ -33,26 +33,14 @@
                </span>
             </td>
             <td>
-                {% if row['gene_name'] %}
-                    {{row['gene_name']}}
-                {% endif %}
+                {{ row['feature'] if row['feature'] is not none }}
             </td>
             <td>
-                {{row['feature'] if row['feature'] is not none}}
-            </td>
-            <td class="editable" data-type="text" data-assertion_id="{{row['assertion_id']}}" data-attr="alt" data-val="{{row['alt']}}">
-                {% if row['alt'] %}
-                    {{row['alt'] if row['alt'] is not none else '(any)'}}
-                {% else %}
-                    <span class="glyphicon glyphicon-edit"></span>
-                {% endif %}
-            </td>
-            <td>
-                {{row['alt_type'] if row['alt_type'] is not none}}
+                {{ row['display_string'] if row['display_string'] is not none }}
             </td>
             <td class="editable" data-type="text" data-assertion_id="{{row['assertion_id']}}" data-attr="therapy_name" data-val="{{row['therapy_name']}}">
                 {% if row['therapy_name'] %}
-                    {{row['therapy_name']}}
+                    {{ row['therapy_name'] }}
                 {% else %}
                     <span class="glyphicon glyphicon-edit"></span>
                 {% endif %}

@@ -1,25 +1,15 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2017-03-17 14:14:20.135
+-- Last modification date: 2019-04-11 21:30:04.182
 
 -- tables
--- Table: Alteration
-CREATE TABLE Alteration (
-    alt_id integer NOT NULL CONSTRAINT Alteration_pk PRIMARY KEY,
-    feature text NOT NULL,
-    alt_type text,
-    alt text,
-    gene_name text,
-    display_string text
-);
-
 -- Table: Assertion
 CREATE TABLE Assertion (
     assertion_id integer NOT NULL CONSTRAINT Assertion_pk PRIMARY KEY,
-    created_on text NOT NULL DEFAULT CURRENT_DATE,
-    last_updated text NOT NULL DEFAULT CURRENT_DATE,
+    created_on text NOT NULL,
+    last_updated text NOT NULL,
     disease text,
-    oncotree_term,
-    oncotree_code,
+    oncotree_term text,
+    oncotree_code text,
     stage integer,
     therapy_name text,
     therapy_type text,
@@ -28,19 +18,8 @@ CREATE TABLE Assertion (
     predictive_implication text,
     favorable_prognosis boolean,
     description text,
-    validated boolean DEFAULT 0,
-    submitted_by text
-);
-
--- Table: Assertion_To_Alteration
-CREATE TABLE Assertion_To_Alteration (
-    aa_id integer NOT NULL CONSTRAINT Assertion_To_Alteration_pk PRIMARY KEY,
-    assertion_id integer NOT NULL,
-    alt_id integer NOT NULL,
-    CONSTRAINT Assertion_To_Alteration_Assertion FOREIGN KEY (assertion_id)
-    REFERENCES Assertion (assertion_id),
-    CONSTRAINT Assertion_To_Alteration_Alteration FOREIGN KEY (alt_id)
-    REFERENCES Alteration (alt_id)
+    validated boolean NOT NULL,
+    submitted_by text NOT NULL
 );
 
 -- Table: Assertion_To_Source
@@ -49,16 +28,70 @@ CREATE TABLE Assertion_To_Source (
     assertion_id integer NOT NULL,
     source_id integer NOT NULL,
     CONSTRAINT Assertion_To_Source_Assertion FOREIGN KEY (assertion_id)
-    REFERENCES Assertion (assertion_id),
+    REFERENCES Assertion (assertion_id)
+    ON DELETE CASCADE,
     CONSTRAINT Assertion_To_Source_Source FOREIGN KEY (source_id)
     REFERENCES Source (source_id)
+);
+
+-- Table: Feature
+CREATE TABLE Feature (
+    feature_id integer NOT NULL CONSTRAINT Feature_pk PRIMARY KEY,
+    feature_set_id integer NOT NULL,
+    feature_def_id integer NOT NULL,
+    CONSTRAINT Feature_Feature_Set FOREIGN KEY (feature_set_id)
+    REFERENCES Feature_Set (feature_set_id)
+    ON DELETE CASCADE,
+    CONSTRAINT Feature_Feature_Definition FOREIGN KEY (feature_def_id)
+    REFERENCES Feature_Definition (feature_def_id)
+);
+
+-- Table: Feature_Attribute
+CREATE TABLE Feature_Attribute (
+    attribute_id integer NOT NULL CONSTRAINT Feature_Attribute_pk PRIMARY KEY,
+    feature_id integer NOT NULL,
+    attribute_def_id integer NOT NULL,
+    value text,
+    CONSTRAINT Feature_Attribute_Feature FOREIGN KEY (feature_id)
+    REFERENCES Feature (feature_id)
+    ON DELETE CASCADE,
+    CONSTRAINT Feature_Attribute_Feature_Attribute_Definition FOREIGN KEY (attribute_def_id)
+    REFERENCES Feature_Attribute_Definition (attribute_def_id)
+);
+
+-- Table: Feature_Attribute_Definition
+CREATE TABLE Feature_Attribute_Definition (
+    attribute_def_id integer NOT NULL CONSTRAINT Feature_Attribute_Definition_pk PRIMARY KEY,
+    feature_def_id integer NOT NULL,
+    name text NOT NULL,
+    readable_name text NOT NULL,
+    type text NOT NULL,
+    CONSTRAINT Feature_Attribute_Definition_Feature_Definition FOREIGN KEY (feature_def_id)
+    REFERENCES Feature_Definition (feature_def_id)
+    ON DELETE CASCADE
+);
+
+-- Table: Feature_Definition
+CREATE TABLE Feature_Definition (
+    feature_def_id integer NOT NULL CONSTRAINT Feature_Definition_pk PRIMARY KEY,
+    name text NOT NULL,
+    readable_name integer NOT NULL,
+    is_germline boolean NOT NULL,
+    CONSTRAINT Feature_Definition_ak_1 UNIQUE (name)
+);
+
+-- Table: Feature_Set
+CREATE TABLE Feature_Set (
+    feature_set_id integer NOT NULL CONSTRAINT Feature_Set_pk PRIMARY KEY,
+    assertion_id integer NOT NULL,
+    CONSTRAINT Feature_Set_Assertion FOREIGN KEY (assertion_id)
+    REFERENCES Assertion (assertion_id)
+    ON DELETE CASCADE
 );
 
 -- Table: Source
 CREATE TABLE Source (
     source_id integer NOT NULL CONSTRAINT Source_pk PRIMARY KEY,
-    created_on NOT NULL DEFAULT CURRENT_DATE,
-    modified_on NOT NULL DEFAULT CURRENT_DATE,
     source_type text NOT NULL,
     cite_text text NOT NULL,
     doi text

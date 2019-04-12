@@ -1,33 +1,41 @@
 """
-Functions that abstract away basic operations with and maninpulations of models, allowing for easier testing.
+Functions that abstract away basic operations with and manipulations of models, allowing for easier testing.
 """
-from .models import Alteration, Assertion, Source, AssertionToAlteration, AssertionToSource
+from .models import Assertion, Source, AssertionToSource, FeatureAttribute,\
+    FeatureAttributeDefinition
 import simplejson as json
 from werkzeug.exceptions import BadRequest
 import urllib
 import re
 from flask import request
-from target_portal.modules.api.errors import error_response as api_error_response
+from almanac_browser.modules.api.errors import error_response as api_error_response
 
 
-def add_or_fetch_alteration(db, gene=None, effect=None, feature=None, alt=None):
-    """Given a gene, effect, and class of alteration, either fetch an existing corresponding alteration, or create a
-    new one if none exists with the given attributes."""
-    alteration = db.session.query(Alteration).filter(Alteration.gene_name == gene,
-                                                     Alteration.alt_type == effect,
-                                                     Alteration.feature == feature,
-                                                     Alteration.alt == alt).first()
+def flatten_sqlalchemy_singlets(l):
+    """In some uses cases, SQLAlchemy returns a list of 1-tuples. This function flattens these lists."""
 
-    if not alteration:
-        alteration = Alteration()
-        alteration.feature = feature
-        alteration.alt_type = effect
-        alteration.gene_name = gene
-        alteration.alt = alt
-        db.session.add(alteration)
-        db.session.flush()
+    return [item[0] for item in l if item[0]]
 
-    return alteration
+
+def get_distinct_attribute_values(db, needle, search_column=FeatureAttributeDefinition.name):
+    """
+    It's often useful to get a list of all the possible distinct values an attribute has been created with; e.g.,
+    all the unique genes that have been created. This function performs this for any attribute.
+    By default, the FeatureAttributeDefinition.name column is used as the search space for the needle parameter.
+    However, the user may specify a different FeatureAttributeDefinition column (such as type or attribute_def_id) to
+    search within.
+    """
+
+    values = db.session.query(FeatureAttribute.value).filter(
+        FeatureAttribute.attribute_def_id == FeatureAttributeDefinition.attribute_def_id,
+        search_column == needle
+    ).distinct().all()
+
+    return [value for value in flatten_sqlalchemy_singlets(values) if value.lower() != 'none']
+
+
+def get_all_genes(db):
+    return get_distinct_attribute_values(db, 'gene', FeatureAttributeDefinition.type)
 
 
 def add_or_fetch_source(db, doi, cite_text=""):
@@ -54,11 +62,11 @@ def amend_alteration_for_assertion(db, assertion, current_alt_value, new_alt_val
 
     # Remove this alteration from this assertion so we can make room for the new one.
     remove_alteration_from_assertion(db, assertion, current_alteration)
-    new_alteration = add_or_fetch_alteration(db,
-                                             gene=current_alteration.gene_name,
-                                             feature=current_alteration.feature,
-                                             effect=current_alteration.alt_type,
-                                             alt=new_alt_value)
+    new_alteration = add_or_fetch_feature(db,
+                                          gene=current_alteration.gene_name,
+                                          feature=current_alteration.feature,
+                                          effect=current_alteration.alt_type,
+                                          alt=new_alt_value)
     assertion.alterations.append(new_alteration)
 
 
@@ -77,6 +85,7 @@ def remove_alteration_from_assertion(db, assertion=None, alteration=None):
     """Remove an Alteration from an Assertion's list of alterations. If there are other Assertions that depend on
     this Alteration, simply remove it from the Assertion in question. Otherwise, if this is the only Assertion that
     this Alteration is linked to, simply delete the Alteration."""
+
     assert(assertion is not None)
     assert(alteration is not None)
 
@@ -93,54 +102,112 @@ def remove_alteration_from_assertion(db, assertion=None, alteration=None):
 
 
 def delete_assertion(db, assertion_to_delete):
-    """Delete an assertion. Before deleting the assertion, check whether deleting it would orphan any rows in the
-    Source or Alteration tables, and delete these as well if so. No database children left behind."""
-    for s in assertion_to_delete.sources:
-        other_assertions_with_same_source = db.session.query(AssertionToSource) \
-            .filter(AssertionToSource.source_id == s.source_id,
-                    AssertionToSource.assertion_id != assertion_to_delete.assertion_id).all()
-        if not other_assertions_with_same_source:
-            # Delete the assertionToSource association, then the source
-            a2s = db.session.query(AssertionToSource).filter(AssertionToSource.assertion_id == assertion_to_delete.assertion_id,
-                                                             AssertionToSource.source_id == s.source_id).first()
-            db.session.delete(a2s)
-            db.session.delete(s)
+    """
+    Delete an assertion.  Note that the CASCADEs settings in models.py and the SQL table definitions handles deletion
+    of most child tables automatically. However, we must manually ensure Sources are orphaned before deleting them.
+    """
 
-    for alt in assertion_to_delete.alterations:
-        remove_alteration_from_assertion(db, assertion_to_delete, alt)
+    sources_to_delete = []
+    for source in assertion_to_delete.sources:
+        if len(source.assertions) == 1:
+            sources_to_delete.append(source)
 
     db.session.delete(assertion_to_delete)
+    db.session.commit()
+
+    for source in sources_to_delete:
+        db.session.delete(source)
+
+    db.session.commit()
 
 
 def get_unapproved_assertion_rows(db):
     unapproved_assertions = db.session.query(Assertion).filter(Assertion.validated == 0).all()
     rows = []
     for assertion in unapproved_assertions:
-        for alt in assertion.alterations:
-            rows.append(make_row(alt, assertion))
+        for feature_set in assertion.feature_sets:
+            rows.extend(make_rows(assertion, feature_set))
+
     return rows
 
 
-def make_row(alt, assertion):
-    return {
-        'gene_name': urllib.parse.unquote(alt.gene_name) if alt.gene_name else None,
-        'feature': alt.feature,
-        'alt_type': alt.alt_type,
-        'alt': alt.alt,
-        'alt_id': alt.alt_id,
-        'therapy_name': assertion.therapy_name,
-        #'therapy_class': assertion.therapy_class,
-        'therapy_type': assertion.therapy_type,
-        'therapy_sensitivity': assertion.therapy_sensitivity,
-        'therapy_resistance': assertion.therapy_resistance,
-        'favorable_prognosis': assertion.favorable_prognosis,
-        'disease': assertion.disease,
-        'submitter': urllib.parse.unquote(assertion.submitted_by) if assertion.submitted_by else None,
-        'predictive_implication': assertion.predictive_implication,
-        'assertion_id': assertion.assertion_id,
-        'sources': [s for s in assertion.sources],
-        'display_string': alt.display_string
-    }
+def find_attribute_by_name(attributes, name):
+    for attribute in attributes:
+        if attribute.attribute_definition.name == name:
+            return attribute.value
+
+    return None
+
+
+def make_display_string(feature):
+    feature_name = feature.feature_definition.name
+    if feature_name == 'rearrangement':
+        rearrangement_type = find_attribute_by_name(feature.attributes, 'rearrangement_type')
+        gene1 = find_attribute_by_name(feature.attributes, 'gene1')
+        gene2 = find_attribute_by_name(feature.attributes, 'gene2')
+        locus = find_attribute_by_name(feature.attributes, 'locus')
+
+        if gene1 and gene2 and locus:
+            return '%s %s-%s %s' % (rearrangement_type, gene1, gene2, locus)
+        if gene1 and gene2:
+            return '%s %s-%s' % (rearrangement_type, gene1, gene2)
+        else:
+            return '%s %s' % (rearrangement_type, locus)
+    elif feature_name in ['somatic_mutation', 'germline_mutation']:
+        return '%s %s %s' % (\
+               find_attribute_by_name(feature.attributes, 'mutation_type'),\
+               find_attribute_by_name(feature.attributes, 'gene'),\
+               find_attribute_by_name(feature.attributes, 'protein_change')
+        )
+    elif feature_name == 'copy_number':
+        gene = find_attribute_by_name(feature.attributes, 'gene')
+        direction = find_attribute_by_name(feature.attributes, 'direction')
+        locus = find_attribute_by_name(feature.attributes, 'locus')
+
+        gene = gene + ' ' if gene else ''
+        direction = direction + ' ' if direction else ''
+        locus = locus if locus else ''
+
+        return '%s%s%s' % (gene, direction, locus)
+
+        return display_string
+    elif feature_name == 'microsatellite_instability':
+        return find_attribute_by_name(feature.attributes, 'direction')
+    elif feature_name == 'mutational_signature':
+        return 'COSMIC ' + find_attribute_by_name(feature.attributes, 'signature_number')
+    elif feature_name in ['mutational_burden', 'neoantigen_burden']:
+        return find_attribute_by_name(feature.attributes, 'burden')
+    elif feature_name in ['knockout', 'silencing']:
+        gene = find_attribute_by_name(feature.attributes, 'gene')
+        technique = find_attribute_by_name(feature.attributes, 'technique')
+
+        if technique:
+            return '%s (%s)' % gene, technique
+        else:
+            return gene
+    elif feature_name == 'aneuploidy':
+        return find_attribute_by_name(feature.attributes, 'effect')
+
+
+def make_rows(assertion, feature_set):
+    rows = []
+    for feature in feature_set.features:
+        rows.append({
+            'feature': feature.feature_definition.readable_name,
+            'display_string': make_display_string(feature),
+            'therapy_name': assertion.therapy_name,
+            'therapy_type': assertion.therapy_type,
+            'therapy_sensitivity': assertion.therapy_sensitivity,
+            'therapy_resistance': assertion.therapy_resistance,
+            'favorable_prognosis': assertion.favorable_prognosis,
+            'disease': assertion.disease,
+            'submitter': urllib.parse.unquote(assertion.submitted_by) if assertion.submitted_by else None,
+            'predictive_implication': assertion.predictive_implication,
+            'assertion_id': assertion.assertion_id,
+            'sources': [s for s in assertion.sources],
+        })
+
+    return rows
 
 
 def http200response(message=None):
@@ -178,12 +245,14 @@ def check_row_exists(db, table, assertion):
     return db.session.query((db.session.query(table).filter(assertion)).exists()).scalar()
 
 
+'''
 check_row_exists.query_exists_assertions = {
     'feature': (Alteration, Alteration.gene_name),
     'disease': (Assertion, Assertion.disease),
     'pred': (Assertion, Assertion.predictive_implication),
     'therapy': (Assertion, Assertion.therapy_name),
 }
+'''
 
 
 def interpret_unified_search_string_informal_substr(db, search_str):

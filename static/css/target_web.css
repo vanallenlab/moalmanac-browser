@@ -154,3 +154,12 @@ table.target-browse-table td a {
 		display: block;
 	}
 }
+
+/* add page */
+.gene-select2 {
+	width: 100%;
+}
+
+.add-feature-row {
+	display: none;
+}

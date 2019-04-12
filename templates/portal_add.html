@@ -35,7 +35,8 @@
     </div>
     <div class="panel-body">
         <p>
-            There was an error processing your submission: <span id="error-text"> please fill in all fields</span>
+            There was an error processing your submission: <span id="error-text"></span>.<br/>
+            Please review the fields below.
         </p>
     </div>
 </div>
@@ -47,75 +48,61 @@
                 <p>DOI, e.g. 10.1126/science.1062538</p>
                 <input id="source-input" name="g" type="text" class="form-control" placeholder="">
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <h3>Gene*</h3>
-                <p>HGNC Gene Symbol</p>
-                <div class="input-group">
-                    <select id="gene-input" name="g"></select>
-                </div>
-            </div>
             <div class="col-md-4">
                 <h3>Cancer Type*</h3>
-                <p>Select from <strong>{{diseases|length}}</strong> cancer types:</p>
+                <p>Select cancer type:</p>
                 <select id="type-select" name="d" class="form-control">
-                    <option selected disabled hidden>Select cancer type</option>
-                    {% for disease in diseases %}
-                    <option>{{disease}}</option>
-                    {% endfor %}
+                    <option><!-- empty option required for placeholder --></option>
                 </select>
             </div>
         </div>
         <div class="row">
             <div class="col-md-4">
-                <h3>Alteration Feature*</h3>
-                <p>Class of Alteration</p>
-                <select id="class-select" name="d" class="form-control">
-                    <option selected disabled hidden>Select feature</option>
-                    {% for at in alteration_classes %}
-                    <option>{{at}}</option>
-                    {% endfor %}
+                <h3>Feature Type*</h3>
+                <p>Select the feature asserted in the source:</p>
+                <select id="feature-definition-input" name="feature-def">
+                    <option><!-- empty option required for placeholder --></option>
                 </select>
-            </div>
-             <div class="col-md-4">
-                <h3>Alteration Effect*</h3>
-                <p>Effect of Alteration</p>
-                <select id="effect-select" name="d" class="form-control">
-                    <option selected disabled hidden>Select effect</option>
-                    {% for e in effects %}
-                    <option>{{e}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-             <div class="col-md-4">
-                <h3>Alteration</h3>
-                <p>Specific Alteration, e.g. L702H </p>
-                <div class="input-group">
-                    <input id="alteration-input" name="a" type="text" placeholder="">
-                </div>
             </div>
         </div>
+        {%  for feature_definition in feature_definitions %}
+        <div id="feature-{{ feature_definition.feature_def_id }}-row" class="row add-feature-row">
+            {%  for attribute_definition in feature_definition.attribute_definitions %}
+            <div class="col-md-3">
+                <h3>{{ attribute_definition.readable_name }}</h3>
+                {% if attribute_definition.type == 'gene' %}
+                <select id="{{ feature_definition.feature_def_id }}-{{ attribute_definition.attribute_def_id }}-input"
+                        class="gene-select2 attribute-select2"
+                        name="{{ feature_definition.name }}-{{ attribute_definition.name }}">
+                    <option><!-- empty option required for placeholder --></option>
+                </select>
+                {% else %}
+                <select id="{{ feature_definition.feature_def_id }}-{{ attribute_definition.attribute_def_id }}-input"
+                        class="nongene-select2 attribute-select2"
+                        data-feature-def-id="{{ feature_definition.feature_def_id }}"
+                        data-attribute-def-id="{{ attribute_definition.attribute_def_id }}"
+                        name="{{ feature_definition.name }}-{{ attribute_definition.name }}">
+                    <option><!-- empty option required for placeholder --></option>
+                </select>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
         <div class="row">
             <div class="col-md-6">
                 <h3>Predictive Implication Level</h3>
-                <p>Select from <strong>{{pred_impls|length}}</strong> predictive implication levels</p>
+                <p>Select a predictive implication level</p>
                 <select id="implication-select" name="p" class="form-control">
-                    <option selected disabled hidden>Select predictive implication level</option>
-                    {% for pred_impl in pred_impls %}
-                    <option>{{pred_impl}}</option>
-                    {% endfor %}
+                    <option><!-- empty option required for placeholder --></option>
                 </select>
             </div>
 
             <div class="col-md-6">
                 <h3>Therapy</h3>
-                <p>Select from <strong>{{therapy_names|length}}</strong> therapies:</p>
+                <p>Select or enter a therapy:</p>
                 <select id="therapy-select" name="t" class="form-control">
-                    <option selected disabled hidden>Select therapy</option>
-                    {% for therapy_name in therapy_names %}
-                    <option>{{therapy_name}}</option>
-                    {% endfor %}
+                    <option><!-- empty option required for placeholder --></option>
                 </select>
             </div>
         </div>

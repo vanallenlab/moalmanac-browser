@@ -1,6 +1,6 @@
 from flask import jsonify, request, url_for
-from target_portal.modules.errors import errors
-from target_portal.modules.api.errors import error_response as api_error_response
+from almanac_browser.modules.errors import errors
+from almanac_browser.modules.api.errors import error_response as api_error_response
 from db import db
 
 
