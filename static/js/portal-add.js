@@ -1,21 +1,4 @@
-// load data objects from remote JSON
-function getJSONSearchSet(url, value_handler, callback) {
-    // value_handler must return an dict with keys id and text
-    $.getJSON(url, function(data) {
-        let search_set = Object;
-        search_set = [];
-        $.each(data, function(index, value) {
-            let new_datum = Object();
-            let value_interp = value_handler(value);
-            new_datum.id = value_interp.id;
-            new_datum.text = value_interp.text;
-
-            search_set.push(new_datum);
-        });
-
-        callback(search_set);
-    });
-}
+// assumes portal-json.js has been included first
 
 function initSelect2Field(selector, data, tags=false, placeholder=null) {
     $(selector).select2({
@@ -29,38 +12,36 @@ function initSelect2Field(selector, data, tags=false, placeholder=null) {
     });
 }
 
-getJSONSearchSet('api/genes',
-    function(value) { return {'id': value, 'text': value}; },
-    function(genes) {
-        initSelect2Field('.gene-select2', genes, true, 'Select gene');
-    }
+getSearchSet('genes',
+    function(value) { return { 'id': value, 'text': value }; },
+    function(genes) { initSelect2Field('.gene-select2', genes, true, 'Select gene'); }
 );
 
-getJSONSearchSet('api/diseases',
-    function(value) { return {'id': value, 'text': value}; },
+getSearchSet('diseases',
+    function(value) { return { 'id': value, 'text': value  }; },
     function(diseases) {
         initSelect2Field('#type-select', diseases, true, 'Select a disease');
     }
 );
 
-getJSONSearchSet('api/predictive_implications',
-    function(value) { return {'id': value, 'text': value}; },
-    function(diseases) {
-        initSelect2Field('#implication-select', diseases, true,
+getSearchSet('predictive_implications',
+    function(value) { return { 'id': value, 'text': value }; },
+    function(preds) {
+        initSelect2Field('#implication-select', preds, false,
             'Select a predictive implication level');
     }
 );
 
-getJSONSearchSet('api/therapies',
-    function(value) { return {'id': value, 'text': value}; },
-    function(diseases) {
-        initSelect2Field('#therapy-select', diseases, true, 'Select a therapy');
+getSearchSet('therapies',
+    function(value) { return { 'id': value, 'text': value }; },
+    function(therapies) {
+        initSelect2Field('#therapy-select', therapies, true, 'Select a therapy');
     }
 );
 
-getJSONSearchSet('api/feature_definitions',
-   function(value) { return {'id': value.feature_def_id, 'text': value.readable_name} },
-   function(definitions) {
+getSearchSet('feature_definitions',
+    function(value) { return {'id': value.feature_def_id, 'text': value.readable_name }; },
+    function(definitions) {
         initSelect2Field('#feature-definition-input', definitions, false, 'Select a feature');
     }
 );

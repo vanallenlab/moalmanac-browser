@@ -1,14 +1,14 @@
 """
 Functions that abstract away basic operations with and manipulations of models, allowing for easier testing.
 """
-from .models import Assertion, Source, AssertionToSource, FeatureAttribute,\
-    FeatureAttributeDefinition
 import simplejson as json
-from werkzeug.exceptions import BadRequest
 import urllib
 import re
-from flask import request
-from almanac_browser.modules.api.errors import error_response as api_error_response
+from sqlalchemy import or_, and_
+from flask import Markup, url_for, request
+from werkzeug.exceptions import BadRequest
+from .models import Assertion, Source, FeatureSet, Feature, FeatureDefinition, FeatureAttribute, \
+    FeatureAttributeDefinition
 
 
 def flatten_sqlalchemy_singlets(l):
@@ -139,7 +139,16 @@ def find_attribute_by_name(attributes, name):
     return None
 
 
+def make_gene_link(gene):
+    gene_token = 'Gene:"%s"[attribute]' % gene
+    return '<a href="%s">%s</a>' % (url_for('portal.search', s=gene_token), gene)
+
+
 def make_display_string(feature):
+    """
+    Creates HTML-friendly version of a feature. Adds search links to genes.
+    """
+
     feature_name = feature.feature_definition.name
     if feature_name == 'rearrangement':
         rearrangement_type = find_attribute_by_name(feature.attributes, 'rearrangement_type')
@@ -148,45 +157,59 @@ def make_display_string(feature):
         locus = find_attribute_by_name(feature.attributes, 'locus')
 
         if gene1 and gene2 and locus:
-            return '%s %s-%s %s' % (rearrangement_type, gene1, gene2, locus)
+            return '%s %s-%s %s' % (rearrangement_type, make_gene_link(gene1), make_gene_link(gene2), locus)
         if gene1 and gene2:
-            return '%s %s-%s' % (rearrangement_type, gene1, gene2)
-        else:
+            return '%s %s-%s' % (rearrangement_type, make_gene_link(gene1), make_gene_link(gene2))
+        elif locus:
             return '%s %s' % (rearrangement_type, locus)
+        else:
+            return rearrangement_type if rearrangement_type else ''
     elif feature_name in ['somatic_mutation', 'germline_mutation']:
-        return '%s %s %s' % (\
-               find_attribute_by_name(feature.attributes, 'mutation_type'),\
-               find_attribute_by_name(feature.attributes, 'gene'),\
-               find_attribute_by_name(feature.attributes, 'protein_change')
-        )
+        mutation_type = find_attribute_by_name(feature.attributes, 'mutation_type')
+        gene = find_attribute_by_name(feature.attributes, 'gene')
+        protein_change = find_attribute_by_name(feature.attributes, 'protein_change')
+
+        if gene:
+            gene = make_gene_link(gene)
+
+        # Any of mutation_type, gene, or protein_change may be None. With None as the first parameter to filter(),
+        # all False/None values are skipped in the final join() call.
+        return ' '.join(filter(None, [mutation_type, gene, protein_change]))
     elif feature_name == 'copy_number':
         gene = find_attribute_by_name(feature.attributes, 'gene')
         direction = find_attribute_by_name(feature.attributes, 'direction')
         locus = find_attribute_by_name(feature.attributes, 'locus')
 
-        gene = gene + ' ' if gene else ''
-        direction = direction + ' ' if direction else ''
-        locus = locus if locus else ''
+        if gene:
+            gene = make_gene_link(gene)
 
-        return '%s%s%s' % (gene, direction, locus)
+        return ' '.join(filter(None, [gene, direction, locus]))
+    elif feature_name == 'microsatellite_stability':
+        direction = find_attribute_by_name(feature.attributes, 'direction')
 
-        return display_string
-    elif feature_name == 'microsatellite_instability':
-        return find_attribute_by_name(feature.attributes, 'direction')
+        return direction if direction else ''
     elif feature_name == 'mutational_signature':
-        return 'COSMIC ' + find_attribute_by_name(feature.attributes, 'signature_number')
+        signature_number = find_attribute_by_name(feature.attributes, 'signature_number')
+
+        return ('COSMIC ' + signature_number) if signature_number else ''
     elif feature_name in ['mutational_burden', 'neoantigen_burden']:
-        return find_attribute_by_name(feature.attributes, 'burden')
+        burden = find_attribute_by_name(feature.attributes, 'burden')
+
+        return burden if burden else ''
     elif feature_name in ['knockout', 'silencing']:
         gene = find_attribute_by_name(feature.attributes, 'gene')
         technique = find_attribute_by_name(feature.attributes, 'technique')
 
-        if technique:
-            return '%s (%s)' % gene, technique
-        else:
-            return gene
+        if gene:
+            gene = make_gene_link(gene)
+
+        return ('%s (%s)' % (gene, technique)) if gene and technique else (gene or technique)
     elif feature_name == 'aneuploidy':
-        return find_attribute_by_name(feature.attributes, 'effect')
+        effect = find_attribute_by_name(feature.attributes, 'effect')
+
+        return effect if effect else ''
+    else:
+        return 'Unknown feature (%s)' % feature_name
 
 
 def make_rows(assertion, feature_set):
@@ -194,7 +217,7 @@ def make_rows(assertion, feature_set):
     for feature in feature_set.features:
         rows.append({
             'feature': feature.feature_definition.readable_name,
-            'display_string': make_display_string(feature),
+            'display_string': Markup(make_display_string(feature)),
             'therapy_name': assertion.therapy_name,
             'therapy_type': assertion.therapy_type,
             'therapy_sensitivity': assertion.therapy_sensitivity,
@@ -234,7 +257,6 @@ def query_distinct_column(db, model, column):
 def check_row_exists(db, table, assertion):
     """
     Returns True if the given assertion holds true for the given column.
-    E.g.: check_row_exists(Alteration, Alteration.gene_name == KRAS)
 
     :param db: Database connection.
     :param table: Table to search within.
@@ -245,70 +267,27 @@ def check_row_exists(db, table, assertion):
     return db.session.query((db.session.query(table).filter(assertion)).exists()).scalar()
 
 
-'''
-check_row_exists.query_exists_assertions = {
-    'feature': (Alteration, Alteration.gene_name),
+check_row_exists.category_table_map = {
+    'feature': (FeatureDefinition, FeatureDefinition.readable_name),
     'disease': (Assertion, Assertion.disease),
     'pred': (Assertion, Assertion.predictive_implication),
     'therapy': (Assertion, Assertion.therapy_name),
+    'attribute': (FeatureAttributeDefinition, FeatureAttributeDefinition.name)
 }
-'''
 
 
-def interpret_unified_search_string_informal_substr(db, search_str):
-    query = {'feature': [], 'disease': [], 'pred': [], 'therapy': [], 'unknown': []}
+def walk_tokens_right_to_left(tokens):
+    token_index = len(tokens) - 1
 
-    # The 3 regex groups below are mutually exclusive due to the OR operators; only one of the groups will ever contain
-    # data. We thus collapse the groups after matching so that our list of tokens doesn't contain empty groups.
-    re_groups = re.findall(r'\"([^\"]+)\"|\'([^\']+)\'|(\S+)', search_str)
-    tokens = []
-    for group in re_groups:
-        token = group[0] or group[1] or group[2]
-        tokens.append(token.strip())
+    while token_index >= 0:
+        aggregate_token = tokens[token_index:]
+        yield aggregate_token
 
-    aggregate_token = []
-    for token in tokens:
-        new_aggregate_token = aggregate_token + [token]
-        new_aggregate_token_str = ' '.join(new_aggregate_token)
-
-        for category, assertion in check_row_exists.query_exists_assertions.items():
-            tag_match = re.match(r'\[([^\[]*)]', token)
-            if tag_match:
-                # If the aggregate token is empty, we already assigned the token based on a DB lookup
-                if aggregate_token:
-                    category = tag_match.group(1)
-                    if category not in check_row_exists.query_exists_assertions.keys():
-                        category = 'unknown'
-
-                    query[category].append(' '.join(aggregate_token))
-
-                new_aggregate_token = []
-                break
-            elif check_row_exists(db, assertion[0], assertion[1].ilike(new_aggregate_token_str)):
-                query[category].append(new_aggregate_token_str)
-                new_aggregate_token = []
-                break
-            elif check_row_exists(db, assertion[0], assertion[1].ilike(token)):
-                query[category].append(token)
-                query['unknown'].extend(aggregate_token)
-                new_aggregate_token = []
-                break
-
-        aggregate_token = new_aggregate_token
-
-    # Any left-over data in aggregate token indicates the last token was not matched to a category
-    if aggregate_token:
-        query['unknown'].extend(aggregate_token)
-
-    return query
+        token_index -= 1
 
 
-def union_dictionaries(d1, d2):
-    new_dict = {}
-    [new_dict.setdefault(k, []).extend(v) for k, v in d1.items()]
-    [new_dict.setdefault(k, []).extend(v) for k, v in d2.items()]
-
-    return new_dict
+def sanitize_token_value(token_value):
+    return re.sub(r'["\']', '', token_value.strip())
 
 
 def interpret_unified_search_string(db, search_str):
@@ -318,10 +297,14 @@ def interpret_unified_search_string(db, search_str):
     tokens containing whitespace are quoted. E.g., a query for clinical trials would be "Clinical trial"[pred].
     However, we attempt to resolve less formally specified queries. Traversing the search string from left to right,
     we build an "aggregate token" combining all tokens seen so far. At each step, the current aggregate token is checked
-    against all categories (feature, disease, etc.); if a match is found, the token is added to the query and the aggregate
-    token is reset. If no match is found, the current individual token is checked against all categories; if a match is
-    found, the current aggregate token (not including the current individual token) is added to the query as an
+    against all categories (feature, disease, etc.); if a match is found, the token is added to the query and the
+    aggregate token is reset. If no match is found, the current individual token is checked against all categories; if a
+    match is found, the current aggregate token (not including the current individual token) is added to the query as an
     "unknown" token and the current individual token is added separately.
+    Colons (:) are used to search for attribute values, with the attribute definition given first and the needle value
+    given second; e.g., Gene:EGFR[attribute] would add a condition that the attribute Gene must equal "EGFR." Once a
+    colon is detected, the token to the left of the colon is used as the attribute definition and the token to the right
+    as the attribute needle value. The entire string (with colon) is returned in the query['attribute'] list.
 
     Example:
     Raw search string: PIK3CA "Invasive Breast Carcinoma"[disease] Preclinical
@@ -332,69 +315,162 @@ def interpret_unified_search_string(db, search_str):
     :return: Dictionary representing query in a structured format.
     """
 
-    query = {'feature': [], 'disease': [], 'pred': [], 'therapy': [], 'unknown': []}
+    query = {'feature': [], 'disease': [], 'pred': [], 'therapy': [], 'attribute': [], 'unknown': []}
 
-    # Initially assume search string is formally specified (with [category] tags).
-    tag_iter = re.finditer(r'\[([^\[]*)\]', search_str)
-    last_pos = 0
-    for match in tag_iter:
-        tag_interval = match.span(1)
+    # The tokenizing regex contains 3 non-matching groups (the (?:) sections). The first matches either a quoted string
+    # or a string of non-whitespace characters, and must occur. The second group differs only in two ways: it must
+    # begin with a colon (:) character, and is optional. It matches attribute search strings (Attribute:Value). The
+    # final group matches an optional value in [brackets], which correspond to formal category tags.
+    token_regex = r'((?:\"[^\"]+\"|\S+)(?:\:\"[^\"]+\"|\S+)?(?:\s*\[[^]]+\])?)'
+    search_tokens = re.findall(token_regex, search_str)
+    unmatched_tokens = []
+    for token in search_tokens:
+        # The "value-category form" represents a search needle followed by a [category] tag. In the regex below, the
+        # first matching group collects all characters before the first [ symbol. The second group matches within the
+        # [category tag].
+        value_category_form = re.match(r'([^[]+)\[([^]]+)\]', token)
+        if value_category_form:
+            this_token_needle = sanitize_token_value(value_category_form.group(1))
+            this_token_category = value_category_form.group(2).strip()
 
-        # If the token corresponding to this tag is quoted, the user may have intended the tokens to the left of the
-        # quoted token to be interpreted informally (e.g.: erlotinib "Clinical trial"[pred] is likely intended to
-        # find uses of erlotinib in clinical trials, not a predictive level named "erlotinib Clinical trial."
-        # Find the left-most quote to the left of this category tag; interpret everything to the left of it informally.
-        left_quotes = re.finditer(r'["\']', search_str[last_pos:tag_interval[0] - 1])
-        quote_idxs = [quote.span(0)[0] for quote in left_quotes]
-        if len(quote_idxs) > 1:
-            opening_quote_pos = quote_idxs[-2]
-            informal_query = interpret_unified_search_string_informal_substr(
-                db, search_str[last_pos:last_pos + opening_quote_pos]
-            )
-            query = union_dictionaries(query, informal_query)
-            last_pos += opening_quote_pos
+            if this_token_category in check_row_exists.category_table_map.keys():
+                # Begin attempting to match the token(s) left of the [category tag] from right to left. We start with
+                # the current token; unmatched_tokens[len(unmatched_tokens):] returns the empty string, leaving only the
+                # current token. We then progressively work from right to left until a match is found.
+                unmatched_tokens.append(this_token_needle)
+                for aggregate_token in walk_tokens_right_to_left(unmatched_tokens):
+                    aggregate_token_str = ' '.join(aggregate_token)
 
-        # March right-to-left from the category tag, until either the aggregated token matches a DB row or we run out of
-        # search string. If we hit a DB match, informally evaluate the remainder of the string.
-        category = search_str[tag_interval[0]:tag_interval[1]].strip()
-        formal_token = None
-        search_substr = search_str[last_pos:tag_interval[0] - 1]
-        search_substr_tokens = search_substr.split()
-        aggregate_token = []
+                    token_needle = aggregate_token_str
+                    check_category = this_token_category
+                    check_assertion = check_row_exists.category_table_map[this_token_category][1].ilike(token_needle)
 
-        if category not in query.keys():
-            category = 'unknown'
-            # If an incorrect category tag is given, we cannot resolve any part of the token in the DB, and therefore
-            # cannot determine a left-sided end point after which to try interpreting new tokens.
-            aggregate_token = search_substr_tokens
-        else:
-            for i in range(len(search_substr_tokens)-1, -1, -1):
-                aggregate_token.insert(0, search_substr_tokens[i])
-                if check_row_exists(
-                        db,
-                        check_row_exists.query_exists_assertions[category][0],
-                        check_row_exists.query_exists_assertions[category][1].ilike(' '.join(aggregate_token))
-                ):
-                    formal_token = ' '.join(aggregate_token)
-                    informal_query = interpret_unified_search_string_informal_substr(
-                        db, ' '.join(search_substr_tokens[:i])
-                    )
-                    query = union_dictionaries(query, informal_query)
+                    # If the token is an Attribute:Value pair, we only want to search using the Attribute name
+                    attribute_name, _, attribute_needle = this_token_needle.partition(':')
+                    if attribute_needle:
+                        token_needle = attribute_name
+                        check_category = 'attribute'
+                        check_assertion = or_(FeatureAttributeDefinition.name.ilike(token_needle),
+                                              FeatureAttributeDefinition.readable_name.ilike(token_needle))
+
+                    if check_row_exists(db, check_category, check_assertion):
+                        query[this_token_category].append(aggregate_token_str)
+                        unmatched_tokens = unmatched_tokens[:len(unmatched_tokens) - len(aggregate_token)]
+                        break
+            else:
+                query['unknown'].append(this_token_needle)
+
+            continue
+
+        # The "attribute-value form" represents the name of an attribute followed by a colon and the desired value of
+        # that attribute (e.g., Gene:EGFR).
+        attribute_value_form = re.match(r'(.+):(?:.+)', token)
+        if attribute_value_form:
+            # Note that we use the entire Attribute:Value pair as the token value to return in the query dict, not
+            # the Value string alone; this is for later interpretation by the search engine.
+            this_token_attribute = sanitize_token_value(attribute_value_form.group(1))
+            this_token_pair = sanitize_token_value(attribute_value_form.group(0))
+            unmatched_tokens.append(this_token_pair)
+
+            for aggregate_token in walk_tokens_right_to_left(unmatched_tokens):
+                aggregate_token_str = ' '.join(aggregate_token)
+                if check_row_exists(db,
+                                    FeatureAttributeDefinition,
+                                    or_(FeatureAttributeDefinition.name.ilike(this_token_attribute),
+                                        FeatureAttributeDefinition.readable_name.ilike(this_token_attribute))):
+                    query['attribute'].append(aggregate_token_str)
+                    unmatched_tokens = unmatched_tokens[:len(unmatched_tokens) - len(aggregate_token)]
                     break
 
-        # If formal_token was never assigned, we never found a DB match. Assign the entire putative token string as the
-        # formal token anyway.
-        if not formal_token:
-            formal_token = ' '.join(aggregate_token)
+            continue
+        # If this point is reached, the token is neither formally specified with a [category tag] nor an
+        # Attribute:Value pair. We will try to determine whether the token (plus or minus the preceding unmatched
+        # tokens) informally matches a database entry.
+        unmatched_tokens.append(token)
+        for aggregate_token in walk_tokens_right_to_left(unmatched_tokens):
+            aggregate_token_str = sanitize_token_value(' '.join(aggregate_token))
+            # query_info[0] = table, query_info[1] = column
+            for category, query_info in check_row_exists.category_table_map.items():
+                if check_row_exists(db, query_info[0], query_info[1].ilike(aggregate_token_str)):
+                    query[category].append(aggregate_token_str)
+                    unmatched_tokens = unmatched_tokens[:len(unmatched_tokens) - len(aggregate_token)]
+                    break
 
-        # remove quotes - they are not necessary when using category tags
-        formal_token = re.sub(r'["\']', '', formal_token)
-        query[category].append(formal_token)
-
-        last_pos = tag_interval[1] + 1
-
-    # Remainder of search string is informally specified (no further [category] tags).
-    informal_query = interpret_unified_search_string_informal_substr(db, search_str[last_pos:])
-    query = union_dictionaries(query, informal_query)
+    # Dump remaining unmatched tokens into unknown category
+    query['unknown'].extend(unmatched_tokens)
 
     return query
+
+
+def unified_search(db, search_str):
+    """
+    Almanac search function. Allows two search methods: Provision of a "unified search string" or individual
+    specification of "search needles" using separate GET parameters (for gene, disease, etc.).
+
+    Multiple queries are allowed within each category, and are wrapped into a boolean OR statement. Queries across
+    categories are wrapped into a boolean AND statement. E.g.: A query for genes PTEN and POLE plus disease Uterine
+    Leiomyoma would be interpreted as "(gene is PTEN OR POLE) AND (disease is Uterine Leiomyoma)". The results would
+    be every assertion about Uterine Leiomyoma that references either the PTEN or POLE genes.
+
+    Returns a list of 2-tuples, in which each 2-tuple contains an Assertion and corresponding FeatureSet.
+    """
+
+    # Note that we will skip any 'unknown' needles return in the interpreted query
+    query = interpret_unified_search_string(db, search_str)
+    if not any([query['feature'], query['attribute'], query['disease'], query['pred'], query['therapy']]):
+        return []
+
+    # filter_components aggregates the filters we will apply to Assertion. No matter the search, we will always
+    # include the "validated=True" filter on Assertions and load all Features & Attributes associated with that
+    # Assertion (although they may be further filtered at a later point).
+    filter_components = [
+        FeatureDefinition.feature_def_id == Feature.feature_def_id,
+        Feature.feature_id == FeatureAttribute.feature_id,
+        Feature.feature_set_id == FeatureSet.feature_set_id,
+        FeatureSet.assertion_id == Assertion.assertion_id,
+        Assertion.validated.is_(True),
+    ]
+
+    if query['feature']:
+        or_stmt = [FeatureDefinition.readable_name.ilike(feature_name) for feature_name in query['feature']]
+        filter_components.append(or_(*or_stmt))
+
+    if query['attribute']:
+        or_stmt = []
+        for attribute_str in query['attribute']:
+            attribute_name, _, attribute_needle = attribute_str.partition(':')
+            attribute_name = sanitize_token_value(attribute_name)
+            attribute_needle = sanitize_token_value(attribute_needle)
+
+            if attribute_name and attribute_needle:
+                # Special case - if the attribute is a gene, we will search within FeatureAttributeDefinition.type ==
+                # 'gene' instead of within FeatureAttributeDefinition.readable_name. This allows searching across all
+                # possible Features that may contain a gene.
+                attribute_def_match = or_(FeatureAttributeDefinition.readable_name.ilike(attribute_name),
+                                          FeatureAttributeDefinition.name.ilike(attribute_name))
+                if attribute_name.lower() == 'gene':
+                    attribute_def_match = FeatureAttributeDefinition.type == 'gene'
+
+                or_stmt.append(and_(
+                    attribute_def_match,
+                    FeatureAttribute.attribute_def_id == FeatureAttributeDefinition.attribute_def_id,
+                    FeatureAttribute.value.ilike(attribute_needle)
+                ))
+
+        filter_components.append(or_(*or_stmt))
+
+    if query['disease']:
+        or_stmt = [Assertion.disease.ilike(cancer) for cancer in query['disease']]
+        filter_components.append(or_(*or_stmt))
+
+    if query['pred']:
+        or_stmt = [Assertion.predictive_implication.ilike(pred) for pred in query['pred']]
+        filter_components.append(or_(*or_stmt))
+
+    if query['therapy']:
+        or_stmt = [Assertion.therapy_name.ilike(therapy) for therapy in query['therapy']]
+        filter_components.append(or_(*or_stmt))
+
+    # The following produces a list of 2-tuples, where each tuple contains the following table objects:
+    # (Assertion, FeatureSet)
+    return db.session.query(Assertion, FeatureSet).filter(*filter_components).all()

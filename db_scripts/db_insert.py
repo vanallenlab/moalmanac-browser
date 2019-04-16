@@ -1,8 +1,8 @@
 import os
 import sys
+import argparse
 import pandas as pd
 from datetime import datetime
-import argparse
 
 sys.path.insert(0, './')
 sys.path.insert(0, 'target_web/')
@@ -231,7 +231,7 @@ for feature_def in feature_defs:
             this_value = series[attribute_def.name]
             new_attribute = FeatureAttribute(feature=new_feature,
                                              attribute_definition=attribute_def,
-                                             value=str(this_value))
+                                             value=str(this_value) if this_value else None)
             new_attributes.append(new_attribute)
             session.add(new_attribute)
 

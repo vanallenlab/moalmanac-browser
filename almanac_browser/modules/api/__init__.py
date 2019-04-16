@@ -1,9 +1,11 @@
+import urllib
 from flask import Blueprint
 from flask import jsonify, request, url_for
-from almanac_browser.modules.models import Assertion, Source, AssertionSchema, SourceSchema, Feature, FeatureSchema,\
-    FeatureDefinition, FeatureDefinitionSchema, FeatureAttributeDefinition, FeatureAttributeDefinitionSchema,\
+from sqlalchemy import and_, or_
+from almanac_browser.modules.models import Assertion, Source, AssertionSchema, SourceSchema, Feature, FeatureSchema, \
+    FeatureDefinition, FeatureDefinitionSchema, FeatureAttributeDefinition, FeatureAttributeDefinitionSchema, \
     FeatureAttribute, FeatureAttributeSchema
-from almanac_browser.modules.helper_functions import add_or_fetch_source, query_distinct_column,\
+from almanac_browser.modules.helper_functions import add_or_fetch_source, query_distinct_column, \
     get_all_genes, get_distinct_attribute_values, flatten_sqlalchemy_singlets
 from .errors import bad_request
 from almanac_browser.modules.portal import IMPLICATION_LEVELS, ALTERATION_CLASSES, EFFECTS
@@ -22,7 +24,7 @@ feature_attribute_definitions_schema = FeatureAttributeDefinitionSchema(many=Tru
 feature_attributes_schema = FeatureAttributeSchema(many=True)
 
 
-#TODO authentication for all API calls
+# TODO authentication for all API calls
 
 @api.route('/assertions/<int:assertion_id>', methods=['GET'])
 def get_assertion(assertion_id):
@@ -113,7 +115,7 @@ def submit():
     if 'cancer_type' not in data:
         return bad_request("Please select a cancer type")
 
-    #some fields are optional
+    # some fields are optional
     if 'alt' not in data:
         data['alt'] = ""
     if 'therapy' not in data:
@@ -174,6 +176,135 @@ def get_therapies():
     )
 
     return jsonify(data)
+
+
+@api.route('/select2_search', methods=['GET'])
+def select2_search():
+    """See https://select2.org/data-sources/formats for the Select2 data format."""
+
+    search_args = request.args.getlist('s')
+    if not search_args:
+        return jsonify({'results': []})
+
+    search_str = urllib.parse.unquote(' '.join(search_args))
+
+    data = {
+        'features': [],
+        'attributes': [],
+        'diseases': [],
+        'therapies': [],
+        'preds': [],
+        'genes': [],
+    }
+
+    feature_defs = db.session.query(FeatureDefinition.readable_name). \
+        filter(FeatureDefinition.readable_name.ilike('%%%s%%' % search_str)).distinct().all()
+    for feature_def in feature_defs:
+        data['features'].append({
+            'id': '"%s"[feature]' % feature_def.readable_name,
+            'text': feature_def.readable_name,
+            'category': 'feature',
+        })
+
+    # We search for attributes twice - once assuming a fully formed Attribute:Value pair, and once assuming the user
+    # has not specified a Value yet (and thus no colon is present).
+    attribute_name_needle, _, attribute_value_needle = search_str.partition(':')
+    if attribute_name_needle and attribute_value_needle:
+        attribute_def_with_attributes = db.session. \
+            query(
+                FeatureDefinition.readable_name,
+                FeatureAttributeDefinition.name,
+                FeatureAttributeDefinition.readable_name,
+                FeatureAttribute.value).\
+            filter(and_(FeatureDefinition.feature_def_id == FeatureAttributeDefinition.feature_def_id,
+                        FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
+                        FeatureAttribute.value.ilike('%%%s%%' % attribute_value_needle), )).distinct().all()
+
+        for feature_rname, attribute_name, attribute_rname, attribute_value in\
+                attribute_def_with_attributes:
+            data['attributes'].append({
+                'id': '"%s"[feature] "%s":"%s"[attribute]' % (feature_rname, attribute_name, attribute_value),
+                'text': '%s %s:%s' % (feature_rname, attribute_rname, attribute_value),
+                'category': 'attribute',
+            })
+    else:
+        attribute_info = db.session.query(
+            FeatureDefinition.readable_name,
+            FeatureAttributeDefinition.name,
+            FeatureAttributeDefinition.readable_name,
+            FeatureAttribute.value
+        ).filter(
+            FeatureDefinition.feature_def_id == FeatureAttributeDefinition.feature_def_id,
+            FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
+            FeatureAttribute.value != None,  # "is not" operator is not allowed in SQLAlchemy
+            or_(FeatureAttributeDefinition.name.ilike('%%%s%%' % attribute_name_needle),
+                FeatureAttributeDefinition.readable_name.ilike('%%%s%%' % attribute_name_needle))).distinct().all()
+        for feature_name, attribute_name, attribute_rname, attribute_value in attribute_info:
+            data['attributes'].append({
+                'id': '"%s"[feature] "%s:%s"[attribute]' % (feature_name, attribute_name, attribute_value),
+                'text': '%s %s:%s' % (feature_name, attribute_rname, attribute_value),
+                'category': 'attribute',
+            })
+
+    disease_assertions = db.session.query(Assertion.disease). \
+        filter(Assertion.disease.ilike('%%%s%%' % search_str)).distinct().all()
+
+    for disease in disease_assertions:
+        disease = disease[0]
+        data['diseases'].append({
+            'id': '"%s"[disease]' % disease,
+            'text': disease,
+            'category': 'disease',
+        })
+
+    therapy_assertions = db.session.query(Assertion.therapy_name). \
+        filter(Assertion.therapy_name.ilike('%%%s%%' % search_str)).distinct().all()
+    for therapy in therapy_assertions:
+        therapy = therapy[0]
+        data['therapies'].append({
+            'id': '"%s"[therapy]' % therapy,
+            'text': therapy,
+            'category': 'therapy',
+        })
+
+    pred_assertions = db.session.query(Assertion.predictive_implication). \
+        filter(Assertion.predictive_implication.ilike('%%%s%%' % search_str)).distinct().all()
+    for pred in pred_assertions:
+        pred = pred[0]
+        data['preds'].append({
+            'id': '"%s"[pred]' % pred,
+            'text': pred,
+            'category': 'pred',
+        })
+
+    # As a last ditch, we search for gene names, which "technically" should be specified as an individual attribute.
+    genes = db.session.query(FeatureAttribute.value). \
+        filter(FeatureAttributeDefinition.type == "gene",
+               FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
+               FeatureAttribute.value.ilike('%%%s%%' % search_str)).distinct().all()
+    for gene in genes:
+        gene = gene[0]
+        data['genes'].append({
+            'id': 'Gene:"%s"[attribute]' % gene,
+            'text': '%s' % gene,
+            'category': 'gene',
+        })
+
+    select2_data = {'results': []}
+    if data['features']:
+        select2_data['results'].append({'text': 'Features', 'children': data['features']})
+    if data['attributes']:
+        select2_data['results'].append({'text': 'Attributes', 'children': data['attributes']})
+    if data['diseases']:
+        select2_data['results'].append({'text': 'Diseases', 'children': data['diseases']})
+    if data['therapies']:
+        select2_data['results'].append({'text': 'Therapies', 'children': data['therapies']})
+    if data['preds']:
+        select2_data['results'].append({'text': 'Predictive Implications', 'children': data['preds']})
+    if data['genes']:
+        select2_data['results'].append({'text': 'Genes', 'children': data['genes']})
+
+    return jsonify(select2_data)
 
 
 @api.route('/extension', methods=['GET'])

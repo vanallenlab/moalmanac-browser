@@ -1,13 +1,13 @@
 import re
+import urllib
 from flask import Blueprint, request, render_template
 from auth import basic_auth
 from werkzeug.exceptions import BadRequest
 from db import db
 from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, FeatureSet
-from .helper_functions import get_unapproved_assertion_rows, make_rows, http404response, http200response, \
-    query_distinct_column, add_or_fetch_source, delete_assertion, \
-    amend_alteration_for_assertion, amend_cite_text_for_assertion, http400response, interpret_unified_search_string, \
-    get_all_genes
+from .helper_functions import get_unapproved_assertion_rows, make_rows, http404response, http200response,\
+    query_distinct_column, add_or_fetch_source, delete_assertion, amend_cite_text_for_assertion, http400response,\
+    get_all_genes, unified_search
 
 portal = Blueprint('portal', __name__)
 
@@ -48,7 +48,7 @@ def index():
     diseases = query_distinct_column(db, Assertion, 'disease')
     therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
 
-    num_genes = get_all_genes(db)
+    num_genes = len(get_all_genes(db))
     num_assertions = db.session.query(Assertion).count()
 
     return render_template('portal_index.html',
@@ -70,14 +70,18 @@ def about():
 @portal.route('/approve_submission')
 def approve_submission():
     """As an admin, approve a submission for inclusion in the searchable database"""
+
     assertion_id = int(request.args['assertion_id'])
     assertion_to_submit = db.session.query(Assertion).filter(Assertion.assertion_id == assertion_id,
                                                              Assertion.validated == 0).first()
-    db.session.add(assertion_to_submit)
-    assertion_to_submit.validated = True
-    db.session.commit()
+    if assertion_to_submit:
+        db.session.add(assertion_to_submit)
+        assertion_to_submit.validated = True
+        db.session.commit()
 
-    return http200response()
+        return http200response(message='Assertion %s added.' % request.args['assertion_id'])
+
+    return http400response(message='Assertion not found or already validated.')
 
 
 @portal.route('/delete_submission')
@@ -90,9 +94,9 @@ def delete_submission():
         delete_assertion(db, assertion_to_delete)
         db.session.commit()
 
-        return http200response()
+        return http200response(message='Assertion %s deleted.' % request.args['assertion_id'])
 
-    return http404response()
+    return http404response(message='Assertion %s not found or already validated.' % request.args['assertion_id'])
 
 
 @portal.route('/amend', methods=['POST'])
@@ -249,61 +253,15 @@ def add():
 
 @portal.route('/search')
 def search():
-    """
-    Almanac search function. Allows two search methods: Provision of a "unified search string" or individual
-    specification of "search needles" using separate GET parameters (for gene, disease, etc.).
-
-    Multiple queries are allowed within each category, and are wrapped into a boolean OR statement. Queries across
-    categories are wrapped into a boolean AND statement. E.g.: A query for genes PTEN and POLE plus disease Uterine
-    Leiomyoma would be interpreted as "(gene is PTEN OR POLE) AND (disease is Uterine Leiomyoma)". The results would
-    be every assertion about Uterine Leiomyoma that references either the PTEN or POLE genes.
-    """
-
-    needles = {'feature': [], 'disease': [], 'pred': [], 'therapy': []}
+    rows = []
     unified_search_args = request.args.getlist('s')
     if unified_search_args:
-        unified_search_str = ' '.join(unified_search_args)
-        # Note that we skip the 'unknown' needles in the interpreted query
-        query = interpret_unified_search_string(db, unified_search_str)
+        unified_search_str = urllib.parse.unquote(' '.join(unified_search_args))
 
-        for key in needles.keys():
-            needles[key] = query[key]
-
-    rows = []
-    if any(needles.values()):
-        # filter_components aggregates the filters we will apply to Assertion. No matter the search, we will always join
-        # the Assertion, AssertionToAlteration, and Alteration tables together, and we will always include the assertion
-        # "validated=True" filter.
-        filter_components = [
-            Assertion.assertion_id == AssertionToAlteration.assertion_id,
-            Alteration.alt_id == AssertionToAlteration.alt_id,
-            Assertion.validated.is_(True)
-        ]
-
-        if needles['feature']:
-            or_stmt = [Alteration.gene_name.ilike(gene) for gene in needles['feature']]
-            filter_components.append(or_(*or_stmt))
-
-        if needles['disease']:
-            or_stmt = [Assertion.disease.ilike(cancer) for cancer in needles['disease']]
-            filter_components.append(or_(*or_stmt))
-
-        if needles['pred']:
-            or_stmt = [Assertion.predictive_implication.ilike(pred) for pred in needles['pred']]
-            filter_components.append(or_(*or_stmt))
-
-        if needles['therapy']:
-            or_stmt = [Assertion.therapy_name.ilike(therapy) for therapy in needles['therapy']]
-            filter_components.append(or_(*or_stmt))
-
-        # The following produces a list of tuples, where each tuple contains the following table objects:
-        # (Assertion, AssertionToAlteration, Alteration)
-        results = (db.session.query(Assertion, AssertionToAlteration, Alteration)
-                   .filter(*filter_components).all())
-
-        # In below, result[0] = Assertion; result[2] = Alteration
+        # In below, result[0] = Assertion; result[2] = FeatureSet
+        results = unified_search(db, unified_search_str)
         for result in results:
-            rows.append(make_rows(result[2], result[0]))
+            rows.extend(make_rows(result[0], result[1]))
 
     return render_template('portal_search_results.html', rows=rows)
 

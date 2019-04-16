@@ -90,8 +90,8 @@ a:hover {
 	font-weight: bold;
 }
 
-.select2-category-feature {
-	background-color: #DAE7F8 !important;
+.select2-category-feature, .select2-category-attribute {
+	background-color: #DAEEFF !important;
 }
 
 .select2-category-disease {
@@ -104,6 +104,10 @@ a:hover {
 
 .select2-category-pred {
 	background-color: #DFDCF9 !important;
+}
+
+.select2-category-gene {
+	background-color: #FFEDED !important;
 }
 
 @media (min-width: 768px) {
