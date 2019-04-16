@@ -63,13 +63,14 @@
             {% endif %}
         </td>
 
-        {% if row['therapy_sensitivity'] != None %}
-            <td>{% if row['therapy_sensitivity'] == 1 %}Sensitivity{% elif row['therapy_sensitivity'] == 0 %}Not sensitive{% endif %}</td>
+        <td>{% if row['therapy_sensitivity'] != None %}
+            {% if row['therapy_sensitivity'] == 1 %}Sensitivity{% elif row['therapy_sensitivity'] == 0 %}Not sensitive{% endif %}
         {% elif row['therapy_resistance'] != None %}
-            <td>{% if row['therapy_resistance'] == 1 %}Resistance{% elif row['therapy_resistance'] == 0 %}Not resistance{% endif %}</td>
+            {% if row['therapy_resistance'] == 1 %}Resistance{% elif row['therapy_resistance'] == 0 %}Not resistance{% endif %}
         {% elif row['favorable_prognosis'] != None %}
-            <td>{% if row['favorable_prognosis'] %}Good{% else %}Poor{% endif %} prognosis</td>
+            {% if row['favorable_prognosis'] %}Good{% else %}Poor{% endif %} prognosis
         {% endif %}
+        </td>
 
         <td>{% if row['disease'] %}
             <a href="search?s=&quot;{{row['disease']|urlencode}}&quot;[disease]">

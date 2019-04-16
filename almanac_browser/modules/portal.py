@@ -207,7 +207,7 @@ def submit():
     assertion = Assertion()
     assertion.validated = False
     assertion.predictive_implication = required_data['implication']
-    assertion.therapy_type = required_data['therapy']
+    assertion.therapy_name = required_data['therapy']
     assertion.disease = required_data['type']
     assertion.old_disease = required_data['type']
     assertion.submitted_by = required_data['email']
