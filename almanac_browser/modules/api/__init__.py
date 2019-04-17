@@ -223,7 +223,7 @@ def select2_search():
         for feature_rname, attribute_name, attribute_rname, attribute_value in\
                 attribute_def_with_attributes:
             data['attributes'].append({
-                'id': '"%s"[feature] "%s":"%s"[attribute]' % (feature_rname, attribute_name, attribute_value),
+                'id': '"%s"[feature] "%s":"%s"[attribute]' % (feature_rname, attribute_rname, attribute_value),
                 'text': '%s %s:%s' % (feature_rname, attribute_rname, attribute_value),
                 'category': 'attribute',
             })
@@ -241,7 +241,7 @@ def select2_search():
                 FeatureAttributeDefinition.readable_name.ilike('%%%s%%' % attribute_name_needle))).distinct().all()
         for feature_name, attribute_name, attribute_rname, attribute_value in attribute_info:
             data['attributes'].append({
-                'id': '"%s"[feature] "%s:%s"[attribute]' % (feature_name, attribute_name, attribute_value),
+                'id': '"%s"[feature] "%s:%s"[attribute]' % (feature_name, attribute_rname, attribute_value),
                 'text': '%s %s:%s' % (feature_name, attribute_rname, attribute_value),
                 'category': 'attribute',
             })
