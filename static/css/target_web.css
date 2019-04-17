@@ -35,6 +35,7 @@ a:hover {
 
 /* front page */
 #index-title-block {
+	padding-top: 0 !important;
 	padding-bottom: 1em !important;
 	margin-bottom: 0;
 }
@@ -49,6 +50,14 @@ a:hover {
 
 .index-abbrev-explain {
 	padding-bottom: 1em;
+}
+
+#or-browse-by {
+	margin-top: 2em;
+}
+
+#or-browse-by p {
+	margin-bottom: 0 !important;
 }
 
 /* Submit entry page */
