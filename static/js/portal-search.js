@@ -9,21 +9,6 @@ function addCategoryClass(data, container) {
     return data.text;
 }
 
-function escapeRegexStr(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-// check if a given token is in the ?s= or &s= search parameters
-function tokenInSearchParams(token) {
-    let search_str = window.location.search;
-    search_str = search_str.replace(/\+/g, ' ');
-    search_str = decodeURIComponent(search_str);
-    search_str = search_str.replace(/(?:["'])/g, '');
-
-    const search_regex = new RegExp('s=' + escapeRegexStr(token) + '(?:&|\\?|\\s*\\[|$)');
-    return !(search_str.match(search_regex) == null);
-}
-
 $(document).ready(function () {
     const select2_search = $('#search');
     select2_search.select2({
@@ -31,6 +16,7 @@ $(document).ready(function () {
         multiple: true,
         templateSelection: addCategoryClass,
         containerCssClass: 'select2-font',
+        minimumInputLength: 2,
         ajax: {
             url: 'api/select2_search',
             dataType: 'json',
