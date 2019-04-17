@@ -25,7 +25,7 @@ function tokenInSearchParams(token) {
 }
 
 $(document).ready(function () {
-    const select2_search = $('.search');
+    const select2_search = $('#search');
     select2_search.select2({
         theme: 'bootstrap',
         multiple: true,

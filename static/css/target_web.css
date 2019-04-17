@@ -74,16 +74,28 @@ a:hover {
 }
 
 /* front page gene search bar */
-#jumbo-gene-search-group {
-	margin: 0 auto;
-}
-
 .input-group-btn {
 	vertical-align: top;
 }
 
-.search {
+#search {
 	width: 100%;
+}
+
+#search-container-outer {
+	width: 80%;
+	margin: 0 auto;
+	text-align: center;
+}
+
+#search-container-inner {
+	display: inline-block;
+}
+
+.search-instructions {
+	color: #777777;
+	font-size: 9pt;
+	float: left;
 }
 
 .select2-font {
