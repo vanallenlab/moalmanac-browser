@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block page_content %}
-    <h1>{{ config['APP_NAME'] }} Search Results</h1>
+    <h1>{{ config['APP_NAME_SHORT'] }} Search Results</h1>
 
     <div id="browse-search-row" class="row">
         <div class="col-md-5">
@@ -42,7 +42,7 @@
 
     {% include 'search_help_modal.html' %}
 
-    <p class="text-muted">Click on any alteration below to view more details about the alteration-actionability
+    <p>Click on any alteration below to view more details about the alteration-actionability
         relationship.</p>
 
     <table class="results-table display compact">
