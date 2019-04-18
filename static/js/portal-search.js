@@ -17,9 +17,11 @@ $(document).ready(function () {
         templateSelection: addCategoryClass,
         containerCssClass: 'select2-font',
         minimumInputLength: 2,
+        placeholder: 'Enter one or more search terms',
         ajax: {
             url: 'api/select2_search',
             dataType: 'json',
+            delay: 150,
             data: function (params) {
                 return {s: params.term};
             }
