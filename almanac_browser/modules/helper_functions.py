@@ -331,7 +331,7 @@ def interpret_unified_search_string(db, search_str):
     # or a string of non-whitespace characters, and must occur. The second group differs only in two ways: it must
     # begin with a colon (:) character, and is optional. It matches attribute search strings (Attribute:Value). The
     # final group matches an optional value in [brackets], which correspond to formal category tags.
-    token_regex = r'((?:\"[^\"]+\"|\S+)(?:\:\"[^\"]+\"|\S+)?(?:\s*\[[^]]+\])?)'
+    token_regex = r'((?:\"[^\"]+\"|[^:\s]+)(?:\:\"[^\"]+\"|[^:\s]+)?(?:\s*\[[^]]+\])?)'
     search_tokens = re.findall(token_regex, search_str)
     unmatched_tokens = []
     for token in search_tokens:
@@ -427,6 +427,7 @@ def unified_search(db, search_str):
 
     # Note that we will skip any 'unknown' needles return in the interpreted query
     query = interpret_unified_search_string(db, search_str)
+
     if not any([query['feature'], query['attribute'], query['disease'], query['pred'], query['therapy']]):
         return []
 

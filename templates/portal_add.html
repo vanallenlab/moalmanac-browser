@@ -71,21 +71,17 @@
             {%  for attribute_definition in feature_definition.attribute_definitions %}
             <div class="col-md-3">
                 <h3>{{ attribute_definition.readable_name }}</h3>
-                {% if attribute_definition.type == 'gene' %}
                 <select id="{{ feature_definition.feature_def_id }}-{{ attribute_definition.attribute_def_id }}-input"
+                        {% if attribute_definition.type == 'gene' %}
                         class="gene-select2 attribute-select2"
-                        name="{{ feature_definition.name }}-{{ attribute_definition.name }}">
-                    <option><!-- empty option required for placeholder --></option>
-                </select>
-                {% else %}
-                <select id="{{ feature_definition.feature_def_id }}-{{ attribute_definition.attribute_def_id }}-input"
+                        {%  else %}
                         class="nongene-select2 attribute-select2"
+                        {%  endif %}
                         data-feature-def-id="{{ feature_definition.feature_def_id }}"
                         data-attribute-def-id="{{ attribute_definition.attribute_def_id }}"
                         name="{{ feature_definition.name }}-{{ attribute_definition.name }}">
                     <option><!-- empty option required for placeholder --></option>
                 </select>
-                {% endif %}
             </div>
             {% endfor %}
         </div>
