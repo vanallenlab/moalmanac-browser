@@ -65,7 +65,6 @@ assertion_tsv_map = {
     'resistance': 'resistance',
     'favorable_prognosis': 'favorable_prognosis',
     'predictive_implication': 'predictive_implication',
-    'predictive_implication_sort': 'predictive_implication_sort',
     'description': 'description',
     'connections': 'connections',
     'ctrpv2_therapy': 'ctrpv2_therapy',
@@ -148,14 +147,7 @@ def sanitize_assertion_df(df, feature):
     ]:
         df.loc[:, boolean_attribute].fillna(0).astype(int).replace({1: True, 0: False})
 
-    df[assertion_tsv_map['predictive_implication_sort']] =\
-        df[assertion_tsv_map['predictive_implication']].replace(IMPLICATION_LEVELS_SORT)
     df = df.where(df.notnull(), None)
-    df.sort_values(
-        [assertion_tsv_map['predictive_implication_sort'],
-         assertion_tsv_map['therapy']],
-        ascending=[False, True],
-        inplace=True)
     df[assertion_tsv_map['display_string']] = create_feature_string_series(df, feature)
 
     return df

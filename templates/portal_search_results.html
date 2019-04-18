@@ -48,7 +48,6 @@
     <table class="results-table display compact">
         <thead>
         <tr>
-            <th>Predictive Level Sort</th>
             <th>Feature</th>
             <th>Alteration</th>
             <th>Therapy</th>
@@ -61,7 +60,6 @@
         <tbody>
         {% for row in rows %}
             <tr>
-                <td>{{ row['predictive_implication_sort'] }}</td>
                 <td>{% if row['feature'] %}
                     <a href="search?s=&quot;{{ row['feature']|urlencode }}&quot;[feature]">{{ row['feature'] }}</a>
                 {% endif %}
@@ -93,7 +91,7 @@
                     </a>
                 {% endif %}
                 </td>
-                <td>
+                <td data-order="{{ row['predictive_implication_sort'] }}">
                     <a href="search?s=&quot;{{ row['predictive_implication']|urlencode }}&quot;[pred]">
                         {{ row['predictive_implication'] }}
                     </a>

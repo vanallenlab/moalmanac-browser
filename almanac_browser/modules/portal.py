@@ -5,20 +5,13 @@ from auth import basic_auth
 from werkzeug.exceptions import BadRequest
 from db import db
 from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, FeatureSet
-from .helper_functions import get_unapproved_assertion_rows, make_rows, http404response, http200response,\
-    query_distinct_column, add_or_fetch_source, delete_assertion, amend_cite_text_for_assertion, http400response,\
+from .helper_functions import IMPLICATION_LEVELS_SORT, get_unapproved_assertion_rows, make_rows, http404response, \
+    http200response, query_distinct_column, add_or_fetch_source, delete_assertion, amend_cite_text_for_assertion, \
+    http400response, \
     get_all_genes, unified_search
 
 portal = Blueprint('portal', __name__)
 
-IMPLICATION_LEVELS_SORT = {
-    'FDA-Approved': 5,
-    'Guideline': 4,
-    'Clinical trial': 3,
-    'Clinical evidence': 2,
-    'Preclinical': 1,
-    'Inferential': 0
-}
 IMPLICATION_LEVELS = ['FDA-Approved', 'Guideline', 'Clinical trial', 'Clinical evidence', 'Preclinical', 'Inferential']
 
 ALTERATION_CLASSES = [
@@ -27,19 +20,19 @@ ALTERATION_CLASSES = [
     'Rearrangement', 'Silencing']
 
 EFFECTS = [
- 'Missense',
- 'Amplification',
- 'Nonsense',
- 'Frameshift',
- 'Splice Site',
- 'Fusion',
- 'Translocation',
- 'Deletion',
- 'shRNA',
- 'siRNA',
- 'InDel',
- 'CRSPR-Cas9',
- 'MSI-High'
+    'Missense',
+    'Amplification',
+    'Nonsense',
+    'Frameshift',
+    'Splice Site',
+    'Fusion',
+    'Translocation',
+    'Deletion',
+    'shRNA',
+    'siRNA',
+    'InDel',
+    'CRSPR-Cas9',
+    'MSI-High'
 ]
 
 
@@ -236,7 +229,7 @@ def submit():
         'type': required_data['type'],
         'source': required_data['source'],
         'feature_name': feature_def.name
-     })
+    })
 
 
 @portal.route('/add')

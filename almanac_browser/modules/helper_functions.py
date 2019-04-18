@@ -10,6 +10,15 @@ from werkzeug.exceptions import BadRequest
 from .models import Assertion, Source, FeatureSet, Feature, FeatureDefinition, FeatureAttribute, \
     FeatureAttributeDefinition
 
+IMPLICATION_LEVELS_SORT = {
+    'FDA-Approved': 5,
+    'Guideline': 4,
+    'Clinical trial': 3,
+    'Clinical evidence': 2,
+    'Preclinical': 1,
+    'Inferential': 0
+}
+
 
 def flatten_sqlalchemy_singlets(l):
     """In some uses cases, SQLAlchemy returns a list of 1-tuples. This function flattens these lists."""
@@ -226,6 +235,7 @@ def make_rows(assertion, feature_set):
             'disease': assertion.disease,
             'submitter': urllib.parse.unquote(assertion.submitted_by) if assertion.submitted_by else None,
             'predictive_implication': assertion.predictive_implication,
+            'predictive_implication_sort': IMPLICATION_LEVELS_SORT[assertion.predictive_implication],
             'assertion_id': assertion.assertion_id,
             'sources': [s for s in assertion.sources],
         })
