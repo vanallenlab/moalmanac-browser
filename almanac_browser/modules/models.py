@@ -51,7 +51,7 @@ class Feature(Base, db.Model):
 
     attributes = db.relationship('FeatureAttribute', back_populates='feature', passive_deletes=True)
     feature_set = db.relationship('FeatureSet', back_populates='features')
-    feature_definition = db.relationship('FeatureDefinition', foreign_keys=feature_def_id)
+    feature_definition = db.relationship('FeatureDefinition', foreign_keys=feature_def_id, backref='features')
 
 
 class FeatureAttribute(Base, db.Model):
@@ -64,7 +64,8 @@ class FeatureAttribute(Base, db.Model):
     value = db.Column('value', db.Text)
 
     feature = db.relationship('Feature', back_populates='attributes')
-    attribute_definition = db.relationship('FeatureAttributeDefinition', foreign_keys=attribute_def_id)
+    attribute_definition = db.relationship('FeatureAttributeDefinition', foreign_keys=attribute_def_id,
+                                           backref='attributes')
 
 
 class Assertion(Base, db.Model):
@@ -105,7 +106,7 @@ class Source(Base, db.Model):
     cite_text = db.Column('cite_text', db.Text)
     source_type = db.Column('source_type', db.Text)
 
-    assertions = db.relationship('Assertion',  secondary='Assertion_To_Source')
+    assertions = db.relationship('Assertion', secondary='Assertion_To_Source')
 
 
 class AssertionToSource(Base, db.Model):

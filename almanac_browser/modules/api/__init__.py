@@ -182,6 +182,16 @@ def get_therapies():
 def select2_search():
     """See https://select2.org/data-sources/formats for the Select2 data format."""
 
+    def _make_attribute_data(attribute_rname, attribute_value, feature_rname=None):
+        if feature_rname:
+            id_value = '"%s"[feature] "%s":"%s"[attribute]' % (feature_rname, attribute_rname, attribute_value)
+            text_value = '%s %s:%s' % (feature_rname, attribute_rname, attribute_value)
+        else:
+            id_value = '"%s":"%s"[attribute]' % (attribute_rname, attribute_value)
+            text_value = '%s:%s' % (attribute_rname, attribute_value)
+
+        return {'id': id_value, 'text': text_value, 'category': 'attribute'}
+
     search_args = request.args.getlist('s')
     if not search_args:
         return jsonify({'results': []})
@@ -197,7 +207,7 @@ def select2_search():
         'genes': [],
     }
 
-    feature_defs = db.session.query(FeatureDefinition.readable_name). \
+    feature_defs = db.session.query(FeatureDefinition). \
         filter(FeatureDefinition.readable_name.ilike('%%%s%%' % search_str)).distinct().all()
     for feature_def in feature_defs:
         data['features'].append({
@@ -206,45 +216,32 @@ def select2_search():
             'category': 'feature',
         })
 
+        # Add all corresponding attributes and possible attribute values for this feature
+        for attribute_def in feature_def.attribute_definitions:
+            for attribute in attribute_def.attributes:
+                new_data = _make_attribute_data(attribute_def.readable_name, attribute.value, feature_def.readable_name)
+                if new_data not in data['attributes']:
+                    data['attributes'].append(new_data)
+
     # We search for attributes twice - once assuming a fully formed Attribute:Value pair, and once assuming the user
     # has not specified a Value yet (and thus no colon is present).
     attribute_name_needle, _, attribute_value_needle = search_str.partition(':')
     if attribute_name_needle and attribute_value_needle:
         attribute_def_with_attributes = db.session. \
-            query(
-                FeatureDefinition.readable_name,
-                FeatureAttributeDefinition.name,
-                FeatureAttributeDefinition.readable_name,
-                FeatureAttribute.value).\
-            filter(and_(FeatureDefinition.feature_def_id == FeatureAttributeDefinition.feature_def_id,
-                        FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
-                        FeatureAttribute.value.ilike('%%%s%%' % attribute_value_needle), )).distinct().all()
+            query(FeatureAttributeDefinition.readable_name, FeatureAttribute.value). \
+            filter(and_(FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
+                        FeatureAttribute.value.ilike('%%%s%%' % attribute_value_needle))).distinct().all()
 
-        for feature_rname, attribute_name, attribute_rname, attribute_value in\
-                attribute_def_with_attributes:
-            data['attributes'].append({
-                'id': '"%s"[feature] "%s":"%s"[attribute]' % (feature_rname, attribute_rname, attribute_value),
-                'text': '%s %s:%s' % (feature_rname, attribute_rname, attribute_value),
-                'category': 'attribute',
-            })
+        for attribute_rname, attribute_value in attribute_def_with_attributes:
+            data['attributes'].append(_make_attribute_data(attribute_rname, attribute_value))
     else:
-        attribute_info = db.session.query(
-            FeatureDefinition.readable_name,
-            FeatureAttributeDefinition.name,
-            FeatureAttributeDefinition.readable_name,
-            FeatureAttribute.value
-        ).filter(
-            FeatureDefinition.feature_def_id == FeatureAttributeDefinition.feature_def_id,
+        attribute_info = db.session.query(FeatureAttributeDefinition.readable_name, FeatureAttribute.value).filter(
             FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
             FeatureAttribute.value != None,  # "is not" operator is not allowed in SQLAlchemy
             or_(FeatureAttributeDefinition.name.ilike('%%%s%%' % attribute_name_needle),
                 FeatureAttributeDefinition.readable_name.ilike('%%%s%%' % attribute_name_needle))).distinct().all()
-        for feature_name, attribute_name, attribute_rname, attribute_value in attribute_info:
-            data['attributes'].append({
-                'id': '"%s"[feature] "%s:%s"[attribute]' % (feature_name, attribute_rname, attribute_value),
-                'text': '%s %s:%s' % (feature_name, attribute_rname, attribute_value),
-                'category': 'attribute',
-            })
+        for attribute_rname, attribute_value in attribute_info:
+            data['attributes'].append(_make_attribute_data(attribute_rname, attribute_value))
 
     disease_assertions = db.session.query(Assertion.disease). \
         filter(Assertion.disease.ilike('%%%s%%' % search_str)).distinct().all()
