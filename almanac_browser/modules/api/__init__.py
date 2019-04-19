@@ -1,10 +1,11 @@
+import re
 import urllib
 from flask import Blueprint
 from flask import jsonify, request, url_for
 from sqlalchemy import and_, or_
 from almanac_browser.modules.models import Assertion, Source, AssertionSchema, SourceSchema, Feature, FeatureSchema, \
     FeatureDefinition, FeatureDefinitionSchema, FeatureAttributeDefinition, FeatureAttributeDefinitionSchema, \
-    FeatureAttribute, FeatureAttributeSchema
+    FeatureAttribute, FeatureAttributeSchema, FeatureSet
 from almanac_browser.modules.helper_functions import add_or_fetch_source, query_distinct_column, \
     get_all_genes, get_distinct_attribute_values, flatten_sqlalchemy_singlets
 from .errors import bad_request
@@ -19,8 +20,11 @@ source_schema = SourceSchema()
 sources_schema = SourceSchema(many=True)
 feature_schema = FeatureSchema()
 features_schema = FeatureSchema(many=True)
+feature_definition_schema = FeatureDefinitionSchema()
 feature_definitions_schema = FeatureDefinitionSchema(many=True)
+feature_attribute_definition_schema = FeatureAttributeDefinitionSchema()
 feature_attribute_definitions_schema = FeatureAttributeDefinitionSchema(many=True)
+feature_attribute_schema = FeatureAttributeSchema()
 feature_attributes_schema = FeatureAttributeSchema(many=True)
 
 
@@ -38,6 +42,13 @@ def get_assertions():
     data = Assertion.query.all()
 
     return assertions_schema.jsonify(data)
+
+
+@api.route('/feature_definitions/<int:definition_id>', methods=['GET'])
+def get_feature_definition(definition_id):
+    definition = FeatureDefinition.query.get_or_404(definition_id)
+
+    return feature_definition_schema.jsonify(definition)
 
 
 @api.route('/feature_definitions', methods=['GET'])
@@ -61,15 +72,36 @@ def get_features():
     return features_schema.jsonify(data)
 
 
-@api.route('/feature_attribute_definitions/<int:feature_def_id>', methods=['GET'])
-def get_feature_attribute_definitions(feature_def_id):
-    data = FeatureAttributeDefinition.query.filter_by(feature_def_id=feature_def_id)
+@api.route('/attribute_definitions/<int:attribute_def_id>', methods=['GET'])
+def get_attribute_definition(attribute_def_id):
+    data = FeatureAttributeDefinition.query.get_or_404(attribute_def_id)
+
+    return feature_attribute_definition_schema.jsonify(data)
+
+
+@api.route('/attribute_definitions', methods=['GET'])
+def get_attribute_definitions():
+    data = FeatureAttributeDefinition.query.all()
 
     return feature_attribute_definitions_schema.jsonify(data)
 
 
-@api.route('/attributes/<int:attribute_def_id>', methods=['GET'])
-def get_attributes(attribute_def_id):
+@api.route('/attributes/<int:attribute_id>', methods=['GET'])
+def get_attribute(attribute_id):
+    data = FeatureAttribute.query.filter_by(attribute_id=attribute_id)
+
+    return feature_attributes_schema.jsonify(data)
+
+
+@api.route('/attributes', methods=['GET'])
+def get_attributes():
+    data = FeatureAttribute.query.all()
+
+    return feature_attributes_schema.jsonify(data)
+
+
+@api.route('/attributes_within_definition/<int:attribute_def_id>', methods=['GET'])
+def get_attributes_within_definition(attribute_def_id):
     data = FeatureAttribute.query.filter_by(attribute_def_id=attribute_def_id)
 
     return feature_attributes_schema.jsonify(data)
@@ -101,38 +133,60 @@ def get_sources():
 
 
 @api.route('/new_assertion', methods=['POST'])
-def submit():
+def new_assertion():
     """Submit an assertion for consideration for inclusion in the database"""
+
     data = request.get_json() or {}
-    if 'gene' not in data or 'doi' not in data or 'email' not in data:
+    print(data)
+    if 'doi' not in data or 'email' not in data:
         return bad_request("Please submit gene symbol, DOI, and email fields")
-    if 'effect' not in data or data['effect'] not in EFFECTS:
-        return bad_request("Please select a valid effect type")
-    if 'alt_class' not in data or data['alt_class'] not in ALTERATION_CLASSES:
-        return bad_request("Please select a valid alteration feature")
     if 'implication' not in data or data['implication'] not in IMPLICATION_LEVELS:
         data['implication'] = None
     if 'cancer_type' not in data:
-        return bad_request("Please select a cancer type")
+        return bad_request('Please select a cancer type')
+    if 'feature_def_id' not in data:
+        return bad_request('Please select a feature definition ID.')
+
+    attribute_data = {}
+    for key, value in data.items():
+        attribute_match = re.match(r'^attribute-(\d+)$', key)
+        if attribute_match:
+            attribute_data[attribute_match.group(1)] = value
+
+    if not attribute_data:
+        return bad_request('Please submit at least one attribute.')
 
     # some fields are optional
-    if 'alt' not in data:
-        data['alt'] = ""
     if 'therapy' not in data:
-        data['therapy'] = ""
-
-    alteration = add_or_fetch_feature(db, data['gene'], data['effect'], data['alt_class'], data['alt'])
-    source = add_or_fetch_source(db, data['doi'])
+        data['therapy'] = ''
 
     assertion = Assertion()
     assertion.validated = False
-    assertion.alterations.append(alteration)
     assertion.predictive_implication = data['implication']
-    assertion.therapy_type = data['therapy']
+    assertion.therapy_name = data['therapy']
     assertion.disease = data['cancer_type']
     assertion.old_disease = data['cancer_type']
-    assertion.sources.append(source)
     assertion.submitted_by = data['email']
+
+    feature_set = FeatureSet(assertion=assertion)
+    feature_def = FeatureDefinition.query.get(data['feature_def_id'])
+    if not feature_def:
+        return bad_request('Invalid feature definition ID.')
+
+    feature = Feature(feature_set=feature_set, feature_definition=feature_def)
+    for attribute_def_id, attribute_value in attribute_data.items():
+        new_attribute = FeatureAttribute(
+            feature_id=data['feature_def_id'],
+            attribute_def_id=attribute_def_id,
+            value=attribute_value
+        )
+
+        feature.attributes.append(new_attribute)
+
+    feature_set.features.append(feature)
+    assertion.feature_sets.append(feature_set)
+    assertion.sources.append(add_or_fetch_source(db, data['doi']))
+
     db.session.add(assertion)
     db.session.commit()
 
