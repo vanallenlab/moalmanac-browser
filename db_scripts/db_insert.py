@@ -112,8 +112,8 @@ def create_feature_string_series(df, feature):
     display_string = assertion_tsv_map['display_string']
     df[display_string] = ''
 
-    if feature in ['Somatic Mutation', 'Germline Mutation']:
-        df.loc[:, display_string] = df.loc[:, ['mutation_type', 'gene', 'protein_change']].fillna('').astype(str).\
+    if feature in ['Somatic Variant', 'Germline Variant']:
+        df.loc[:, display_string] = df.loc[:, ['variant_type', 'gene', 'protein_change']].fillna('').astype(str).\
             apply(lambda x: ' '.join(x), axis=1)
     elif feature is 'Copy Number':
         df.loc[:, display_string] = df.loc[:, ['direction', 'gene', 'locus']].fillna('').astype(str).\

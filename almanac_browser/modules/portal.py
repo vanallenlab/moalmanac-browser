@@ -16,7 +16,7 @@ IMPLICATION_LEVELS = ['FDA-Approved', 'Guideline', 'Clinical trial', 'Clinical e
 
 ALTERATION_CLASSES = [
     'Aneuploidy', 'Copy Number', 'Germline', 'Knockout', 'Microsatellite Stability',
-    'Mutation', 'Mutational Burden', 'Mutational Signature', 'Neoantigen Burden',
+    'Variant', 'Mutational Burden', 'Mutational Signature', 'Neoantigen Burden',
     'Rearrangement', 'Silencing']
 
 EFFECTS = [

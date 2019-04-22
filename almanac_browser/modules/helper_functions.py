@@ -173,17 +173,17 @@ def make_display_string(feature):
             return '%s %s' % (rearrangement_type, locus)
         else:
             return rearrangement_type if rearrangement_type else ''
-    elif feature_name in ['somatic_mutation', 'germline_mutation']:
-        mutation_type = find_attribute_by_name(feature.attributes, 'mutation_type')
+    elif feature_name in ['somatic_variant', 'germline_variant']:
+        variant_type = find_attribute_by_name(feature.attributes, 'variant_type')
         gene = find_attribute_by_name(feature.attributes, 'gene')
         protein_change = find_attribute_by_name(feature.attributes, 'protein_change')
 
         if gene:
             gene = make_gene_link(gene)
 
-        # Any of mutation_type, gene, or protein_change may be None. With None as the first parameter to filter(),
+        # Any of variant_type, gene, or protein_change may be None. With None as the first parameter to filter(),
         # all False/None values are skipped in the final join() call.
-        return ' '.join(filter(None, [mutation_type, gene, protein_change]))
+        return ' '.join(filter(None, [variant_type, gene, protein_change]))
     elif feature_name == 'copy_number':
         gene = find_attribute_by_name(feature.attributes, 'gene')
         direction = find_attribute_by_name(feature.attributes, 'direction')
