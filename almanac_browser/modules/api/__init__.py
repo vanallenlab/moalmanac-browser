@@ -378,3 +378,4 @@ def populate_ext():
                    effects=EFFECTS,
                    therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name']
                    )
+

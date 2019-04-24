@@ -1,6 +1,9 @@
 import re
+import io
+import csv
 import urllib
-from flask import Blueprint, request, render_template
+from zipfile import ZipFile
+from flask import Blueprint, request, render_template, send_file
 from auth import basic_auth
 from werkzeug.exceptions import BadRequest
 from db import db
@@ -265,3 +268,77 @@ def assertion(assertion_id):
 
     return render_template('portal_assertion.html',
                            assertion=assertion)
+
+
+@portal.route('/export', methods=['GET'])
+def export():
+    feature_defs = FeatureDefinition.query.all()
+
+    zip_output = io.BytesIO()
+    zip_file = ZipFile(zip_output, 'w')
+
+    for feature_def in feature_defs:
+        tsv_output = io.StringIO()
+        tsv_writer = csv.writer(tsv_output, delimiter='\t')
+
+        # Write headers
+        row = []
+        for attribute_definition in feature_def.attribute_definitions:
+            row.append(attribute_definition.name)
+
+        row.extend([
+            'disease',
+            'oncotree_code',
+            'therapy_name',
+            'therapy_type',
+            'therapy_sensitivity',
+            'therapy_resistance',
+            'favorable_prognosis',
+            'predictive_implication',
+            'description',
+            'doi',
+            'source',
+            'last_updated'
+        ])
+        tsv_writer.writerow(row)
+
+        for feature in feature_def.features:
+            # Write per-assertion data
+            for assertion in db.session.query(Assertion).filter(
+                    Feature.feature_id == feature.feature_id,
+                    FeatureAttribute.feature_id == Feature.feature_id,
+                    Feature.feature_id == FeatureSet.feature_set_id,
+                    FeatureSet.assertion_id == Assertion.assertion_id
+            ):
+                row = []
+                for attribute in feature.attributes:
+                    row.append(attribute.value)
+
+                row.extend([
+                    assertion.disease,
+                    assertion.oncotree_code,
+                    assertion.therapy_name,
+                    assertion.therapy_type,
+                    assertion.therapy_sensitivity,
+                    assertion.therapy_resistance,
+                    assertion.favorable_prognosis,
+                    assertion.predictive_implication,
+                    assertion.description,
+                ])
+
+                source_dois = []
+                source_cite_texts = []
+                for source in assertion.sources:
+                    source_dois.append(source.doi if source.doi else '')
+                    source_cite_texts.append(source.cite_text if source.cite_text else '')
+
+                row.extend(['|'.join(source_dois), '|'.join(source_cite_texts)])
+                row.append(assertion.last_updated)
+                tsv_writer.writerow(row)
+
+        zip_file.writestr('%s.tsv' % feature_def.name, tsv_output.getvalue().encode('utf-8'))
+        tsv_output.close()
+
+    zip_file.close()
+    zip_output.seek(0)
+    return send_file(zip_output, mimetype='application/zip', attachment_filename='almanac.zip', as_attachment=True)
