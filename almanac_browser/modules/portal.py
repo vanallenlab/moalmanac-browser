@@ -18,7 +18,7 @@ portal = Blueprint('portal', __name__)
 IMPLICATION_LEVELS = ['FDA-Approved', 'Guideline', 'Clinical trial', 'Clinical evidence', 'Preclinical', 'Inferential']
 
 ALTERATION_CLASSES = [
-    'Aneuploidy', 'Copy Number', 'Germline', 'Knockout', 'Microsatellite Stability',
+    'Aneuploidy', 'Copy Number', 'Germline', 'Knockdown', 'Microsatellite Stability',
     'Variant', 'Mutational Burden', 'Mutational Signature', 'Neoantigen Burden',
     'Rearrangement', 'Silencing']
 

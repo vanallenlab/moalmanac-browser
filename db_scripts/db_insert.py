@@ -118,7 +118,7 @@ def create_feature_string_series(df, feature):
     elif feature is 'Copy Number':
         df.loc[:, display_string] = df.loc[:, ['direction', 'gene', 'locus']].fillna('').astype(str).\
             apply(lambda x: ' '.join(x), axis=1)
-    elif feature in ['Knockout', 'Silencing']:
+    elif feature in ['Knockdown', 'Silencing']:
         df.loc[:, display_string] = df.loc[:, ['technique', 'gene']].fillna('').astype(str).\
             apply(lambda x: ' '.join(x), axis=1)
     elif feature is 'Rearrangement':

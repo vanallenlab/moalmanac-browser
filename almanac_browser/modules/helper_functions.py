@@ -205,7 +205,7 @@ def make_display_string(feature):
         burden = find_attribute_by_name(feature.attributes, 'burden')
 
         return burden if burden else ''
-    elif feature_name in ['knockout', 'silencing']:
+    elif feature_name in ['knockdown', 'silencing']:
         gene = find_attribute_by_name(feature.attributes, 'gene')
         technique = find_attribute_by_name(feature.attributes, 'technique')
 
