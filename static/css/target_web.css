@@ -102,7 +102,7 @@ a:hover {
 }
 
 #search-container-inner {
-	display: inline-block;
+	display: inline-table;
 }
 
 .search-instructions {
