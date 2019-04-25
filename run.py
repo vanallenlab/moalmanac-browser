@@ -1,4 +1,4 @@
-from target_portal import create_app
+from almanac_browser import create_app
 import os
 
 app = create_app(__name__)

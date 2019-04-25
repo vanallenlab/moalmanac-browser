@@ -9,6 +9,20 @@ from .modules.api import api
 from .modules.editor import editor
 from .modules.portal import portal
 
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+from sqlite3 import Connection
+
+
+@event.listens_for(Engine, 'connect')
+def _set_sqlite_pragma(dbapi_connection, connection_record):
+    """By default, SQLite does not support foreign keys unless manually enabled."""
+
+    if isinstance(dbapi_connection, Connection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute('PRAGMA foreign_keys=ON;')
+        cursor.close()
+
 
 def create_app(name=__name__):
     app = Flask(name)
@@ -27,4 +41,3 @@ def create_app(name=__name__):
     basic_auth.init_app(app)
 
     return app
-

@@ -6,11 +6,8 @@ $(document).ready(function() {
             ordering: true,
             paging: true,
             searching: false,
-            "order": [[ 0, "desc" ]],
-            "columnDefs": [{
-                "targets": [ 0 ],
-                "visible": false
-            }]
+            order: [[ 5, "desc" ]],
+            columnDefs: [{orderable: false, targets: 6}]
         });
     }
 });

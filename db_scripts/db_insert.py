@@ -1,25 +1,36 @@
+import os
 import sys
+import argparse
+import pandas as pd
+from datetime import datetime
 
 sys.path.insert(0, './')
 sys.path.insert(0, 'target_web/')
 sys.path.insert(0, 'target_web/modules/')
-
-import pandas as pd
-from datetime import datetime
-from target_portal.modules.models import Alteration, Assertion, Source, Version
+from almanac_browser.modules.models import FeatureDefinition, FeatureAttributeDefinition, Feature, FeatureAttribute,\
+    FeatureSet, Assertion, Source, AssertionToSource, Version
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-if len(sys.argv) != 6:
-    sys.stdout.write('Usage:\n')
-    sys.stdout.write('TARGET_insert.py import_file.tsv db_name.sqlite3 1 2 3\n')
-    sys.exit()
 
-import_file = sys.argv[1]
-db_name = sys.argv[2]
-v_major = sys.argv[3]
-v_minor = sys.argv[4]
-v_patch = sys.argv[5]
+parser = argparse.ArgumentParser(
+    description='Convert human-generated Almanac TSV files into SQLite files for use by the Almanac Portal.'
+)
+parser.add_argument('features_tsv', help='TSV file containing feature definitions')
+parser.add_argument('assertions_folder', help='Folder containing assertion TSV files')
+parser.add_argument('db_filename', help='Output DB filename')
+parser.add_argument('version_major', help='Major version number')
+parser.add_argument('version_minor', help='Minor version number')
+parser.add_argument('version_patch', help='Patch version number')
+
+args = parser.parse_args()
+
+features_tsv = args.features_tsv
+assertions_folder = args.assertions_folder
+db_name = args.db_filename
+v_major = args.version_major
+v_minor = args.version_minor
+v_patch = args.version_patch
 
 engine = create_engine('sqlite:///%s' % db_name)
 session = sessionmaker(bind=engine)()
@@ -33,37 +44,42 @@ IMPLICATION_LEVELS_SORT = {
     'Inferential': 0
 }
 
-feature_type = 'feature_type'
-feature = 'feature'
-alt_type = 'alteration_type'
-alt = 'alteration'
-disease = 'disease'
-stage = 'stage'
-ontology = 'oncotree_ontology'
-code = 'oncotree_code'
-therapy = 'therapy'
-therapy_class = 'therapy_class'
-therapy_type = 'therapy_type'
-sensitivity = 'sensitivity'
-resistance = 'resistance'
-favorable_prognosis = 'favorable_prognosis'
-predictive_implication = 'predictive_implication'
-predictive_implication_sort = 'predictive_implication_sort'
-description = 'description'
-connections = 'connections'
-ctrpv2_therapy = 'ctrpv2_therapy'
-doi = 'doi'
-citation = 'citation'
-source_type = 'source_type'
-pubmed_id = 'pubmed_id'
-display_string = 'display_string'
+features_tsv_map = {
+    'feature_name': 'feature',
+    'readable_feature_name': 'readable_name',
+    'is_germline': 'is_germline',
+    'attribute_name': 'attribute',
+    'readable_attribute_name': 'readable_attribute',
+    'type': 'type',
+}
+
+assertion_tsv_map = {
+    'disease': 'disease',
+    'stage': 'stage',
+    'ontology': 'oncotree_ontology',
+    'code': 'oncotree_code',
+    'therapy': 'therapy',
+    'therapy_class': 'therapy_class',
+    'therapy_type': 'therapy_type',
+    'sensitivity': 'sensitivity',
+    'resistance': 'resistance',
+    'favorable_prognosis': 'favorable_prognosis',
+    'predictive_implication': 'predictive_implication',
+    'description': 'description',
+    'connections': 'connections',
+    'ctrpv2_therapy': 'ctrpv2_therapy',
+    'doi': 'doi',
+    'citation': 'citation',
+    'source_type': 'source_type',
+    'pubmed_id': 'pubmed_id',
+    'display_string': 'display_string',
+}
 
 
 def insert_if_new(model, **kwargs):
     """
     Insert db_item if it does not already exist in the database.
     **kwargs contains the list of items that must match for a database row to be considered "identical."
-    Returns (db_instance, bool), where the boolean value is True if an item was inserted and False otherwise.
     Adapted from http://stackoverflow.com/questions/2546207/does-sqlalchemy-have-an-equivalent-of-djangos-get-or-create
     """
 
@@ -76,8 +92,8 @@ def insert_if_new(model, **kwargs):
         return instance
 
 
-def read_table(handle):
-    return pd.read_csv(handle, sep='\t', encoding='latin-1')
+def read_tsv(handle):
+    return pd.read_csv(handle, sep='\t', encoding='utf-8')
 
 
 def commit_objects(objects_to_add):
@@ -92,107 +108,142 @@ def commit_object(object_to_add):
     session.flush()
 
 
-def create_feature_string_series(dataframe):
-    dataframe[display_string] = ''
-    cond_aneuploidy = dataframe.loc[:, feature_type] == 'Aneuploidy'
-    cond_mutation = dataframe.loc[:, feature_type] == 'Mutation'
-    cond_germline = dataframe.loc[:, feature_type] == 'Germline'
+def create_feature_string_series(df, feature):
+    display_string = assertion_tsv_map['display_string']
+    df[display_string] = ''
 
-    cond_copynumber = dataframe.loc[:, feature_type] == 'Copy Number'
-    cond_knockout = dataframe.loc[:, feature_type] == 'Knockout'
-    cond_silencing = dataframe.loc[:, feature_type] == 'Silencing'
-    cond_msi = dataframe.loc[:, feature_type] == 'Microsatellite Stability'
-    cond_signature = dataframe.loc[:, feature_type] == 'Mutational Signature'
-    cond_burden = dataframe.loc[:, feature_type].str.contains('Burden')
-    cond_rearrangement = dataframe.loc[:, feature_type] == 'Rearrangement'
+    if feature in ['Somatic Variant', 'Germline Variant']:
+        df.loc[:, display_string] = df.loc[:, ['variant_type', 'gene', 'protein_change']].fillna('').astype(str).\
+            apply(lambda x: ' '.join(x), axis=1)
+    elif feature is 'Copy Number':
+        df.loc[:, display_string] = df.loc[:, ['direction', 'gene', 'locus']].fillna('').astype(str).\
+            apply(lambda x: ' '.join(x), axis=1)
+    elif feature in ['Knockdown', 'Silencing']:
+        df.loc[:, display_string] = df.loc[:, ['technique', 'gene']].fillna('').astype(str).\
+            apply(lambda x: ' '.join(x), axis=1)
+    elif feature is 'Rearrangement':
+        df.loc[:, display_string] = df.loc[:, ['rearrangement_type', 'gene1', 'gene2', 'locus']].fillna('').astype(str)
+        for display_index in df.loc[:, display_string].index:
+            display_series = feature_defs_df.loc[display_index, :]
+            if display_series[1] and display_series[2]:
+                df.loc[:, display_string].apply(lambda x: '%s %s-%s' %
+                                                          (display_series[0], display_series[1], display_series[2]))
+            else:
+                df.loc[:, display_string].apply(lambda x: '%s %s' % (display_series[0], display_series[3]))
+    elif feature is 'Aneuploidy':
+        df.loc[:, display_string] = df.loc[:, ['effect']].fillna('').astype(str)
+    elif feature is 'Microsatellite Stability':
+        df.loc[:, display_string] = df.loc[:, ['direction']].fillna('').astype(str)
 
-    cond1 = cond_mutation | cond_germline
-    cond2 = cond_copynumber
-    cond3 = cond_knockout | cond_silencing
-    cond4 = cond_rearrangement
-    cond5 = cond_aneuploidy | cond_msi | cond_signature
-    cond6 = cond_burden
+    df.loc[:, display_string] += feature + ' '
 
-    dataframe.loc[cond1, display_string] = (dataframe.loc[cond1, [alt_type, feature_type, alt]].fillna('').astype(str).
-                                            apply(lambda x: ' '.join(x), axis=1))
-    dataframe.loc[cond2, display_string] = (dataframe.loc[cond2, [feature_type, alt_type]].fillna('').astype(str).
-                                            apply(lambda x: ' '.join(x), axis=1))
-    dataframe.loc[cond3, display_string] = (dataframe.loc[cond3, [alt_type, feature_type]].fillna('').astype(str).
-                                            apply(lambda x: ' '.join(x), axis=1))
-    dataframe.loc[cond4, display_string] = (dataframe.loc[cond4, [feature_type, alt, alt_type]].fillna('').astype(str).
-                                            apply(lambda x: ' '.join(x), axis=1))
-    dataframe.loc[cond5, display_string] = dataframe.loc[cond5, feature_type].fillna('').astype(str)
-    dataframe.loc[cond6, display_string] = (dataframe.loc[cond6, feature_type].fillna('').astype(str) +
-                                            ', > ' + dataframe.loc[cond6, alt].fillna('').astype(str))
-    return dataframe[display_string]
+    return df[display_string]
 
 
-df = read_table(import_file)
-for information in [sensitivity, resistance, favorable_prognosis]:
-    df.loc[:, information].astype(float).replace({1.0: True, 0.0: False})
-df[predictive_implication_sort] = df[predictive_implication].replace(IMPLICATION_LEVELS_SORT)
-df = df.where(df.notnull(), None)
-df.sort_values([predictive_implication_sort, feature, therapy],
-               ascending=[False, True, True], inplace=True)
-df[display_string] = create_feature_string_series(df)
+def sanitize_assertion_df(df, feature):
+    sensitivity = assertion_tsv_map['sensitivity']
+    for boolean_attribute in [
+        assertion_tsv_map['sensitivity'], assertion_tsv_map['resistance'], assertion_tsv_map['favorable_prognosis']
+    ]:
+        df.loc[:, boolean_attribute].fillna(0).astype(int).replace({1: True, 0: False})
+
+    df = df.where(df.notnull(), None)
+    df[assertion_tsv_map['display_string']] = create_feature_string_series(df, feature)
+
+    return df
 
 
-for index in df.index:
-    new_alterations = []
-    new_sources = []
+# Load feature & feature attribute definitions
+feature_defs_df = read_tsv(features_tsv)
+for index in feature_defs_df.index:
+    new_attribute_definitions = []
+    series = feature_defs_df.loc[index, :]
 
-    series = df.loc[index, :]
-
-    # To do, rename feature and gene_name to be feature_type and feature
-    new_alteration = insert_if_new(
-        Alteration,
-        feature=series.loc[feature_type],
-        gene_name=series.loc[feature],
-        alt_type=series.loc[alt_type],
-        alt=series.loc[alt],
-        display_string=series.loc[display_string]
+    new_feature_def = insert_if_new(
+        FeatureDefinition,
+        name=series.loc[features_tsv_map['feature_name']],
+        readable_name=series.loc[features_tsv_map['readable_feature_name']],
+        is_germline=series.loc[features_tsv_map['is_germline']],
     )
 
-    new_alterations.append(new_alteration)
-
-    new_source = insert_if_new(
-        Source,
-        doi=series.loc[doi],
-        cite_text=series.loc[citation],
-        source_type=series.loc[source_type]
-    )
-    new_sources.append(new_source)
-
-    session.bulk_save_objects(new_sources + new_alterations, return_defaults=True)
-    session.commit()
-    session.flush()
-
-    new_assert = Assertion(
-        therapy_name=series.loc[therapy],
-        #therapy_class=series.loc[therapy_class],
-        therapy_type=series.loc[therapy_type],
-        therapy_sensitivity=series.loc[sensitivity],
-        therapy_resistance=series.loc[resistance],
-        favorable_prognosis=series.loc[favorable_prognosis],
-        predictive_implication=series.loc[predictive_implication],
-        description=series.loc[description],
-        disease=series.loc[ontology],
-        old_disease=series.loc[disease],
-        #oncotree_term=series.loc[ontology],
-        oncotree_code=series.loc[code],
-        submitted_by='breardon@broadinstitute.org',
-        validated=1,
-        created_on=datetime.now(),
-        last_updated=datetime.now()
+    new_attribute_def = FeatureAttributeDefinition(
+        name=series.loc[features_tsv_map['attribute_name']],
+        readable_name=series.loc[features_tsv_map['readable_attribute_name']],
+        type=series.loc[features_tsv_map['type']]
     )
 
-    for source in new_sources:
-        new_assert.sources.append(source)
+    new_attribute_def.feature_definition = new_feature_def
+    session.add(new_feature_def)
+    session.add(new_attribute_def)
 
-    for alteration in new_alterations:
-        new_assert.alterations.append(alteration)
+# Load assertions within each feature
+feature_defs = session.query(FeatureDefinition).all()
+assertions_counter = 0
+for feature_def in feature_defs:
+    feature_file = '%s.tsv' % feature_def.name
+    assertion_df = read_tsv(os.path.join(assertions_folder, feature_file))
+    assertion_df = sanitize_assertion_df(assertion_df, feature_def.name)
+    assertions_counter += len(assertion_df.index)
 
-    commit_object(new_assert)
+    for index in assertion_df.index:
+        series = assertion_df.loc[index, :]
+
+        new_assertion = Assertion(
+            therapy_name=series.loc[assertion_tsv_map['therapy']],
+            therapy_type=series.loc[assertion_tsv_map['therapy_type']],
+            therapy_sensitivity=series.loc[assertion_tsv_map['sensitivity']],
+            therapy_resistance=series.loc[assertion_tsv_map['resistance']],
+            favorable_prognosis=series.loc[assertion_tsv_map['favorable_prognosis']],
+            predictive_implication=series.loc[assertion_tsv_map['predictive_implication']],
+            description=series.loc[assertion_tsv_map['description']],
+            disease=series.loc[assertion_tsv_map['ontology']],
+            old_disease=series.loc[assertion_tsv_map['disease']],
+            oncotree_code=series.loc[assertion_tsv_map['code']],
+            submitted_by='breardon@broadinstitute.org',
+            validated=1,
+            created_on=datetime.now(),
+            last_updated=datetime.now()
+        )
+        session.add(new_assertion)
+
+        # We could technically have multiple FeatureSets associated with one Assertion; this is difficult to implement
+        # using spreadsheet input, and we only create one FeatureSet per Assertion below.
+        new_feature_set = FeatureSet(assertion=new_assertion)
+        new_feature = Feature(feature_set=new_feature_set, feature_definition=feature_def)
+        session.add(new_feature_set)
+        session.add(new_feature)
+
+        new_attributes = []
+        for attribute_def in feature_def.attribute_definitions:
+            if attribute_def.name not in series:
+                print('Warning: attribute "%s" not present for "%s" feature: %s' %
+                      attribute_def.name, feature_def.name, series)
+                continue
+
+            this_value = series[attribute_def.name]
+            new_attribute = FeatureAttribute(feature=new_feature,
+                                             attribute_definition=attribute_def,
+                                             value=str(this_value) if this_value else None)
+            new_attributes.append(new_attribute)
+            session.add(new_attribute)
+
+            new_source = insert_if_new(
+                Source,
+                doi=series[assertion_tsv_map['doi']],
+                cite_text=series[assertion_tsv_map['citation']],
+                source_type=series[assertion_tsv_map['source_type']]
+            )
+            session.add(new_source)
+
+            new_assertion_to_source = AssertionToSource(assertion=new_assertion, source=new_source)
+            session.add(new_assertion_to_source)
+
+        new_feature.attributes = new_attributes
+        new_feature_set.features.append(new_feature)
+
+
+session.commit()
+session.flush()
 
 version = Version(
     major=v_major,
@@ -201,3 +252,5 @@ version = Version(
 )
 
 commit_object(version)
+
+print('Imported %s assertions.' % assertions_counter)
