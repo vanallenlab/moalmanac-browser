@@ -195,3 +195,8 @@ a:hover {
 .add-feature-row {
 	display: none;
 }
+
+.cover-image {
+    display:block;
+    margin:auto;
+}

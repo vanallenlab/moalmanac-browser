@@ -49,6 +49,45 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
+        <h3 class="panel-title"><strong>Predictive Implication Levels</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            {{ config['APP_NAME'] }} classifies each curated assertion with a predictive implication levels which describes the
+            strength of evidence asserting the relationship between a given molecular feature and clinical action. The levels used are:
+        </p>
+        <table class="table table-condensed">
+            <tr><th>Level</th><th>Description</th></tr>
+            <tr>
+                <td>FDA-Approved</td>
+                <td>The Food and Drug Association (FDA) recognizes an association between the alteration and recommended clinical action.</td>
+            </tr>
+            <tr>
+                <td>Guideline</td>
+                <td>This relationship is catalogued as a guideline for standard of care treatment.</td>
+            </tr>
+            <tr>
+                <td>Clinical trial</td>
+                <td>The alteration is or has been used as an eligibility criterion for a clinical trial.</td>
+            </tr>
+            <tr>
+                <td>Clinical evidence</td>
+                <td>The relationship is reported in a clinical study that did not directly involve a clinical trial.</td>
+            </tr>
+            <tr>
+                <td>Preclinical evidence</td>
+                <td>This relationship is reported in a study involving mice, cell lines, or patient derived models.</td>
+            </tr>
+            <tr>
+                <td>Inferential evidence</td>
+                <td>The relationship is inferred as a result of mathematical modeling or an association between molecular features.</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
         <h3 class="panel-title"><strong>Literature curation</strong></h3>
     </div>
     <div class="panel-body">
@@ -68,45 +107,6 @@
 </div>
 
 <div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title"><strong>Predictive Implication Levels</strong></h3>
-    </div>
-    <div class="panel-body">
-        <p>
-            {{ config['APP_NAME'] }} classifies each curated assertion with a "predictive implication level" that describes the
-            strength of the relationship between the given alteration and clinical action. The levels used are:
-        </p>
-        <table class="table table-condensed">
-            <tr><th>Level</th><th>Description</th></tr>
-            <tr>
-                <td>FDA-Approved</td>
-                <td>There is a validated association between the alteration and the recommended clinical action.</td>
-            </tr>
-            <tr>
-                <td>Level A</td>
-                <td>The alteration is or has been used as an eligibility criterion for a clinical trial.</td>
-            </tr>
-            <tr>
-                <td>Level B</td>
-                <td>There is limited early clinical evidence in support of this alteration/action relationship.</td>
-            </tr>
-            <tr>
-                <td>Level C</td>
-				<td>There is limited early clinical evidence in support of this alteration/action relationship, but it is observed in a different tumor type.<br><small><em style="color:gray;">Used in PHIAL, but not applicable to {{ config['APP_NAME_SHORT'] }}.</em></small></td>
-            </tr>
-            <tr>
-                <td>Level D</td>
-                <td>There is preclinical evidence in support of this alteration/action relationship.</td>
-            </tr>
-            <tr>
-                <td>Level E</td>
-                <td>There is inferential evidence in support of this alteration/action relationship.</td>
-            </tr>
-        </table>
-    </div>
-</div>
-
-<div class="panel panel-default">
 	<div class="panel-heading">
 		<h3 class="panel-title"><strong>Terms</strong></h3>
 	</div>
@@ -114,5 +114,10 @@
         {% include "terms_of_service.html" %}
 	</div>
 </div>
+
+<figure style="display:block, margin:0 auto; text-align:center">
+    <img src="/static/img/almanac.png" height="600px">
+    <figcaption>Illustration by <a href="https://www.linkedin.com/in/ekofman/">Eric Kofman</a></figcaption>
+</figure>
 
 {%- endblock %}
