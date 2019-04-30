@@ -7,7 +7,7 @@ from flask import Blueprint, request, render_template, send_file
 from auth import basic_auth
 from werkzeug.exceptions import BadRequest
 from db import db
-from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition
+from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, AssertionToFeature
 from .helper_functions import IMPLICATION_LEVELS_SORT, get_unapproved_assertion_rows, make_rows, http404response, \
     http200response, query_distinct_column, add_or_fetch_source, delete_assertion, amend_cite_text_for_assertion, \
     http400response, \
@@ -208,9 +208,8 @@ def submit():
     assertion.old_disease = required_data['type']
     assertion.submitted_by = required_data['email']
 
-    feature_set = FeatureSet(assertion=assertion)
     feature_def = FeatureDefinition.query.get(required_data['feature_id'])
-    feature = Feature(feature_set=feature_set, feature_definition=feature_def)
+    feature = Feature(feature_definition=feature_def)
     for attribute_def_id, attribute_value in attribute_data.items():
         feature.attributes.append(FeatureAttribute(
             feature_id=required_data['feature_id'],
@@ -218,8 +217,7 @@ def submit():
             value=attribute_value
         ))
 
-    feature_set.features.append(feature)
-    assertion.feature_sets.append(feature_set)
+    assertion.features.append(feature)
     assertion.sources.append(add_or_fetch_source(db, required_data['source']))
 
     db.session.add(assertion)
@@ -254,7 +252,7 @@ def search():
     if unified_search_args:
         unified_search_str = urllib.parse.unquote(' '.join(unified_search_args))
 
-        # In below, result[0] = Assertion; result[2] = FeatureSet
+        # In below, result[0] = Assertion; result[2] = Feature
         results = unified_search(db, unified_search_str)
         for result in results:
             rows.extend(make_rows(result[0], result[1]))
@@ -307,8 +305,7 @@ def export():
             for assertion in db.session.query(Assertion).filter(
                     Feature.feature_id == feature.feature_id,
                     FeatureAttribute.feature_id == Feature.feature_id,
-                    Feature.feature_id == FeatureSet.feature_set_id,
-                    FeatureSet.assertion_id == Assertion.assertion_id
+                    Feature.assertion_id == Assertion.assertion_id
             ):
                 row = []
                 for attribute in feature.attributes:

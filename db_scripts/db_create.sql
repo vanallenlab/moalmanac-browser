@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2019-04-30 01:42:35.017
+-- Last modification date: 2019-04-30 12:48:21.672
 
 -- tables
 -- Table: Assertion
@@ -27,10 +27,9 @@ CREATE TABLE Assertion_To_Feature (
     atf_id integer NOT NULL CONSTRAINT Assertion_To_Feature_pk PRIMARY KEY,
     assertion_id integer NOT NULL,
     feature_id integer NOT NULL,
-    CONSTRAINT Feature_Set_Assertion FOREIGN KEY (assertion_id)
-    REFERENCES Assertion (assertion_id)
-    ON DELETE CASCADE,
-    CONSTRAINT Feature_Set_Feature FOREIGN KEY (feature_id)
+    CONSTRAINT Assertion_To_Feature_Assertion FOREIGN KEY (assertion_id)
+    REFERENCES Assertion (assertion_id),
+    CONSTRAINT Assertion_To_Feature_Feature FOREIGN KEY (feature_id)
     REFERENCES Feature (feature_id)
 );
 

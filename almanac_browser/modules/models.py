@@ -81,7 +81,7 @@ class Assertion(Base, db.Model):
     favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
     description = db.Column('description', db.Text)
 
-    feature = db.relationship('Feature', secondary='Assertion_To_Feature', uselist=True)
+    features = db.relationship('Feature', secondary='Assertion_To_Feature', uselist=True)
     sources = db.relationship('Source', secondary='Assertion_To_Source', uselist=True)
 
 
