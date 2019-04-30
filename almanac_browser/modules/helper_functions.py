@@ -8,7 +8,7 @@ from sqlalchemy import or_, and_
 from flask import Markup, url_for, request
 from werkzeug.exceptions import BadRequest
 from .models import Assertion, Source, Feature, FeatureDefinition, FeatureAttribute, \
-    FeatureAttributeDefinition
+    FeatureAttributeDefinition, AssertionToFeature
 
 IMPLICATION_LEVELS_SORT = {
     'FDA-Approved': 5,
@@ -90,22 +90,22 @@ def amend_cite_text_for_assertion(db, assertion, doi, new_cite_text):
     current_source.cite_text = new_cite_text
 
 
-def remove_alteration_from_assertion(db, assertion=None, alteration=None):
+def remove_alteration_from_assertion(db, assertion=None, feature=None):
     """Remove an Alteration from an Assertion's list of alterations. If there are other Assertions that depend on
     this Alteration, simply remove it from the Assertion in question. Otherwise, if this is the only Assertion that
     this Alteration is linked to, simply delete the Alteration."""
 
     assert(assertion is not None)
-    assert(alteration is not None)
+    assert(feature is not None)
 
-    other_assertions_with_same_alteration = db.session.query(AssertionToAlteration) \
-        .filter(AssertionToAlteration.alt_id == alteration.alt_id,
-                AssertionToAlteration.assertion_id != assertion.assertion_id).all()
+    other_assertions_with_same_alteration = db.session.query(AssertionToFeature) \
+        .filter(AssertionToFeature.feature_id == feature.feature_id,
+                AssertionToFeature.assertion_id != assertion.assertion_id).all()
     if not other_assertions_with_same_alteration:
-        db.session.delete(alteration)
+        db.session.delete(feature)
     else:
         current_alterations = assertion.alterations
-        new_alterations = [a for a in current_alterations if a.alt_id != alteration.alt_id]
+        new_alterations = [a for a in current_alterations if a.alt_id != feature.alt_id]
         assertion.alterations = new_alterations
         db.session.add(assertion)
 
@@ -134,9 +134,8 @@ def get_unapproved_assertion_rows(db):
     unapproved_assertions = db.session.query(Assertion).filter(Assertion.validated == 0).all()
     rows = []
     for assertion in unapproved_assertions:
-        for feature_set in assertion.feature_sets:
-            rows.extend(make_rows(assertion, feature_set))
-
+        for feature in assertion.features:
+            rows.extend(make_rows(assertion, feature))
     return rows
 
 
@@ -221,10 +220,9 @@ def make_display_string(feature):
         return 'Unknown feature (%s)' % feature_name
 
 
-def make_rows(assertion, feature_set):
+def make_rows(assertion, feature):
     rows = []
-    for feature in feature_set.features:
-        rows.append({
+    rows.append({
             'feature': feature.feature_definition.readable_name,
             'display_string': Markup(make_display_string(feature)),
             'therapy_name': assertion.therapy_name,
@@ -238,7 +236,7 @@ def make_rows(assertion, feature_set):
             'predictive_implication_sort': IMPLICATION_LEVELS_SORT[assertion.predictive_implication],
             'assertion_id': assertion.assertion_id,
             'sources': [s for s in assertion.sources],
-        })
+    })
 
     return rows
 
@@ -437,7 +435,8 @@ def unified_search(db, search_str):
     filter_components = [
         FeatureDefinition.feature_def_id == Feature.feature_def_id,
         Feature.feature_id == FeatureAttribute.feature_id,
-        Feature.assertion_id == Assertion.assertion_id,
+        AssertionToFeature.assertion_id == Assertion.assertion_id,
+        AssertionToFeature.feature_id == Feature.feature_id,
         Assertion.validated.is_(True),
     ]
 
@@ -483,4 +482,4 @@ def unified_search(db, search_str):
 
     # The following produces a list of 2-tuples, where each tuple contains the following table objects:
     # (Assertion, Feature)
-    return db.session.query(Assertion, Feature).filter(*filter_components).all()
+    return db.session.query(Assertion, AssertionToFeature).filter(*filter_components).all()

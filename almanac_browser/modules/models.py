@@ -35,7 +35,6 @@ class Feature(Base, db.Model):
 
     feature_id = db.Column('feature_id', db.Integer, primary_key=True)
     feature_def_id = db.Column('feature_def_id', db.Integer, db.ForeignKey(FeatureDefinition.feature_def_id))
-    #assertion_id = db.Column('assertion_id', db.Integer, db.ForeignKey('Assertion.assertion_id', ondelete='CASCADE'))
 
     attributes = db.relationship('FeatureAttribute', back_populates='feature', passive_deletes=True)
     feature_definition = db.relationship('FeatureDefinition', foreign_keys=feature_def_id, backref='features')

@@ -252,10 +252,10 @@ def search():
     if unified_search_args:
         unified_search_str = urllib.parse.unquote(' '.join(unified_search_args))
 
-        # In below, result[0] = Assertion; result[2] = Feature
+        # In below, result[0] = Assertion; result[1] = Feature
         results = unified_search(db, unified_search_str)
         for result in results:
-            rows.extend(make_rows(result[0], result[1]))
+            rows.extend(make_rows(result[0], result[1].feature))
 
     return render_template('portal_search_results.html', rows=rows)
 
