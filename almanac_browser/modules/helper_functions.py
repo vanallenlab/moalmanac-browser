@@ -7,7 +7,7 @@ import re
 from sqlalchemy import or_, and_
 from flask import Markup, url_for, request
 from werkzeug.exceptions import BadRequest
-from .models import Assertion, Source, FeatureSet, Feature, FeatureDefinition, FeatureAttribute, \
+from .models import Assertion, Source, Feature, FeatureDefinition, FeatureAttribute, \
     FeatureAttributeDefinition
 
 IMPLICATION_LEVELS_SORT = {
@@ -422,7 +422,7 @@ def unified_search(db, search_str):
     Leiomyoma would be interpreted as "(gene is PTEN OR POLE) AND (disease is Uterine Leiomyoma)". The results would
     be every assertion about Uterine Leiomyoma that references either the PTEN or POLE genes.
 
-    Returns a list of 2-tuples, in which each 2-tuple contains an Assertion and corresponding FeatureSet.
+    Returns a list of 2-tuples, in which each 2-tuple contains an Assertion and corresponding Feature.
     """
 
     # Note that we will skip any 'unknown' needles return in the interpreted query
@@ -437,8 +437,7 @@ def unified_search(db, search_str):
     filter_components = [
         FeatureDefinition.feature_def_id == Feature.feature_def_id,
         Feature.feature_id == FeatureAttribute.feature_id,
-        Feature.feature_set_id == FeatureSet.feature_set_id,
-        FeatureSet.assertion_id == Assertion.assertion_id,
+        Feature.assertion_id == Assertion.assertion_id,
         Assertion.validated.is_(True),
     ]
 
@@ -483,5 +482,5 @@ def unified_search(db, search_str):
         filter_components.append(or_(*or_stmt))
 
     # The following produces a list of 2-tuples, where each tuple contains the following table objects:
-    # (Assertion, FeatureSet)
-    return db.session.query(Assertion, FeatureSet).filter(*filter_components).all()
+    # (Assertion, Feature)
+    return db.session.query(Assertion, Feature).filter(*filter_components).all()

@@ -5,23 +5,12 @@ from datetime import datetime
 Base = declarative_base()
 
 
-class FeatureSet(Base, db.Model):
-    __tablename__ = 'Feature_Set'
-
-    feature_set_id = db.Column('feature_set_id', db.Integer, primary_key=True)
-    assertion_id = db.Column('assertion_id', db.Integer, db.ForeignKey('Assertion.assertion_id', ondelete='CASCADE'))
-
-    assertion = db.relationship('Assertion')
-    features = db.relationship('Feature', back_populates='feature_set', passive_deletes=True)
-
-
 class FeatureDefinition(Base, db.Model):
     __tablename__ = 'Feature_Definition'
 
     feature_def_id = db.Column('feature_def_id', db.Integer, primary_key=True)
     name = db.Column('name', db.Text)
     readable_name = db.Column('readable_name', db.Text)
-    is_germline = db.Column('is_germline', db.Boolean)
 
     attribute_definitions = db.relationship('FeatureAttributeDefinition')
 
@@ -45,12 +34,10 @@ class Feature(Base, db.Model):
     __tablename__ = 'Feature'
 
     feature_id = db.Column('feature_id', db.Integer, primary_key=True)
-    feature_set_id = db.Column('feature_set_id', db.Integer,
-                               db.ForeignKey(FeatureSet.feature_set_id, ondelete='CASCADE'))
     feature_def_id = db.Column('feature_def_id', db.Integer, db.ForeignKey(FeatureDefinition.feature_def_id))
+    #assertion_id = db.Column('assertion_id', db.Integer, db.ForeignKey('Assertion.assertion_id', ondelete='CASCADE'))
 
     attributes = db.relationship('FeatureAttribute', back_populates='feature', passive_deletes=True)
-    feature_set = db.relationship('FeatureSet', back_populates='features')
     feature_definition = db.relationship('FeatureDefinition', foreign_keys=feature_def_id, backref='features')
 
 
@@ -94,7 +81,7 @@ class Assertion(Base, db.Model):
     favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
     description = db.Column('description', db.Text)
 
-    feature_sets = db.relationship('FeatureSet', back_populates='assertion', passive_deletes=True)
+    feature = db.relationship('Feature', secondary='Assertion_To_Feature', uselist=True)
     sources = db.relationship('Source', secondary='Assertion_To_Source', uselist=True)
 
 
@@ -107,6 +94,19 @@ class Source(Base, db.Model):
     source_type = db.Column('source_type', db.Text)
 
     assertions = db.relationship('Assertion', secondary='Assertion_To_Source')
+
+
+class AssertionToFeature(Base, db.Model):
+    __tablename__ = 'Assertion_To_Feature'
+
+    atf_id = db.Column('atf_id', db.Integer, primary_key=True)
+    assertion_id = db.Column('assertion_id', db.Integer, db.ForeignKey(Assertion.assertion_id, ondelete='CASCADE'))
+    feature_id = db.Column('feature_id', db.Integer, db.ForeignKey(Feature.feature_id))
+
+    db.UniqueConstraint('feature_id', 'assertion_id', name='UC_feature_id_assertion_id')
+
+    assertion = db.relationship('Assertion', foreign_keys=assertion_id)
+    feature = db.relationship('Feature', foreign_keys=feature_id)
 
 
 class AssertionToSource(Base, db.Model):

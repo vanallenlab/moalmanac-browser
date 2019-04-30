@@ -8,7 +8,7 @@ sys.path.insert(0, './')
 sys.path.insert(0, 'target_web/')
 sys.path.insert(0, 'target_web/modules/')
 from almanac_browser.modules.models import FeatureDefinition, FeatureAttributeDefinition, Feature, FeatureAttribute,\
-    FeatureSet, Assertion, Source, AssertionToSource, Version
+    Assertion, Source, AssertionToFeature, AssertionToSource, Version # FeatureSet
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -47,7 +47,6 @@ IMPLICATION_LEVELS_SORT = {
 features_tsv_map = {
     'feature_name': 'feature',
     'readable_feature_name': 'readable_name',
-    'is_germline': 'is_germline',
     'attribute_name': 'attribute',
     'readable_attribute_name': 'readable_attribute',
     'type': 'type',
@@ -162,8 +161,7 @@ for index in feature_defs_df.index:
     new_feature_def = insert_if_new(
         FeatureDefinition,
         name=series.loc[features_tsv_map['feature_name']],
-        readable_name=series.loc[features_tsv_map['readable_feature_name']],
-        is_germline=series.loc[features_tsv_map['is_germline']],
+        readable_name=series.loc[features_tsv_map['readable_feature_name']]
     )
 
     new_attribute_def = FeatureAttributeDefinition(
@@ -206,12 +204,11 @@ for feature_def in feature_defs:
         )
         session.add(new_assertion)
 
-        # We could technically have multiple FeatureSets associated with one Assertion; this is difficult to implement
-        # using spreadsheet input, and we only create one FeatureSet per Assertion below.
-        new_feature_set = FeatureSet(assertion=new_assertion)
-        new_feature = Feature(feature_set=new_feature_set, feature_definition=feature_def)
-        session.add(new_feature_set)
+        new_feature = Feature(feature_definition=feature_def)
         session.add(new_feature)
+
+        new_assertion_to_feature = AssertionToFeature(assertion=new_assertion, feature=new_feature)
+        session.add(new_assertion_to_feature)
 
         new_attributes = []
         for attribute_def in feature_def.attribute_definitions:
@@ -239,8 +236,6 @@ for feature_def in feature_defs:
             session.add(new_assertion_to_source)
 
         new_feature.attributes = new_attributes
-        new_feature_set.features.append(new_feature)
-
 
 session.commit()
 session.flush()

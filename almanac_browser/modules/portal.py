@@ -7,7 +7,7 @@ from flask import Blueprint, request, render_template, send_file
 from auth import basic_auth
 from werkzeug.exceptions import BadRequest
 from db import db
-from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, FeatureSet
+from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition
 from .helper_functions import IMPLICATION_LEVELS_SORT, get_unapproved_assertion_rows, make_rows, http404response, \
     http200response, query_distinct_column, add_or_fetch_source, delete_assertion, amend_cite_text_for_assertion, \
     http400response, \
