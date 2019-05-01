@@ -47,73 +47,18 @@
     </div>
 
     <div class="panel-body">
-        <p>{{assertion.description}}</p>
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Feature</th>
-                    <th>Feature type</th>
-                    <th>Alt. type</th>
-                    <th>Alteration</th>
-                    {% if assertion.favorable_prognosis is none %}
-                    <th>Therapy</th>
-                    <th>Response</th>
-                    {% else %}
-                    <th>Prognosis</th>
-                    {% endif %}
-                    <th>Cancer type</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for alt in assertion.alterations %}
-                <tr>
-                    <td>{% if alt.gene_name is not none %}{{alt.gene_name}}{% endif %}</td>
-                    <td>{% if alt.feature is not none %}{{alt.feature}}{% endif %}</td>
-                    <td>{% if alt.alt_type is not none %}{{alt.alt_type}}{% endif %}</td>
-                    <td>{% if alt.alt is not none %}{{alt.alt}}{% endif %}</td>
-                    {% if assertion.favorable_prognosis is none %}
-                    <td>{{assertion.therapy_name}}</td>
-                    <td>
-                        {% if assertion.therapy_sensitivity == 1 %}
-                            Sensitivity
-                        {% elif assertion.therapy_sensitivity == 0 %}
-                            Not sensitive
-                        {% elif assertion.therapy_resistance == 1 %}
-                            Resistance
-                        {% elif assertion.therapy_resistance == 0 %}
-                            Not resistance
-                        {% endif %}
-                    </td>
-                    {% else %}
-                    <td>
-                        {% if assertion.favorable_prognosis %}Favorable{% else %}Unfavorable{% endif %}
-                    </td>
-                    {% endif %}
-                    <td>{% if assertion.disease is not none %}{{assertion.disease}}{% endif %}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+        {% for feature in features %}
+        <p style="font-size:24px"><strong>{{ feature[0].feature_definition.readable_name }}: {{ feature[1] }}</strong></p>
+        {% endfor %}
+        <p style="font-size:15px">{{assertion.description}}</p>
 
         <p class="text-muted">Citations:</p>
         <ul>
         {% for source in assertion.sources %}
 			<li>
-				{% if source.doi is not none %}
-                    {% if source.source_type == 'Journal' %}
-                        <a href="https://doi.org/{{source.doi|urlencode}}">
-                            {{source.cite_text}}
-                        </a>
-                    {% elif source.source_type == 'Clinical Trial' %}
-                        <a href="https://clinicaltrials.gov/ct2/show/{{source.doi|urlencode}}">
-                            {{source.cite_text}}
-                        </a>
-                    {% endif %}
-				{% else %}
-				    {{source.cite_text}}
-				{% endif %}
+                <a href="{{ source.url }}">
+                    {{ source.cite_text }}
+                </a>
 			</li>
         {% endfor %}
         </ul>

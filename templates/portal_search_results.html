@@ -48,8 +48,8 @@
     <table class="results-table display compact">
         <thead>
         <tr>
+            <th>Feature type</th>
             <th>Feature</th>
-            <th>Alteration</th>
             <th>Therapy</th>
             <th>Response</th>
             <th>Cancer Type</th>
@@ -89,7 +89,7 @@
                     <a href="search?s=&quot;{{ row['disease']|urlencode }}&quot;[disease]">
                         {{ row['disease'] }}
                     </a>
-                {% endif %}
+                    {% endif %}
                 </td>
                 <td data-order="{{ row['predictive_implication_sort'] }}">
                     <a href="search?s=&quot;{{ row['predictive_implication']|urlencode }}&quot;[pred]">

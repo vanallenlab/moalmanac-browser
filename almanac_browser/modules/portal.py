@@ -3,7 +3,7 @@ import io
 import csv
 import urllib
 from zipfile import ZipFile
-from flask import Blueprint, request, render_template, send_file
+from flask import Blueprint, request, render_template, send_file, Markup
 from auth import basic_auth
 from werkzeug.exceptions import BadRequest
 from db import db
@@ -11,7 +11,7 @@ from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, Ass
 from .helper_functions import IMPLICATION_LEVELS_SORT, get_unapproved_assertion_rows, make_rows, http404response, \
     http200response, query_distinct_column, add_or_fetch_source, delete_assertion, amend_cite_text_for_assertion, \
     http400response, \
-    get_all_genes, unified_search
+    get_all_genes, unified_search, make_display_string
 
 portal = Blueprint('portal', __name__)
 
@@ -263,9 +263,13 @@ def search():
 @portal.route('/assertion/<int:assertion_id>')
 def assertion(assertion_id):
     assertion = db.session.query(Assertion).filter(Assertion.assertion_id == assertion_id).first()
+    features = []
+    for feature in assertion.features:
+        string = Markup(make_display_string(feature))
+        features.append((feature, string))
 
     return render_template('portal_assertion.html',
-                           assertion=assertion)
+                           assertion=assertion, features=features)
 
 
 @portal.route('/export', methods=['GET'])

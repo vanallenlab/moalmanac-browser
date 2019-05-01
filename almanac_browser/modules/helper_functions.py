@@ -165,11 +165,11 @@ def make_display_string(feature):
         locus = find_attribute_by_name(feature.attributes, 'locus')
 
         if gene1 and gene2 and locus:
-            return '%s %s-%s %s' % (rearrangement_type, make_gene_link(gene1), make_gene_link(gene2), locus)
+            return '%s--%s %s %s' % (make_gene_link(gene1), make_gene_link(gene2), locus, rearrangement_type)
         if gene1 and gene2:
-            return '%s %s-%s' % (rearrangement_type, make_gene_link(gene1), make_gene_link(gene2))
+            return '%s--%s %s' % (make_gene_link(gene1), make_gene_link(gene2), rearrangement_type)
         elif locus:
-            return '%s %s' % (rearrangement_type, locus)
+            return '%s %s' % (locus, rearrangement_type)
         else:
             return rearrangement_type if rearrangement_type else ''
     elif feature_name in ['somatic_variant', 'germline_variant']:
@@ -182,7 +182,7 @@ def make_display_string(feature):
 
         # Any of variant_type, gene, or protein_change may be None. With None as the first parameter to filter(),
         # all False/None values are skipped in the final join() call.
-        return ' '.join(filter(None, [variant_type, gene, protein_change]))
+        return ' '.join(filter(None, [gene, variant_type, protein_change]))
     elif feature_name == 'copy_number':
         gene = find_attribute_by_name(feature.attributes, 'gene')
         direction = find_attribute_by_name(feature.attributes, 'direction')
@@ -199,7 +199,7 @@ def make_display_string(feature):
     elif feature_name == 'mutational_signature':
         signature_number = find_attribute_by_name(feature.attributes, 'signature_number')
 
-        return ('COSMIC ' + signature_number) if signature_number else ''
+        return ('COSMIC Signature {}'.format(signature_number)) if signature_number else ''
     elif feature_name in ['mutational_burden', 'neoantigen_burden']:
         burden = find_attribute_by_name(feature.attributes, 'burden')
 
