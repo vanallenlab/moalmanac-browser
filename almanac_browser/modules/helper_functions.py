@@ -183,13 +183,22 @@ def make_display_string(feature):
         gene = find_attribute_by_name(feature.attributes, 'gene')
         protein_change = find_attribute_by_name(feature.attributes, 'protein_change')
         exon = find_attribute_by_name(feature.attributes, 'exon')
+        if exon:
+            print(type(exon))
+            exon = 'Exon {}'.format(exon.rstrip('0').rstrip('.'))
 
         if gene:
             gene = make_gene_link(gene)
 
+        pathogenic = None
+        if feature_name == 'germline_variant':
+            pathogenic = find_attribute_by_name(feature.attributes, 'pathogenic')
+            if pathogenic:
+                pathogenic = '(Pathogenic)'
+
         # Any of variant_type, gene, or protein_change may be None. With None as the first parameter to filter(),
         # all False/None values are skipped in the final join() call.
-        return ' '.join(filter(None, [gene, variant_type, protein_change]))
+        return ' '.join(filter(None, [gene, exon, variant_type, protein_change, pathogenic]))
     elif feature_name == 'copy_number':
         gene = find_attribute_by_name(feature.attributes, 'gene')
         direction = find_attribute_by_name(feature.attributes, 'direction')
