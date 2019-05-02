@@ -19,8 +19,8 @@ a {
 }
 
 a:hover {
-	color: #E4002B;
-	text-decoration: none;
+	color: #A70C36;
+	text-decoration: underline;
 }
 
 /* footer */
