@@ -3,15 +3,15 @@ import io
 import csv
 import urllib
 from zipfile import ZipFile
-from flask import Blueprint, request, render_template, send_file
+from flask import Blueprint, request, render_template, send_file, Markup
 from auth import basic_auth
 from werkzeug.exceptions import BadRequest
 from db import db
-from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, FeatureSet
+from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, AssertionToFeature
 from .helper_functions import IMPLICATION_LEVELS_SORT, get_unapproved_assertion_rows, make_rows, http404response, \
     http200response, query_distinct_column, add_or_fetch_source, delete_assertion, amend_cite_text_for_assertion, \
     http400response, \
-    get_all_genes, unified_search
+    get_all_genes, unified_search, make_display_string
 
 portal = Blueprint('portal', __name__)
 
@@ -208,9 +208,8 @@ def submit():
     assertion.old_disease = required_data['type']
     assertion.submitted_by = required_data['email']
 
-    feature_set = FeatureSet(assertion=assertion)
     feature_def = FeatureDefinition.query.get(required_data['feature_id'])
-    feature = Feature(feature_set=feature_set, feature_definition=feature_def)
+    feature = Feature(feature_definition=feature_def)
     for attribute_def_id, attribute_value in attribute_data.items():
         feature.attributes.append(FeatureAttribute(
             feature_id=required_data['feature_id'],
@@ -218,8 +217,7 @@ def submit():
             value=attribute_value
         ))
 
-    feature_set.features.append(feature)
-    assertion.feature_sets.append(feature_set)
+    assertion.features.append(feature)
     assertion.sources.append(add_or_fetch_source(db, required_data['source']))
 
     db.session.add(assertion)
@@ -254,10 +252,10 @@ def search():
     if unified_search_args:
         unified_search_str = urllib.parse.unquote(' '.join(unified_search_args))
 
-        # In below, result[0] = Assertion; result[2] = FeatureSet
+        # In below, result[0] = Assertion; result[1] = Feature
         results = unified_search(db, unified_search_str)
         for result in results:
-            rows.extend(make_rows(result[0], result[1]))
+            rows.extend(make_rows(result[0], result[1].feature))
 
     return render_template('portal_search_results.html', rows=rows)
 
@@ -265,9 +263,13 @@ def search():
 @portal.route('/assertion/<int:assertion_id>')
 def assertion(assertion_id):
     assertion = db.session.query(Assertion).filter(Assertion.assertion_id == assertion_id).first()
+    features = []
+    for feature in assertion.features:
+        string = Markup(make_display_string(feature))
+        features.append((feature, string))
 
     return render_template('portal_assertion.html',
-                           assertion=assertion)
+                           assertion=assertion, features=features)
 
 
 @portal.route('/export', methods=['GET'])
@@ -307,8 +309,7 @@ def export():
             for assertion in db.session.query(Assertion).filter(
                     Feature.feature_id == feature.feature_id,
                     FeatureAttribute.feature_id == Feature.feature_id,
-                    Feature.feature_id == FeatureSet.feature_set_id,
-                    FeatureSet.assertion_id == Assertion.assertion_id
+                    Feature.assertion_id == Assertion.assertion_id
             ):
                 row = []
                 for attribute in feature.attributes:

@@ -5,23 +5,12 @@ from datetime import datetime
 Base = declarative_base()
 
 
-class FeatureSet(Base, db.Model):
-    __tablename__ = 'Feature_Set'
-
-    feature_set_id = db.Column('feature_set_id', db.Integer, primary_key=True)
-    assertion_id = db.Column('assertion_id', db.Integer, db.ForeignKey('Assertion.assertion_id', ondelete='CASCADE'))
-
-    assertion = db.relationship('Assertion')
-    features = db.relationship('Feature', back_populates='feature_set', passive_deletes=True)
-
-
 class FeatureDefinition(Base, db.Model):
     __tablename__ = 'Feature_Definition'
 
     feature_def_id = db.Column('feature_def_id', db.Integer, primary_key=True)
     name = db.Column('name', db.Text)
     readable_name = db.Column('readable_name', db.Text)
-    is_germline = db.Column('is_germline', db.Boolean)
 
     attribute_definitions = db.relationship('FeatureAttributeDefinition')
 
@@ -45,12 +34,9 @@ class Feature(Base, db.Model):
     __tablename__ = 'Feature'
 
     feature_id = db.Column('feature_id', db.Integer, primary_key=True)
-    feature_set_id = db.Column('feature_set_id', db.Integer,
-                               db.ForeignKey(FeatureSet.feature_set_id, ondelete='CASCADE'))
     feature_def_id = db.Column('feature_def_id', db.Integer, db.ForeignKey(FeatureDefinition.feature_def_id))
 
     attributes = db.relationship('FeatureAttribute', back_populates='feature', passive_deletes=True)
-    feature_set = db.relationship('FeatureSet', back_populates='features')
     feature_definition = db.relationship('FeatureDefinition', foreign_keys=feature_def_id, backref='features')
 
 
@@ -72,16 +58,15 @@ class Assertion(Base, db.Model):
     __tablename__ = 'Assertion'
 
     assertion_id = db.Column('assertion_id', db.Integer, primary_key=True)
-    created_on = db.Column('created_on', db.Text, default=datetime.now)
-    last_updated = db.Column('last_updated', db.Text, default=datetime.now)
-    disease = db.Column('oncotree_term', db.Text)
-    old_disease = db.Column('disease', db.Text)
+    disease = db.Column('disease', db.Text)
+    context = db.Column('context', db.Text)
+    oncotree_term = db.Column('oncotree_term', db.Text)
     oncotree_code = db.Column('oncotree_code', db.Text)
-    stage = db.Column('stage', db.Integer)
     therapy_name = db.Column('therapy_name', db.Text)
     therapy_type = db.Column('therapy_type', db.Text)
     therapy_sensitivity = db.Column('therapy_sensitivity', db.Boolean)
     therapy_resistance = db.Column('therapy_resistance', db.Boolean)
+    favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
     predictive_implication = db.Column('predictive_implication', db.Enum('FDA-Approved',
                                                                          'Guideline',
                                                                          'Clinical trial',
@@ -89,12 +74,13 @@ class Assertion(Base, db.Model):
                                                                          'Preclinical',
                                                                          'Inferential',
                                                                          'Predictive implication'))
+    description = db.Column('description', db.Text)
+    created_on = db.Column('created_on', db.Text, default=datetime.now)
+    last_updated = db.Column('last_updated', db.Text, default=datetime.now)
     validated = db.Column('validated', db.Boolean, default=False)
     submitted_by = db.Column('submitted_by', db.Text)
-    favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
-    description = db.Column('description', db.Text)
 
-    feature_sets = db.relationship('FeatureSet', back_populates='assertion', passive_deletes=True)
+    features = db.relationship('Feature', secondary='Assertion_To_Feature', uselist=True)
     sources = db.relationship('Source', secondary='Assertion_To_Source', uselist=True)
 
 
@@ -102,11 +88,27 @@ class Source(Base, db.Model):
     __tablename__ = 'Source'
 
     source_id = db.Column('source_id', db.Integer, primary_key=True)
-    doi = db.Column('doi', db.Text)
-    cite_text = db.Column('cite_text', db.Text)
     source_type = db.Column('source_type', db.Text)
+    citation = db.Column('citation', db.Text)
+    url = db.Column('url', db.Text)
+    doi = db.Column('doi', db.Text)
+    pmid = db.Column('pmid', db.Text)
+    nct = db.Column('nct', db.Text)
 
     assertions = db.relationship('Assertion', secondary='Assertion_To_Source')
+
+
+class AssertionToFeature(Base, db.Model):
+    __tablename__ = 'Assertion_To_Feature'
+
+    atf_id = db.Column('atf_id', db.Integer, primary_key=True)
+    assertion_id = db.Column('assertion_id', db.Integer, db.ForeignKey(Assertion.assertion_id, ondelete='CASCADE'))
+    feature_id = db.Column('feature_id', db.Integer, db.ForeignKey(Feature.feature_id))
+
+    db.UniqueConstraint('feature_id', 'assertion_id', name='UC_feature_id_assertion_id')
+
+    assertion = db.relationship('Assertion', foreign_keys=assertion_id)
+    feature = db.relationship('Feature', foreign_keys=feature_id)
 
 
 class AssertionToSource(Base, db.Model):

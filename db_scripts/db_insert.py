@@ -5,10 +5,10 @@ import pandas as pd
 from datetime import datetime
 
 sys.path.insert(0, './')
-sys.path.insert(0, 'target_web/')
-sys.path.insert(0, 'target_web/modules/')
+sys.path.insert(0, 'almanac_browser/')
+sys.path.insert(0, 'almanac_browser/modules/')
 from almanac_browser.modules.models import FeatureDefinition, FeatureAttributeDefinition, Feature, FeatureAttribute,\
-    FeatureSet, Assertion, Source, AssertionToSource, Version
+    Assertion, Source, AssertionToFeature, AssertionToSource, Version
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -47,7 +47,6 @@ IMPLICATION_LEVELS_SORT = {
 features_tsv_map = {
     'feature_name': 'feature',
     'readable_feature_name': 'readable_name',
-    'is_germline': 'is_germline',
     'attribute_name': 'attribute',
     'readable_attribute_name': 'readable_attribute',
     'type': 'type',
@@ -55,24 +54,24 @@ features_tsv_map = {
 
 assertion_tsv_map = {
     'disease': 'disease',
-    'stage': 'stage',
-    'ontology': 'oncotree_ontology',
-    'code': 'oncotree_code',
-    'therapy': 'therapy',
+    'context': 'context',
+    'oncotree_term': 'oncotree_term',
+    'oncotree_code': 'oncotree_code',
+    'therapy_name': 'therapy_name',
     'therapy_class': 'therapy_class',
     'therapy_type': 'therapy_type',
-    'sensitivity': 'sensitivity',
-    'resistance': 'resistance',
+    'therapy_sensitivity': 'therapy_sensitivity',
+    'therapy_resistance': 'therapy_resistance',
     'favorable_prognosis': 'favorable_prognosis',
     'predictive_implication': 'predictive_implication',
     'description': 'description',
-    'connections': 'connections',
-    'ctrpv2_therapy': 'ctrpv2_therapy',
-    'doi': 'doi',
-    'citation': 'citation',
     'source_type': 'source_type',
-    'pubmed_id': 'pubmed_id',
-    'display_string': 'display_string',
+    'citation': 'citation',
+    'url': 'url',
+    'doi': 'doi',
+    'pmid': 'pmid',
+    'nct': 'nct',
+    'last_updated': 'last_updated'
 }
 
 
@@ -141,15 +140,15 @@ def create_feature_string_series(df, feature):
 
 
 def sanitize_assertion_df(df, feature):
-    sensitivity = assertion_tsv_map['sensitivity']
     for boolean_attribute in [
-        assertion_tsv_map['sensitivity'], assertion_tsv_map['resistance'], assertion_tsv_map['favorable_prognosis']
+        assertion_tsv_map['therapy_sensitivity'],
+        assertion_tsv_map['therapy_resistance'],
+        assertion_tsv_map['favorable_prognosis']
     ]:
-        df.loc[:, boolean_attribute].fillna(0).astype(int).replace({1: True, 0: False})
+        df.loc[:, boolean_attribute].replace({1: True, 0: False})
 
     df = df.where(df.notnull(), None)
-    df[assertion_tsv_map['display_string']] = create_feature_string_series(df, feature)
-
+    #df[assertion_tsv_map['display_string']] = create_feature_string_series(df, feature)
     return df
 
 
@@ -162,8 +161,7 @@ for index in feature_defs_df.index:
     new_feature_def = insert_if_new(
         FeatureDefinition,
         name=series.loc[features_tsv_map['feature_name']],
-        readable_name=series.loc[features_tsv_map['readable_feature_name']],
-        is_germline=series.loc[features_tsv_map['is_germline']],
+        readable_name=series.loc[features_tsv_map['readable_feature_name']]
     )
 
     new_attribute_def = FeatureAttributeDefinition(
@@ -189,16 +187,17 @@ for feature_def in feature_defs:
         series = assertion_df.loc[index, :]
 
         new_assertion = Assertion(
-            therapy_name=series.loc[assertion_tsv_map['therapy']],
+            disease=series.loc[assertion_tsv_map['oncotree_term']],
+            oncotree_term=series.loc[assertion_tsv_map['oncotree_term']],
+            oncotree_code=series.loc[assertion_tsv_map['oncotree_code']],
+            context=series.loc[assertion_tsv_map['context']],
+            therapy_name=series.loc[assertion_tsv_map['therapy_name']],
             therapy_type=series.loc[assertion_tsv_map['therapy_type']],
-            therapy_sensitivity=series.loc[assertion_tsv_map['sensitivity']],
-            therapy_resistance=series.loc[assertion_tsv_map['resistance']],
+            therapy_sensitivity=series.loc[assertion_tsv_map['therapy_sensitivity']],
+            therapy_resistance=series.loc[assertion_tsv_map['therapy_resistance']],
             favorable_prognosis=series.loc[assertion_tsv_map['favorable_prognosis']],
             predictive_implication=series.loc[assertion_tsv_map['predictive_implication']],
             description=series.loc[assertion_tsv_map['description']],
-            disease=series.loc[assertion_tsv_map['ontology']],
-            old_disease=series.loc[assertion_tsv_map['disease']],
-            oncotree_code=series.loc[assertion_tsv_map['code']],
             submitted_by='breardon@broadinstitute.org',
             validated=1,
             created_on=datetime.now(),
@@ -206,12 +205,11 @@ for feature_def in feature_defs:
         )
         session.add(new_assertion)
 
-        # We could technically have multiple FeatureSets associated with one Assertion; this is difficult to implement
-        # using spreadsheet input, and we only create one FeatureSet per Assertion below.
-        new_feature_set = FeatureSet(assertion=new_assertion)
-        new_feature = Feature(feature_set=new_feature_set, feature_definition=feature_def)
-        session.add(new_feature_set)
+        new_feature = Feature(feature_definition=feature_def)
         session.add(new_feature)
+
+        new_assertion_to_feature = AssertionToFeature(assertion=new_assertion, feature=new_feature)
+        session.add(new_assertion_to_feature)
 
         new_attributes = []
         for attribute_def in feature_def.attribute_definitions:
@@ -229,9 +227,12 @@ for feature_def in feature_defs:
 
             new_source = insert_if_new(
                 Source,
+                source_type=series[assertion_tsv_map['source_type']],
+                citation=series[assertion_tsv_map['citation']],
+                url=series[assertion_tsv_map['url']],
                 doi=series[assertion_tsv_map['doi']],
-                cite_text=series[assertion_tsv_map['citation']],
-                source_type=series[assertion_tsv_map['source_type']]
+                pmid=series[assertion_tsv_map['pmid']],
+                nct=series[assertion_tsv_map['nct']]
             )
             session.add(new_source)
 
@@ -239,8 +240,6 @@ for feature_def in feature_defs:
             session.add(new_assertion_to_source)
 
         new_feature.attributes = new_attributes
-        new_feature_set.features.append(new_feature)
-
 
 session.commit()
 session.flush()

@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2019-04-11 21:30:04.182
+-- Last modification date: 2019-05-02 00:54:00.162
 
 -- tables
 -- Table: Assertion
@@ -10,16 +10,27 @@ CREATE TABLE Assertion (
     disease text,
     oncotree_term text,
     oncotree_code text,
-    stage integer,
+    context text,
     therapy_name text,
     therapy_type text,
     therapy_sensitivity boolean,
     therapy_resistance boolean,
-    predictive_implication text,
     favorable_prognosis boolean,
+    predictive_implication text,
     description text,
     validated boolean NOT NULL,
     submitted_by text NOT NULL
+);
+
+-- Table: Assertion_To_Feature
+CREATE TABLE Assertion_To_Feature (
+    atf_id integer NOT NULL CONSTRAINT Assertion_To_Feature_pk PRIMARY KEY,
+    assertion_id integer NOT NULL,
+    feature_id integer NOT NULL,
+    CONSTRAINT Assertion_To_Feature_Assertion FOREIGN KEY (assertion_id)
+    REFERENCES Assertion (assertion_id),
+    CONSTRAINT Assertion_To_Feature_Feature FOREIGN KEY (feature_id)
+    REFERENCES Feature (feature_id)
 );
 
 -- Table: Assertion_To_Source
@@ -37,11 +48,7 @@ CREATE TABLE Assertion_To_Source (
 -- Table: Feature
 CREATE TABLE Feature (
     feature_id integer NOT NULL CONSTRAINT Feature_pk PRIMARY KEY,
-    feature_set_id integer NOT NULL,
     feature_def_id integer NOT NULL,
-    CONSTRAINT Feature_Feature_Set FOREIGN KEY (feature_set_id)
-    REFERENCES Feature_Set (feature_set_id)
-    ON DELETE CASCADE,
     CONSTRAINT Feature_Feature_Definition FOREIGN KEY (feature_def_id)
     REFERENCES Feature_Definition (feature_def_id)
 );
@@ -76,25 +83,18 @@ CREATE TABLE Feature_Definition (
     feature_def_id integer NOT NULL CONSTRAINT Feature_Definition_pk PRIMARY KEY,
     name text NOT NULL,
     readable_name integer NOT NULL,
-    is_germline boolean NOT NULL,
     CONSTRAINT Feature_Definition_ak_1 UNIQUE (name)
-);
-
--- Table: Feature_Set
-CREATE TABLE Feature_Set (
-    feature_set_id integer NOT NULL CONSTRAINT Feature_Set_pk PRIMARY KEY,
-    assertion_id integer NOT NULL,
-    CONSTRAINT Feature_Set_Assertion FOREIGN KEY (assertion_id)
-    REFERENCES Assertion (assertion_id)
-    ON DELETE CASCADE
 );
 
 -- Table: Source
 CREATE TABLE Source (
     source_id integer NOT NULL CONSTRAINT Source_pk PRIMARY KEY,
     source_type text NOT NULL,
-    cite_text text NOT NULL,
-    doi text
+    citation text NOT NULL,
+    url text NOT NULL,
+    doi text,
+    pmid text,
+    nct text
 );
 
 -- Table: Version

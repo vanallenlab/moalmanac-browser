@@ -5,7 +5,7 @@ from flask import jsonify, request, url_for
 from sqlalchemy import and_, or_
 from almanac_browser.modules.models import Assertion, Source, AssertionSchema, SourceSchema, Feature, FeatureSchema, \
     FeatureDefinition, FeatureDefinitionSchema, FeatureAttributeDefinition, FeatureAttributeDefinitionSchema, \
-    FeatureAttribute, FeatureAttributeSchema, FeatureSet
+    FeatureAttribute, FeatureAttributeSchema
 from almanac_browser.modules.helper_functions import add_or_fetch_source, query_distinct_column, \
     get_all_genes, get_distinct_attribute_values, flatten_sqlalchemy_singlets
 from .errors import bad_request
@@ -168,12 +168,12 @@ def new_assertion():
     assertion.old_disease = data['cancer_type']
     assertion.submitted_by = data['email']
 
-    feature_set = FeatureSet(assertion=assertion)
+    features = Feature(assertion=assertion)
     feature_def = FeatureDefinition.query.get(data['feature_def_id'])
     if not feature_def:
         return bad_request('Invalid feature definition ID.')
 
-    feature = Feature(feature_set=feature_set, feature_definition=feature_def)
+    feature = Feature(feature_definition=feature_def)
     for attribute_def_id, attribute_value in attribute_data.items():
         new_attribute = FeatureAttribute(
             feature_id=data['feature_def_id'],
@@ -183,8 +183,8 @@ def new_assertion():
 
         feature.attributes.append(new_attribute)
 
-    feature_set.features.append(feature)
-    assertion.feature_sets.append(feature_set)
+    features.features.append(feature)
+    assertion.feature_sets.append(features)
     assertion.sources.append(add_or_fetch_source(db, data['doi']))
 
     db.session.add(assertion)

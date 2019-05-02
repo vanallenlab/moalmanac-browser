@@ -8,6 +8,7 @@ from .models import Assertion, Source, AssertionToSource
 
 editor = Blueprint('editor', __name__)
 
+
 class AlterationForm(FlaskForm):
     feature_type = StringField(label='Feature type',
                                    validators=[validators.InputRequired(message='A feature type is required.')])
@@ -17,6 +18,7 @@ class AlterationForm(FlaskForm):
 
     def __init__(self, csrf_enabled=False, *args, **kwargs):
         super(AlterationForm, self).__init__(csrf_enabled=csrf_enabled, *args, **kwargs)
+
 
 class AssertionForm(FlaskForm):
     disease = StringField(label='Disease',
@@ -34,6 +36,7 @@ class AssertionForm(FlaskForm):
     def __init__(self, csrf_enabled=False, *args, **kwargs):
         super(AssertionForm, self).__init__(csrf_enabled=csrf_enabled, *args, **kwargs)
 
+
 class SourceForm(FlaskForm):
     cite_text = StringField(label='Cite text',
                             validators=[validators.InputRequired(message='Citation text is required.')])
@@ -43,10 +46,12 @@ class SourceForm(FlaskForm):
     def __init__(self, csrf_enabled=False, *args, **kwargs):
         super(SourceForm, self).__init__(csrf_enabled=csrf_enabled, *args, **kwargs)
 
+
 class EditorForm(FlaskForm):
     alteration = fields.FieldList(fields.FormField(AlterationForm))
     assertion = fields.FieldList(fields.FormField(AssertionForm))
     source = fields.FieldList(fields.FormField(SourceForm))
+
 
 def insert_if_new(model, defaults=None, **kwargs):
     """
@@ -65,6 +70,7 @@ def insert_if_new(model, defaults=None, **kwargs):
         instance = model(**params)
         db.session.add(instance)
         return instance, True
+
 
 @editor.route('/', methods=('GET', 'POST'))
 def index():
@@ -167,7 +173,6 @@ def index():
 
             db.session.bulk_save_objects(new_objs)
             db.session.commit()"""
-
 
     return render_template('editor_index.html',
                            editor_form=editor_form,

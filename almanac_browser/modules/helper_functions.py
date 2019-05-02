@@ -7,8 +7,8 @@ import re
 from sqlalchemy import or_, and_
 from flask import Markup, url_for, request
 from werkzeug.exceptions import BadRequest
-from .models import Assertion, Source, FeatureSet, Feature, FeatureDefinition, FeatureAttribute, \
-    FeatureAttributeDefinition
+from .models import Assertion, Source, Feature, FeatureDefinition, FeatureAttribute, \
+    FeatureAttributeDefinition, AssertionToFeature
 
 IMPLICATION_LEVELS_SORT = {
     'FDA-Approved': 5,
@@ -90,22 +90,22 @@ def amend_cite_text_for_assertion(db, assertion, doi, new_cite_text):
     current_source.cite_text = new_cite_text
 
 
-def remove_alteration_from_assertion(db, assertion=None, alteration=None):
+def remove_alteration_from_assertion(db, assertion=None, feature=None):
     """Remove an Alteration from an Assertion's list of alterations. If there are other Assertions that depend on
     this Alteration, simply remove it from the Assertion in question. Otherwise, if this is the only Assertion that
     this Alteration is linked to, simply delete the Alteration."""
 
     assert(assertion is not None)
-    assert(alteration is not None)
+    assert(feature is not None)
 
-    other_assertions_with_same_alteration = db.session.query(AssertionToAlteration) \
-        .filter(AssertionToAlteration.alt_id == alteration.alt_id,
-                AssertionToAlteration.assertion_id != assertion.assertion_id).all()
+    other_assertions_with_same_alteration = db.session.query(AssertionToFeature) \
+        .filter(AssertionToFeature.feature_id == feature.feature_id,
+                AssertionToFeature.assertion_id != assertion.assertion_id).all()
     if not other_assertions_with_same_alteration:
-        db.session.delete(alteration)
+        db.session.delete(feature)
     else:
         current_alterations = assertion.alterations
-        new_alterations = [a for a in current_alterations if a.alt_id != alteration.alt_id]
+        new_alterations = [a for a in current_alterations if a.alt_id != feature.alt_id]
         assertion.alterations = new_alterations
         db.session.add(assertion)
 
@@ -134,9 +134,8 @@ def get_unapproved_assertion_rows(db):
     unapproved_assertions = db.session.query(Assertion).filter(Assertion.validated == 0).all()
     rows = []
     for assertion in unapproved_assertions:
-        for feature_set in assertion.feature_sets:
-            rows.extend(make_rows(assertion, feature_set))
-
+        for feature in assertion.features:
+            rows.extend(make_rows(assertion, feature))
     return rows
 
 
@@ -166,24 +165,42 @@ def make_display_string(feature):
         locus = find_attribute_by_name(feature.attributes, 'locus')
 
         if gene1 and gene2 and locus:
-            return '%s %s-%s %s' % (rearrangement_type, make_gene_link(gene1), make_gene_link(gene2), locus)
-        if gene1 and gene2:
-            return '%s %s-%s' % (rearrangement_type, make_gene_link(gene1), make_gene_link(gene2))
+            return '%s--%s %s %s' % (make_gene_link(gene1), make_gene_link(gene2), locus, rearrangement_type)
+        elif gene1 and gene2:
+            return '%s--%s %s' % (make_gene_link(gene1), make_gene_link(gene2), rearrangement_type)
+        elif gene1 and locus:
+            return '%s %s %s' % (make_gene_link(gene1), locus, rearrangement_type)
+        elif gene1 and rearrangement_type:
+            return '%s %s' % (make_gene_link(gene1), rearrangement_type)
+        elif gene1:
+            return '%s' % (make_gene_link(gene1))
         elif locus:
-            return '%s %s' % (rearrangement_type, locus)
+            return '%s %s' % (locus, rearrangement_type)
         else:
             return rearrangement_type if rearrangement_type else ''
+
     elif feature_name in ['somatic_variant', 'germline_variant']:
         variant_type = find_attribute_by_name(feature.attributes, 'variant_type')
         gene = find_attribute_by_name(feature.attributes, 'gene')
         protein_change = find_attribute_by_name(feature.attributes, 'protein_change')
+        exon = find_attribute_by_name(feature.attributes, 'exon')
+        if exon:
+            print(type(exon))
+            exon = 'Exon {}'.format(exon.rstrip('0').rstrip('.'))
 
         if gene:
             gene = make_gene_link(gene)
 
+        pathogenic = None
+        if feature_name == 'germline_variant':
+            pathogenic = find_attribute_by_name(feature.attributes, 'pathogenic')
+            if pathogenic:
+                pathogenic = '(Pathogenic)'
+
         # Any of variant_type, gene, or protein_change may be None. With None as the first parameter to filter(),
         # all False/None values are skipped in the final join() call.
-        return ' '.join(filter(None, [variant_type, gene, protein_change]))
+        return ' '.join(filter(None, [gene, exon, variant_type, protein_change, pathogenic]))
+
     elif feature_name == 'copy_number':
         gene = find_attribute_by_name(feature.attributes, 'gene')
         direction = find_attribute_by_name(feature.attributes, 'direction')
@@ -193,18 +210,35 @@ def make_display_string(feature):
             gene = make_gene_link(gene)
 
         return ' '.join(filter(None, [gene, direction, locus]))
+
     elif feature_name == 'microsatellite_stability':
-        direction = find_attribute_by_name(feature.attributes, 'direction')
+        direction = find_attribute_by_name(feature.attributes, 'status')
 
         return direction if direction else ''
+
     elif feature_name == 'mutational_signature':
-        signature_number = find_attribute_by_name(feature.attributes, 'signature_number')
+        signature_number = find_attribute_by_name(feature.attributes, 'cosmic_signature_number')
 
-        return ('COSMIC ' + signature_number) if signature_number else ''
+        return ('COSMIC Signature {}'.format(signature_number)) if signature_number else ''
+
     elif feature_name in ['mutational_burden', 'neoantigen_burden']:
-        burden = find_attribute_by_name(feature.attributes, 'burden')
+        if feature_name == 'mutational_burden':
+            unit = 'mutations'
+        else:
+            unit = 'neoantigens'
 
-        return burden if burden else ''
+        classification = find_attribute_by_name(feature.attributes, 'classification')
+        minimum = find_attribute_by_name(feature.attributes, 'minimum_{}'.format(unit))
+        per_mb = find_attribute_by_name(feature.attributes, '{}_per_mb'.format(unit))
+        if minimum:
+            return '{} ( >= {} {})'.format(classification, minimum, unit)
+        elif per_mb:
+            return '{} ( >= {} {}/Mb)'.format(classification, per_mb, unit)
+        elif classification:
+            return '{}'.format(classification)
+        else:
+            return ''
+
     elif feature_name in ['knockdown', 'silencing']:
         gene = find_attribute_by_name(feature.attributes, 'gene')
         technique = find_attribute_by_name(feature.attributes, 'technique')
@@ -213,18 +247,19 @@ def make_display_string(feature):
             gene = make_gene_link(gene)
 
         return ('%s (%s)' % (gene, technique)) if gene and technique else (gene or technique)
+
     elif feature_name == 'aneuploidy':
-        effect = find_attribute_by_name(feature.attributes, 'effect')
+        effect = find_attribute_by_name(feature.attributes, 'event')
 
         return effect if effect else ''
+
     else:
         return 'Unknown feature (%s)' % feature_name
 
 
-def make_rows(assertion, feature_set):
+def make_rows(assertion, feature):
     rows = []
-    for feature in feature_set.features:
-        rows.append({
+    rows.append({
             'feature': feature.feature_definition.readable_name,
             'display_string': Markup(make_display_string(feature)),
             'therapy_name': assertion.therapy_name,
@@ -238,7 +273,7 @@ def make_rows(assertion, feature_set):
             'predictive_implication_sort': IMPLICATION_LEVELS_SORT[assertion.predictive_implication],
             'assertion_id': assertion.assertion_id,
             'sources': [s for s in assertion.sources],
-        })
+    })
 
     return rows
 
@@ -422,7 +457,7 @@ def unified_search(db, search_str):
     Leiomyoma would be interpreted as "(gene is PTEN OR POLE) AND (disease is Uterine Leiomyoma)". The results would
     be every assertion about Uterine Leiomyoma that references either the PTEN or POLE genes.
 
-    Returns a list of 2-tuples, in which each 2-tuple contains an Assertion and corresponding FeatureSet.
+    Returns a list of 2-tuples, in which each 2-tuple contains an Assertion and corresponding Feature.
     """
 
     # Note that we will skip any 'unknown' needles return in the interpreted query
@@ -437,8 +472,8 @@ def unified_search(db, search_str):
     filter_components = [
         FeatureDefinition.feature_def_id == Feature.feature_def_id,
         Feature.feature_id == FeatureAttribute.feature_id,
-        Feature.feature_set_id == FeatureSet.feature_set_id,
-        FeatureSet.assertion_id == Assertion.assertion_id,
+        AssertionToFeature.assertion_id == Assertion.assertion_id,
+        AssertionToFeature.feature_id == Feature.feature_id,
         Assertion.validated.is_(True),
     ]
 
@@ -483,5 +518,5 @@ def unified_search(db, search_str):
         filter_components.append(or_(*or_stmt))
 
     # The following produces a list of 2-tuples, where each tuple contains the following table objects:
-    # (Assertion, FeatureSet)
-    return db.session.query(Assertion, FeatureSet).filter(*filter_components).all()
+    # (Assertion, Feature)
+    return db.session.query(Assertion, AssertionToFeature).filter(*filter_components).all()

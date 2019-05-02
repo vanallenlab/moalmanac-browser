@@ -7,7 +7,7 @@
 # Set create/drop locations below
 
 FEATURES_FILE="$1"
-ASSERTIONS_FILE="$2"
+ASSERTIONS_FOLDER="$2"
 DB_NAME="$3"
 V_MAJOR="$4"
 V_MINOR="$5"
@@ -20,8 +20,8 @@ INSERT_SCRIPT="$SCRIPT_DIR/db_insert.py"
 
 if [[ "$#" -ne 6 ]]; then
 	echo 'Usage:'
-	echo 'create_db.sh <feature definitions file> <assertions file> <db name> <major version> <minor version> <patch version>'
-	echo 'Example: create_db.sh features_file.tsv assertions_file.tsv new_db 1 2 3'
+	echo 'create_db.sh <feature definitions file> <assertions folder> <db name> <major version> <minor version> <patch version>'
+	echo 'Example: create_db.sh features_file.tsv assertions_folder/*.txt new_db 1 2 3'
 	exit 1
 fi
 
@@ -45,10 +45,10 @@ echo "Creating tables..."
 cat "$CREATE_SCRIPT" | sqlite3 "$DB_NAME"
 echo 'Importing data:'
 echo -e "\tFeatures file  : ${FEATURES_FILE}"
-echo -e "\tAssertions file: ${ASSERTIONS_FILE}"
+echo -e "\tAssertions folder: ${ASSERTIONS_FOLDER}"
 echo -e "\tOutput database: ${DB_NAME}"
 echo -e "\tVersion        : ${V_MAJOR}.${V_MINOR}.${V_PATCH}"
-python "$INSERT_SCRIPT" "$FEATURES_FILE" "$ASSERTIONS_FILE" "$DB_NAME" "$V_MAJOR" "$V_MINOR" "$V_PATCH"
+python "$INSERT_SCRIPT" "$FEATURES_FILE" "$ASSERTIONS_FOLDER" "$DB_NAME" "$V_MAJOR" "$V_MINOR" "$V_PATCH"
 
 OUTPUT_FILE=${DB_NAME}.${V_MAJOR}.${V_MINOR}.${V_PATCH}.sqlite3
 mv ${DB_NAME} ${OUTPUT_FILE}

@@ -34,7 +34,7 @@ def create_app(name=__name__):
     app.register_blueprint(portal)
 
     db.init_app(app)
-    ma.init_app(app) #must initialize after SQLAlchemy
+    ma.init_app(app) # must initialize after SQLAlchemy
 
     CORS(app)
 
