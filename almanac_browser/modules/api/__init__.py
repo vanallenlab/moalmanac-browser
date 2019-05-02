@@ -5,7 +5,7 @@ from flask import jsonify, request, url_for
 from sqlalchemy import and_, or_
 from almanac_browser.modules.models import Assertion, Source, AssertionSchema, SourceSchema, Feature, FeatureSchema, \
     FeatureDefinition, FeatureDefinitionSchema, FeatureAttributeDefinition, FeatureAttributeDefinitionSchema, \
-    FeatureAttribute, FeatureAttributeSchema#, FeatureSet
+    FeatureAttribute, FeatureAttributeSchema
 from almanac_browser.modules.helper_functions import add_or_fetch_source, query_distinct_column, \
     get_all_genes, get_distinct_attribute_values, flatten_sqlalchemy_singlets
 from .errors import bad_request

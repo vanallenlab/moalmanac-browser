@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2019-04-30 12:48:21.672
+-- Last modification date: 2019-05-02 00:54:00.162
 
 -- tables
 -- Table: Assertion
@@ -10,13 +10,13 @@ CREATE TABLE Assertion (
     disease text,
     oncotree_term text,
     oncotree_code text,
-    stage integer,
+    context text,
     therapy_name text,
     therapy_type text,
     therapy_sensitivity boolean,
     therapy_resistance boolean,
-    predictive_implication text,
     favorable_prognosis boolean,
+    predictive_implication text,
     description text,
     validated boolean NOT NULL,
     submitted_by text NOT NULL
@@ -90,10 +90,11 @@ CREATE TABLE Feature_Definition (
 CREATE TABLE Source (
     source_id integer NOT NULL CONSTRAINT Source_pk PRIMARY KEY,
     source_type text NOT NULL,
-    cite_text text NOT NULL,
+    citation text NOT NULL,
+    url text NOT NULL,
     doi text,
-    nct text,
-    url text
+    pmid text,
+    nct text
 );
 
 -- Table: Version

@@ -176,6 +176,7 @@ def make_display_string(feature):
         variant_type = find_attribute_by_name(feature.attributes, 'variant_type')
         gene = find_attribute_by_name(feature.attributes, 'gene')
         protein_change = find_attribute_by_name(feature.attributes, 'protein_change')
+        exon = find_attribute_by_name(feature.attributes, 'exon')
 
         if gene:
             gene = make_gene_link(gene)

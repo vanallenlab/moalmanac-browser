@@ -58,16 +58,15 @@ class Assertion(Base, db.Model):
     __tablename__ = 'Assertion'
 
     assertion_id = db.Column('assertion_id', db.Integer, primary_key=True)
-    created_on = db.Column('created_on', db.Text, default=datetime.now)
-    last_updated = db.Column('last_updated', db.Text, default=datetime.now)
-    disease = db.Column('oncotree_term', db.Text)
-    old_disease = db.Column('disease', db.Text)
+    disease = db.Column('disease', db.Text)
+    context = db.Column('context', db.Text)
+    oncotree_term = db.Column('oncotree_term', db.Text)
     oncotree_code = db.Column('oncotree_code', db.Text)
-    stage = db.Column('stage', db.Integer)
     therapy_name = db.Column('therapy_name', db.Text)
     therapy_type = db.Column('therapy_type', db.Text)
     therapy_sensitivity = db.Column('therapy_sensitivity', db.Boolean)
     therapy_resistance = db.Column('therapy_resistance', db.Boolean)
+    favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
     predictive_implication = db.Column('predictive_implication', db.Enum('FDA-Approved',
                                                                          'Guideline',
                                                                          'Clinical trial',
@@ -75,10 +74,11 @@ class Assertion(Base, db.Model):
                                                                          'Preclinical',
                                                                          'Inferential',
                                                                          'Predictive implication'))
+    description = db.Column('description', db.Text)
+    created_on = db.Column('created_on', db.Text, default=datetime.now)
+    last_updated = db.Column('last_updated', db.Text, default=datetime.now)
     validated = db.Column('validated', db.Boolean, default=False)
     submitted_by = db.Column('submitted_by', db.Text)
-    favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
-    description = db.Column('description', db.Text)
 
     features = db.relationship('Feature', secondary='Assertion_To_Feature', uselist=True)
     sources = db.relationship('Source', secondary='Assertion_To_Source', uselist=True)
@@ -88,9 +88,12 @@ class Source(Base, db.Model):
     __tablename__ = 'Source'
 
     source_id = db.Column('source_id', db.Integer, primary_key=True)
-    doi = db.Column('doi', db.Text)
-    cite_text = db.Column('cite_text', db.Text)
     source_type = db.Column('source_type', db.Text)
+    citation = db.Column('citation', db.Text)
+    url = db.Column('url', db.Text)
+    doi = db.Column('doi', db.Text)
+    pmid = db.Column('pmid', db.Text)
+    nct = db.Column('nct', db.Text)
 
     assertions = db.relationship('Assertion', secondary='Assertion_To_Source')
 
