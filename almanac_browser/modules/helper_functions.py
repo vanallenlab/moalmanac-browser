@@ -178,6 +178,7 @@ def make_display_string(feature):
             return '%s %s' % (locus, rearrangement_type)
         else:
             return rearrangement_type if rearrangement_type else ''
+
     elif feature_name in ['somatic_variant', 'germline_variant']:
         variant_type = find_attribute_by_name(feature.attributes, 'variant_type')
         gene = find_attribute_by_name(feature.attributes, 'gene')
@@ -199,6 +200,7 @@ def make_display_string(feature):
         # Any of variant_type, gene, or protein_change may be None. With None as the first parameter to filter(),
         # all False/None values are skipped in the final join() call.
         return ' '.join(filter(None, [gene, exon, variant_type, protein_change, pathogenic]))
+
     elif feature_name == 'copy_number':
         gene = find_attribute_by_name(feature.attributes, 'gene')
         direction = find_attribute_by_name(feature.attributes, 'direction')
@@ -208,18 +210,35 @@ def make_display_string(feature):
             gene = make_gene_link(gene)
 
         return ' '.join(filter(None, [gene, direction, locus]))
+
     elif feature_name == 'microsatellite_stability':
-        direction = find_attribute_by_name(feature.attributes, 'direction')
+        direction = find_attribute_by_name(feature.attributes, 'status')
 
         return direction if direction else ''
+
     elif feature_name == 'mutational_signature':
-        signature_number = find_attribute_by_name(feature.attributes, 'signature_number')
+        signature_number = find_attribute_by_name(feature.attributes, 'cosmic_signature_number')
 
         return ('COSMIC Signature {}'.format(signature_number)) if signature_number else ''
-    elif feature_name in ['mutational_burden', 'neoantigen_burden']:
-        burden = find_attribute_by_name(feature.attributes, 'burden')
 
-        return burden if burden else ''
+    elif feature_name in ['mutational_burden', 'neoantigen_burden']:
+        if feature_name == 'mutational_burden':
+            unit = 'mutations'
+        else:
+            unit = 'neoantigens'
+
+        classification = find_attribute_by_name(feature.attributes, 'classification')
+        minimum = find_attribute_by_name(feature.attributes, 'minimum_{}'.format(unit))
+        per_mb = find_attribute_by_name(feature.attributes, '{}_per_mb'.format(unit))
+        if minimum:
+            return '{} ( >= {} {})'.format(classification, minimum, unit)
+        elif per_mb:
+            return '{} ( >= {} {}/Mb)'.format(classification, per_mb, unit)
+        elif classification:
+            return '{}'.format(classification)
+        else:
+            return ''
+
     elif feature_name in ['knockdown', 'silencing']:
         gene = find_attribute_by_name(feature.attributes, 'gene')
         technique = find_attribute_by_name(feature.attributes, 'technique')
@@ -228,10 +247,12 @@ def make_display_string(feature):
             gene = make_gene_link(gene)
 
         return ('%s (%s)' % (gene, technique)) if gene and technique else (gene or technique)
+
     elif feature_name == 'aneuploidy':
-        effect = find_attribute_by_name(feature.attributes, 'effect')
+        effect = find_attribute_by_name(feature.attributes, 'event')
 
         return effect if effect else ''
+
     else:
         return 'Unknown feature (%s)' % feature_name
 
