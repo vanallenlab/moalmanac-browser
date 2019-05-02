@@ -166,8 +166,14 @@ def make_display_string(feature):
 
         if gene1 and gene2 and locus:
             return '%s--%s %s %s' % (make_gene_link(gene1), make_gene_link(gene2), locus, rearrangement_type)
-        if gene1 and gene2:
+        elif gene1 and gene2:
             return '%s--%s %s' % (make_gene_link(gene1), make_gene_link(gene2), rearrangement_type)
+        elif gene1 and locus:
+            return '%s %s %s' % (make_gene_link(gene1), locus, rearrangement_type)
+        elif gene1 and rearrangement_type:
+            return '%s %s' % (make_gene_link(gene1), rearrangement_type)
+        elif gene1:
+            return '%s' % (make_gene_link(gene1))
         elif locus:
             return '%s %s' % (locus, rearrangement_type)
         else:
