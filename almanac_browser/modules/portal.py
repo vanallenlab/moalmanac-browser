@@ -3,7 +3,7 @@ import io
 import csv
 import urllib
 from zipfile import ZipFile
-from flask import Blueprint, request, render_template, send_file, Markup
+from flask import Blueprint, request, render_template, send_file, Markup, redirect, url_for
 from auth import basic_auth
 from werkzeug.exceptions import BadRequest
 from db import db
@@ -260,8 +260,12 @@ def search():
     return render_template('portal_search_results.html', rows=rows)
 
 
+@portal.route('/assertion/')
 @portal.route('/assertion/<int:assertion_id>')
-def assertion(assertion_id):
+def assertion(assertion_id=None):
+    if assertion_id is None:
+        return redirect(url_for('portal.index'))
+
     assertion = db.session.query(Assertion).filter(Assertion.assertion_id == assertion_id).first()
     features = []
     for feature in assertion.features:
