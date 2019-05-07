@@ -283,14 +283,15 @@ def export():
         tsv_output = io.StringIO()
         tsv_writer = csv.writer(tsv_output, delimiter='\t')
 
-        # Write headers
         row = []
+        # Write headers
         for attribute_definition in feature_def.attribute_definitions:
             row.append(attribute_definition.name)
 
         row.extend([
             'disease',
             'oncotree_code',
+            'context',
             'therapy_name',
             'therapy_type',
             'therapy_sensitivity',
@@ -298,19 +299,22 @@ def export():
             'favorable_prognosis',
             'predictive_implication',
             'description',
+            'source_type',
+            'citation',
+            'url',
             'doi',
-            'source',
+            'pmid',
+            'nct',
             'last_updated'
         ])
         tsv_writer.writerow(row)
 
         for feature in feature_def.features:
-            # Write per-assertion data
-            for assertion in db.session.query(Assertion).filter(
+            for assertion in (db.session.query(Assertion).join(AssertionToFeature).join(Feature).filter(
                     Feature.feature_id == feature.feature_id,
                     FeatureAttribute.feature_id == Feature.feature_id,
-                    Feature.assertion_id == Assertion.assertion_id
-            ):
+                    AssertionToFeature.feature_id == Feature.feature_id)):
+
                 row = []
                 for attribute in feature.attributes:
                     row.append(attribute.value)
@@ -318,24 +322,26 @@ def export():
                 row.extend([
                     assertion.disease,
                     assertion.oncotree_code,
+                    assertion.context,
                     assertion.therapy_name,
                     assertion.therapy_type,
                     assertion.therapy_sensitivity,
                     assertion.therapy_resistance,
                     assertion.favorable_prognosis,
                     assertion.predictive_implication,
-                    assertion.description,
+                    assertion.description
                 ])
 
-                source_dois = []
-                source_cite_texts = []
                 for source in assertion.sources:
-                    source_dois.append(source.doi if source.doi else '')
-                    source_cite_texts.append(source.cite_text if source.cite_text else '')
-
-                row.extend(['|'.join(source_dois), '|'.join(source_cite_texts)])
-                row.append(assertion.last_updated)
-                tsv_writer.writerow(row)
+                    row_per_source = row.copy()
+                    row_per_source.append(source.source_type if source.source_type else '')
+                    row_per_source.append(source.citation if source.citation else '')
+                    row_per_source.append(source.url if source.url else '')
+                    row_per_source.append(source.doi if source.doi else '')
+                    row_per_source.append(str(source.pmid) if source.pmid else '')
+                    row_per_source.append(source.nct if source.nct else '')
+                    row_per_source.append(assertion.last_updated)
+                    tsv_writer.writerow(row_per_source)
 
         zip_file.writestr('%s.tsv' % feature_def.name, tsv_output.getvalue().encode('utf-8'))
         tsv_output.close()

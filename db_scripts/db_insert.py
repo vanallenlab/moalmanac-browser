@@ -200,8 +200,8 @@ for feature_def in feature_defs:
             description=series.loc[assertion_tsv_map['description']],
             submitted_by='breardon@broadinstitute.org',
             validated=1,
-            created_on=datetime.now(),
-            last_updated=datetime.now()
+            created_on=datetime.now().strftime("%D"),
+            last_updated=datetime.strptime(series.loc[assertion_tsv_map['last_updated']], "%m/%d/%y").date()
         )
         session.add(new_assertion)
 
@@ -231,13 +231,12 @@ for feature_def in feature_defs:
                 citation=series[assertion_tsv_map['citation']],
                 url=series[assertion_tsv_map['url']],
                 doi=series[assertion_tsv_map['doi']],
-                pmid=series[assertion_tsv_map['pmid']],
+                pmid=str(series[assertion_tsv_map['pmid']]),
                 nct=series[assertion_tsv_map['nct']]
             )
             session.add(new_source)
-
-            new_assertion_to_source = AssertionToSource(assertion=new_assertion, source=new_source)
-            session.add(new_assertion_to_source)
+        new_assertion_to_source = AssertionToSource(assertion=new_assertion, source=new_source)
+        session.add(new_assertion_to_source)
 
         new_feature.attributes = new_attributes
 
