@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2019-05-02 00:54:00.162
+-- Last modification date: 2019-05-06 15:50:36.242
 
 -- tables
 -- Table: Assertion
@@ -93,7 +93,7 @@ CREATE TABLE Source (
     citation text NOT NULL,
     url text NOT NULL,
     doi text,
-    pmid text,
+    pmid integer,
     nct text
 );
 
