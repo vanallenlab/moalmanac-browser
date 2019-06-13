@@ -180,26 +180,34 @@ def make_display_string(feature):
             return rearrangement_type if rearrangement_type else ''
 
     elif feature_name in ['somatic_variant', 'germline_variant']:
-        variant_type = find_attribute_by_name(feature.attributes, 'variant_type')
+        variant_class = find_attribute_by_name(feature.attributes, 'variant_annotation')
         gene = find_attribute_by_name(feature.attributes, 'gene')
+        cdna_change = find_attribute_by_name(feature.attributes, 'cdna_change')
         protein_change = find_attribute_by_name(feature.attributes, 'protein_change')
         exon = find_attribute_by_name(feature.attributes, 'exon')
-        if exon:
-            print(type(exon))
-            exon = 'Exon {}'.format(exon.rstrip('0').rstrip('.'))
-
         if gene:
             gene = make_gene_link(gene)
+
+        if exon:
+            exon = 'Exon {}'.format(exon.rstrip('0').rstrip('.'))
 
         pathogenic = None
         if feature_name == 'germline_variant':
             pathogenic = find_attribute_by_name(feature.attributes, 'pathogenic')
             if pathogenic:
-                pathogenic = '(Pathogenic)'
+                pathogenic = 'Pathogenic'
 
         # Any of variant_type, gene, or protein_change may be None. With None as the first parameter to filter(),
         # all False/None values are skipped in the final join() call.
-        return ' '.join(filter(None, [gene, exon, variant_type, protein_change, pathogenic]))
+        if protein_change:
+            gene_display = ' '.join(filter(None, [gene, protein_change]))
+        else:
+            gene_display = ' '.join(filter(None, [gene, exon]))
+
+        annotation = ', '.join(filter(None, [variant_class, pathogenic]))
+        if annotation:
+            annotation = '({})'.format(annotation)
+        return ' '.join(filter(None, [gene_display, annotation]))
 
     elif feature_name == 'copy_number':
         gene = find_attribute_by_name(feature.attributes, 'gene')
