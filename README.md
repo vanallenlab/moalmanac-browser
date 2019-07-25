@@ -21,6 +21,8 @@ Do not call `os.urandom` in `secret_key.py`; this will cause the secret key to c
 
 `GCP_SECRET_KEY` is used by Flask to cryptographically sign data stored in browser cookies; view [the Flask documentation for more information](http://flask.pocoo.org/docs/1.0/quickstart/#sessions).
 
+`USERNAME` AND `PASSWORD` are specify credentials for logging into the /approve page, to review and approve given submitted entries. 
+
 ### config.py
 `config.py` contains several configuration variables; for most of them, the provided defaults suffice. The following variables may need to be changed by the user:
 
