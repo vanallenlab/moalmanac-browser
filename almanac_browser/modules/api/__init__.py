@@ -131,7 +131,7 @@ def get_sources():
 
     return sources_schema.jsonify(data)
 
-
+# deprecated since API changes spring 2019
 @api.route('/new_assertion', methods=['POST'])
 def new_assertion():
     """Submit an assertion for consideration for inclusion in the database"""
