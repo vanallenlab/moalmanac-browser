@@ -233,7 +233,7 @@ def submit():
     return http200response(message={
         'email': required_data['email'],
         'therapy': required_data['therapy'] or 'None',
-        'implication': required_data['implication'] or 'None',
+        'implication': required_data['implication'],
         'type': required_data['type'],
         'source': required_data['source'],
         'feature_name': feature_def.name
