@@ -38,6 +38,13 @@ EFFECTS = [
     'MSI-High'
 ]
 
+RESPONSES = [
+    'Sensitivity',
+    'Resistance',
+    'Good prognosis',
+    'Poor prognosis',
+    'Not sensitive'
+]
 
 @portal.route('/')
 def index():
@@ -196,7 +203,7 @@ def submit():
     if not required_data['feature_id']:
         return http400response('Please select a feature')
     if not required_data['implication'] or required_data['implication'] not in IMPLICATION_LEVELS:
-        implication = None
+        return http400response('Please select an implication')
     if not required_data['type']:
         return http400response('Please select a cancer type')
 
