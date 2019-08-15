@@ -283,6 +283,11 @@ def assertion(assertion_id=None):
                            assertion=assertion, features=features)
 
 
+@portal.route('/privacy_policy')
+def privacy_policy():
+    return render_template('PrivacyPolicy_Connector_publish.html')
+
+
 @portal.route('/export', methods=['GET'])
 def export():
     feature_defs = FeatureDefinition.query.all()
