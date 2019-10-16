@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2019-07-25 18:52:52.999
+-- Last modification date: 2019-10-16 20:41:26.208
 
 -- tables
 -- Table: Assertion
@@ -18,6 +18,7 @@ CREATE TABLE Assertion (
     favorable_prognosis boolean,
     predictive_implication text,
     description text,
+    preferred_assertion boolean,
     validated boolean NOT NULL,
     submitted_by text NOT NULL
 );
