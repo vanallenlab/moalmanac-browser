@@ -38,6 +38,13 @@ EFFECTS = [
     'MSI-High'
 ]
 
+RESPONSES = [
+    'Sensitivity',
+    'Resistance',
+    'Good prognosis',
+    'Poor prognosis',
+    'Not sensitive'
+]
 
 @portal.route('/')
 def index():
@@ -196,7 +203,7 @@ def submit():
     if not required_data['feature_id']:
         return http400response('Please select a feature')
     if not required_data['implication'] or required_data['implication'] not in IMPLICATION_LEVELS:
-        implication = None
+        return http400response('Please select an implication')
     if not required_data['type']:
         return http400response('Please select a cancer type')
 
@@ -226,7 +233,7 @@ def submit():
     return http200response(message={
         'email': required_data['email'],
         'therapy': required_data['therapy'] or 'None',
-        'implication': required_data['implication'] or 'None',
+        'implication': required_data['implication'],
         'type': required_data['type'],
         'source': required_data['source'],
         'feature_name': feature_def.name
@@ -274,6 +281,11 @@ def assertion(assertion_id=None):
 
     return render_template('portal_assertion.html',
                            assertion=assertion, features=features)
+
+
+@portal.route('/privacy_policy')
+def privacy_policy():
+    return render_template('PrivacyPolicy_Connector_publish.html')
 
 
 @portal.route('/export', methods=['GET'])

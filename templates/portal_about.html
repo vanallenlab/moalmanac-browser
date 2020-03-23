@@ -16,11 +16,22 @@
             information from the literature, increasing the abilities of clinicians and researchers alike to rapidly
             assess the importance of an alteration.
         </p>
+    </div>
+</div>
 
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><strong>Data access</strong></h3>
+    </div>
+    <div class="panel-body">
         <p>
             <a href="#" data-toggle="modal" data-target="#download-tos-modal">The contents of the {{ config['APP_NAME_SHORT'] }} may be downloaded here.</a>
             Each feature represented in the almanac (e.g., "somatic variant," "knockdown," etc.) is represented in a separate tab-separated value (TSV) file.
-            The collection of TSV files representing the entire Almanac database is provided in a single ZIP file.
+            The collection of TSV files representing the entire Almanac database is provided in a single ZIP file. The knowledge base can also be programmatically interfaced
+            with through our <a href="https://app.swaggerhub.com/apis-docs/vanallenlab/almanac-browser/0.2#/" target="_blank">API endpoints</a>.
+            <br><br>
+            Please consider suggesting relationships through our <a href="{{ url_for('portal.add') }}">web form</a> or our
+            <a href="https://chrome.google.com/webstore/detail/molecular-oncology-almana/jliaipolchffpaccagodphgjpfdpcbcm" target="_blank">Google Chrome extension</a>.
         </p>
     </div>
 </div>
@@ -49,12 +60,12 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
-        <h3 class="panel-title"><strong>Predictive Implication Levels</strong></h3>
+        <h3 class="panel-title"><strong>Predictive implication levels</strong></h3>
     </div>
     <div class="panel-body">
         <p>
-            {{ config['APP_NAME'] }} classifies each curated assertion with a predictive implication levels which describes the
-            strength of evidence asserting the relationship between a given molecular feature and clinical action. The levels used are:
+            {{ config['APP_NAME'] }} categorizes each curated assertion by the strength of evidence asserting the
+            relationship between a given molecular feature and clinical action. The levels used are:
         </p>
         <table class="table table-condensed">
             <tr><th>Level</th><th>Description</th></tr>

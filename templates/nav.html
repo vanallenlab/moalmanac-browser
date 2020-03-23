@@ -14,14 +14,16 @@
 
 		<div class="collapse navbar-collapse" id="navbar-collapse">
 			<ul class="nav navbar-nav">
+				<li><a href="https://app.swaggerhub.com/apis-docs/vanallenlab/almanac-browser/0.2#/" target="_blank">API</a></li>
 				<li><a href="https://moalmanac.org">Browser</a></li>
+				<li><a href="https://chrome.google.com/webstore/detail/molecular-oncology-almana/jliaipolchffpaccagodphgjpfdpcbcm" target="_blank">Extension</a></li>
 				<li><a href="https://portal.moalmanac.org">Portal</a></li>
-                <li><a href="https://app.swaggerhub.com/apis-docs/vanallenlab/almanac-browser/0.1#/">API</a></li>
 			</ul>
 
 			<ul class="nav navbar-nav navbar-right">
+                <li><a href="{{ url_for('portal.privacy_policy') }}">Privacy policy</a></li>
 				<li><a href="{{ url_for('portal.about') }}">About</a></li>
-				<li><a href="{{ url_for('portal.add') }}">Submit Entry</a></li>
+				<li><a href="{{ url_for('portal.add') }}">Submit entry</a></li>
 			</ul>
 		</div>
 	</div>

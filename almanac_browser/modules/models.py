@@ -2,6 +2,7 @@ from flask_sqlalchemy import declarative_base
 from almanac_browser import db, ma
 from datetime import datetime
 
+
 Base = declarative_base()
 
 

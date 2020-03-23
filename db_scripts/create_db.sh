@@ -2,8 +2,8 @@
 
 # Create database from TSV import file
 # Usage:
-# bash create_db.sh <input filename> <database name> <major version> <minor version> <patch version>
-# Example: bash create_db.sh import_file.tsv db_name 1 2 3
+# bash create_db.sh <feature definitions file> <assertions folder> <db name> <major version> <minor version> <patch version>
+# Example: bash Example: create_db.sh features_file.tsv assertions_folder/*.txt almanac 1 2 3
 # Set create/drop locations below
 
 FEATURES_FILE="$1"
@@ -21,7 +21,7 @@ INSERT_SCRIPT="$SCRIPT_DIR/db_insert.py"
 if [[ "$#" -ne 6 ]]; then
 	echo 'Usage:'
 	echo 'create_db.sh <feature definitions file> <assertions folder> <db name> <major version> <minor version> <patch version>'
-	echo 'Example: create_db.sh features_file.tsv assertions_folder/*.txt new_db 1 2 3'
+	echo 'Example: bash create_db.sh features_file.tsv assertions_folder/*.txt almanac 1 2 3'
 	exit 1
 fi
 

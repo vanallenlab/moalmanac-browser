@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2019-05-06 15:50:36.242
+-- Last modification date: 2019-10-16 20:41:26.208
 
 -- tables
 -- Table: Assertion
@@ -18,6 +18,7 @@ CREATE TABLE Assertion (
     favorable_prognosis boolean,
     predictive_implication text,
     description text,
+    preferred_assertion boolean,
     validated boolean NOT NULL,
     submitted_by text NOT NULL
 );
@@ -90,8 +91,8 @@ CREATE TABLE Feature_Definition (
 CREATE TABLE Source (
     source_id integer NOT NULL CONSTRAINT Source_pk PRIMARY KEY,
     source_type text NOT NULL,
-    citation text NOT NULL,
-    url text NOT NULL,
+    citation text,
+    url text,
     doi text,
     pmid integer,
     nct text
