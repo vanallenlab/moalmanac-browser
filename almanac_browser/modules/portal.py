@@ -7,7 +7,7 @@ from flask import Blueprint, request, render_template, send_file, Markup, redire
 from auth import basic_auth
 from werkzeug.exceptions import BadRequest
 from db import db
-from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, AssertionToFeature
+from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, AssertionToFeature, Version
 from .helper_functions import IMPLICATION_LEVELS_SORT, get_unapproved_assertion_rows, make_rows, http404response, \
     http200response, query_distinct_column, add_or_fetch_source, delete_assertion, amend_cite_text_for_assertion, \
     http400response, \
@@ -54,13 +54,22 @@ def index():
     num_genes = len(get_all_genes(db))
     num_assertions = db.session.query(Assertion).count()
 
+    major = query_distinct_column(db, Version, 'major')
+    minor = query_distinct_column(db, Version, 'minor')
+    patch = query_distinct_column(db, Version, 'patch')
+    release = query_distinct_column(db, Version, 'release')
+    version_string = str(major[0]) + '.' + str(minor[0]) + '.' + str(patch[0])
+    release_string = str(release[0])
+
     return render_template('portal_index.html',
                            nav_current_page='index',
                            num_genes=num_genes,
                            num_assertions=num_assertions,
                            diseases=[d for d in sorted(diseases) if not d == 'Oncotree Term'],
                            pred_impls=IMPLICATION_LEVELS,
-                           therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name']
+                           therapy_names=[t for t in sorted(therapy_names) if not t == 'Therapy name'],
+                           version_string=version_string,
+                           release_string=release_string
                            )
 
 
