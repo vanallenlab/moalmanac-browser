@@ -47,7 +47,7 @@ def get_all_genes(db):
     return get_distinct_attribute_values(db, 'gene', FeatureAttributeDefinition.type)
 
 
-def add_or_fetch_source(db, doi, cite_text=""):
+def add_or_fetch_source(db, doi, empty_text=''):
     """Given a DOI, either fetch an exisiting corresponding source, or create a new one if none exists yet with the
     given attributes"""
     source = db.session.query(Source).filter(Source.doi == doi).first()
@@ -55,7 +55,11 @@ def add_or_fetch_source(db, doi, cite_text=""):
         source = Source()
         source.doi = doi
         source.source_type = 'Journal'
-        source.cite_text = cite_text
+        source.citation = empty_text
+        source.url = 'https://doi.org/' + doi
+        source.doi = doi
+        source.pmid = empty_text
+        source.nct = empty_text
         db.session.add(source)
         db.session.flush()
 
