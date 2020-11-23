@@ -131,6 +131,7 @@ class Version(Base, db.Model):
     major = db.Column('major', db.Integer, primary_key=True)
     minor = db.Column('minor', db.Integer)
     patch = db.Column('patch', db.Integer)
+    release = db.Column('release', db.String)
 
 
 class AssertionSchema(ma.ModelSchema):

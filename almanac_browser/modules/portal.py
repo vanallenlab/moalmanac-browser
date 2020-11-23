@@ -257,7 +257,7 @@ def search():
     rows = []
     unified_search_args = request.args.getlist('s')
     if unified_search_args:
-        unified_search_str = urllib.parse.unquote(' '.join(unified_search_args))
+        unified_search_str = urllib.unquote(' '.join(unified_search_args))
 
         # In below, result[0] = Assertion; result[1] = Feature
         results = unified_search(db, unified_search_str)

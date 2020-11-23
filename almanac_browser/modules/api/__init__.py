@@ -250,7 +250,7 @@ def select2_search():
     if not search_args:
         return jsonify({'results': []})
 
-    search_str = urllib.parse.unquote(' '.join(search_args))
+    search_str = urllib.unquote(' '.join(search_args))
 
     data = {
         'features': [],
