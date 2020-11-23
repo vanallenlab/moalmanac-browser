@@ -16,14 +16,16 @@ from sqlalchemy.orm import sessionmaker
 parser = argparse.ArgumentParser(
     description='Convert human-generated Almanac TSV files into SQLite files for use by the Almanac Portal.'
 )
-parser.add_argument('features_tsv', help='TSV file containing feature definitions')
-parser.add_argument('assertions_folder', help='Folder containing assertion TSV files')
-parser.add_argument('db_filename', help='Output DB filename')
-parser.add_argument('version_major', help='Major version number')
-parser.add_argument('version_minor', help='Minor version number')
-parser.add_argument('version_patch', help='Patch version number')
+parser.add_argument('--features_tsv', help='TSV file containing feature definitions')
+parser.add_argument('--assertions_folder', help='Folder containing assertion TSV files')
+parser.add_argument('--db_filename', help='Output DB filename')
+parser.add_argument('--version_major', help='Major version number')
+parser.add_argument('--version_minor', help='Minor version number')
+parser.add_argument('--version_patch', help='Patch version number')
+parser.add_argument('--version_data_release', help='Release date of database content')
 
 args = parser.parse_args()
+print(args)
 
 features_tsv = args.features_tsv
 assertions_folder = args.assertions_folder
@@ -31,6 +33,7 @@ db_name = args.db_filename
 v_major = args.version_major
 v_minor = args.version_minor
 v_patch = args.version_patch
+release = args.version_data_release
 
 engine = create_engine('sqlite:///%s' % db_name)
 session = sessionmaker(bind=engine)()
@@ -246,7 +249,8 @@ session.flush()
 version = Version(
     major=v_major,
     minor=v_minor,
-    patch=v_patch
+    patch=v_patch,
+    release=release
 )
 
 commit_object(version)

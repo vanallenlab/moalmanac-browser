@@ -102,7 +102,8 @@ CREATE TABLE Source (
 CREATE TABLE Version (
     major integer NOT NULL CONSTRAINT Version_pk PRIMARY KEY,
     minor integer NOT NULL,
-    patch integer NOT NULL
+    patch integer NOT NULL,
+    release text NOT NULL
 );
 
 -- End of file.
