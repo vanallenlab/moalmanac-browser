@@ -280,7 +280,7 @@ def make_rows(assertion, feature):
             'therapy_resistance': assertion.therapy_resistance,
             'favorable_prognosis': assertion.favorable_prognosis,
             'disease': assertion.disease,
-            'submitter': urllib.unquote(assertion.submitted_by) if assertion.submitted_by else None,
+            'submitter': urllib.parse.unquote(assertion.submitted_by) if assertion.submitted_by else None,
             'predictive_implication': assertion.predictive_implication,
             'predictive_implication_sort': IMPLICATION_LEVELS_SORT[assertion.predictive_implication],
             'assertion_id': assertion.assertion_id,

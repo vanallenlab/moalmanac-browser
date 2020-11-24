@@ -266,7 +266,7 @@ def search():
     rows = []
     unified_search_args = request.args.getlist('s')
     if unified_search_args:
-        unified_search_str = urllib.unquote(' '.join(unified_search_args))
+        unified_search_str = urllib.parse.unquote(' '.join(unified_search_args))
 
         # In below, result[0] = Assertion; result[1] = Feature
         results = unified_search(db, unified_search_str)
@@ -305,7 +305,7 @@ def export():
     zip_file = ZipFile(zip_output, 'w')
 
     for feature_def in feature_defs:
-        tsv_output = io.StringIO()
+        tsv_output = io.BytesIO()
         tsv_writer = csv.writer(tsv_output, delimiter='\t')
 
         row = []
@@ -363,7 +363,7 @@ def export():
                     row_per_source.append(source.citation if source.citation else '')
                     row_per_source.append(source.url if source.url else '')
                     row_per_source.append(source.doi if source.doi else '')
-                    row_per_source.append(str(source.pmid) if source.pmid else '')
+                    row_per_source.append(source.pmid if source.pmid else '')
                     row_per_source.append(source.nct if source.nct else '')
                     row_per_source.append(assertion.last_updated)
                     tsv_writer.writerow(row_per_source)
@@ -373,4 +373,13 @@ def export():
 
     zip_file.close()
     zip_output.seek(0)
-    return send_file(zip_output, mimetype='application/zip', attachment_filename='almanac.zip', as_attachment=True)
+
+    major = query_distinct_column(db, Version, 'major')
+    minor = query_distinct_column(db, Version, 'minor')
+    patch = query_distinct_column(db, Version, 'patch')
+    release = query_distinct_column(db, Version, 'release')
+    version_string = str(major[0]) + '.' + str(minor[0]) + '.' + str(patch[0])
+    release_string = str(release[0])
+
+    zip_name = 'almanac.' + version_string + '.' + release_string  + '.zip'
+    return send_file(zip_output, mimetype='application/zip', attachment_filename=zip_name, as_attachment=True)
