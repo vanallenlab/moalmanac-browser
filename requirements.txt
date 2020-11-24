@@ -9,7 +9,7 @@ Flask-SQLAlchemy==2.1
 Flask-WTF==0.13.1
 Frozen-Flask==0.13
 itsdangerous==0.24
-Jinja2==2.8
+Jinja2==2.10.1
 MarkupSafe==0.23
 marshmallow==2.20.0
 marshmallow-sqlalchemy==0.15.0
