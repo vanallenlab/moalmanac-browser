@@ -2,9 +2,9 @@
 The Molecular Oncology Almanac captures the current body of knowledge on how genetic alterations affect clinical actionability. As the field of precision medicine grows, the quantity of research on how specific alterations affect therapeutic response and patient prognosis expands at an increasing rate. The Molecular Oncology Almanac seeks to curate this information from the literature, increasing the abilities of clinicians and researchers alike to rapidly assess the importance of an alteration.
 
 ## Installation and set up
-The Molecular Oncology Almanac browser uses Python 2.7. When creating a virtual environment, please specify the Python version as it is not compatible with 3.5+.
+The Molecular Oncology Almanac browser uses Python 3.5.
 ```bash
-virtualenv --python=/usr/bin/python2.7 venv
+virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
