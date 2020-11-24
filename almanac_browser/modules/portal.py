@@ -305,7 +305,7 @@ def export():
     zip_file = ZipFile(zip_output, 'w')
 
     for feature_def in feature_defs:
-        tsv_output = io.BytesIO()
+        tsv_output = io.StringIO()
         tsv_writer = csv.writer(tsv_output, delimiter='\t')
 
         row = []
