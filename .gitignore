@@ -1,8 +1,0 @@
-config.py
-venv/
-logs/
-.idea/
-*.pyc
-*.swp
-secret_key.py
-db_export
