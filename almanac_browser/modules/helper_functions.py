@@ -229,9 +229,9 @@ def make_display_string(feature):
         return direction if direction else ''
 
     elif feature_name == 'mutational_signature':
+        signature_version = find_attribute_by_name(feature.attributes, 'cosmic_signature_version')
         signature_number = find_attribute_by_name(feature.attributes, 'cosmic_signature_number')
-
-        return ('COSMIC Signature {}'.format(signature_number)) if signature_number else ''
+        return f'COSMIC Signature (version {signature_version}) {signature_number}' if signature_number else ''
 
     elif feature_name in ['mutational_burden', 'neoantigen_burden']:
         if feature_name == 'mutational_burden':
