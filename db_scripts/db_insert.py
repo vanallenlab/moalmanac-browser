@@ -61,7 +61,7 @@ assertion_tsv_map = {
     'oncotree_term': 'oncotree_term',
     'oncotree_code': 'oncotree_code',
     'therapy_name': 'therapy_name',
-    'therapy_class': 'therapy_class',
+    'therapy_strategy': 'therapy_strategy',
     'therapy_type': 'therapy_type',
     'therapy_sensitivity': 'therapy_sensitivity',
     'therapy_resistance': 'therapy_resistance',
@@ -195,6 +195,7 @@ for feature_def in feature_defs:
             oncotree_code=series.loc[assertion_tsv_map['oncotree_code']],
             context=series.loc[assertion_tsv_map['context']],
             therapy_name=series.loc[assertion_tsv_map['therapy_name']],
+            therapy_strategy=series.loc[assertion_tsv_map['therapy_strategy']],
             therapy_type=series.loc[assertion_tsv_map['therapy_type']],
             therapy_sensitivity=series.loc[assertion_tsv_map['therapy_sensitivity']],
             therapy_resistance=series.loc[assertion_tsv_map['therapy_resistance']],
@@ -235,7 +236,7 @@ for feature_def in feature_defs:
                 url=series[assertion_tsv_map['url']],
                 doi=series[assertion_tsv_map['doi']],
                 pmid=str(series[assertion_tsv_map['pmid']]),
-                nct=series[assertion_tsv_map['nct']]
+                nct=str(series[assertion_tsv_map['nct']])
             )
             session.add(new_source)
         new_assertion_to_source = AssertionToSource(assertion=new_assertion, source=new_source)

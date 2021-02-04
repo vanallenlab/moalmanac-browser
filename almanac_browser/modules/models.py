@@ -64,6 +64,7 @@ class Assertion(Base, db.Model):
     oncotree_term = db.Column('oncotree_term', db.Text)
     oncotree_code = db.Column('oncotree_code', db.Text)
     therapy_name = db.Column('therapy_name', db.Text)
+    therapy_strategy = db.Column('therapy_strategy', db.Text)
     therapy_type = db.Column('therapy_type', db.Text)
     therapy_sensitivity = db.Column('therapy_sensitivity', db.Boolean)
     therapy_resistance = db.Column('therapy_resistance', db.Boolean)
