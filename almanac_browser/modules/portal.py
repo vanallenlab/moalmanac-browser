@@ -46,6 +46,7 @@ RESPONSES = [
     'Not sensitive'
 ]
 
+
 @portal.route('/')
 def index():
     diseases = query_distinct_column(db, Assertion, 'disease')
