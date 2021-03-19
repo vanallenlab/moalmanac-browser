@@ -1,7 +1,7 @@
 from flask_sqlalchemy import declarative_base
 from almanac_browser import db, ma
 from datetime import datetime
-from marshmallow_sqlalchemy.fields import Nested
+from marshmallow_sqlalchemy import fields
 
 Base = declarative_base()
 
@@ -145,24 +145,52 @@ class AssertionSchema(ma.Schema):
         fields = ("assertion_id", "disease", "context", "oncotree_term", "oncotree_code",
                   "therapy_name", "therapy_strategy", "therapy_type", "therapy_sensitivity", "therapy_resistance",
                   "favorable_prognosis", "predictive_implication", "description", "last_updated", "sources")
-    sources = Nested(SourceSchema, many=True, exclude=("assertions",))
-
-
-class FeatureSchema(ma.Schema):
-    class Meta:
-        model = Feature
-
-
-class FeatureDefinitionSchema(ma.Schema):
-    class Meta:
-        model = FeatureDefinition
-
-
-class FeatureAttributeDefinitionSchema(ma.Schema):
-    class Meta:
-        model = FeatureAttributeDefinition
+    sources = fields.Nested(SourceSchema, many=True, exclude=("assertions",))
 
 
 class FeatureAttributeSchema(ma.Schema):
     class Meta:
-        model = FeatureAttribute
+        fields = ("attribute_id", "attribute_definition", "feature", "value")
+
+
+class FeatureAttributeDefinitionSchema(ma.Schema):
+    class Meta:
+        fields = ("attribute_def_id", "attributes", "feature_definition", "name", "readable_name", "type")
+    attributes = fields.Nested(FeatureAttributeSchema, many=True)
+
+
+class FeatureDefinitionSchema(ma.Schema):
+    class Meta:
+        fields = ("attribute_definitions", "feature_def_id", "features", "name", "readable_name")
+    attribute_definitions = fields.Nested(FeatureAttributeDefinitionSchema, many=True)
+
+
+class FeatureSchema(ma.Schema):
+    class Meta:
+        fields = ("attributes", "feature_definition", "feature_id")
+    feature_definition = fields.Nested(FeatureDefinitionSchema)
+    attributes = fields.Nested(FeatureAttributeSchema, many=True)
+
+
+class MolecularFeatureAttributeSchema(ma.Schema):
+    class Meta:
+        fields = ("attribute_id", "attribute_definition", "feature", "value")
+
+
+class MolecularFeatureAttributeDefinitionSchema(ma.Schema):
+    class Meta:
+        fields = ("attribute_def_id", "attributes", "feature_definition", "name", "readable_name", "type")
+    attributes = fields.Nested(FeatureAttributeSchema, many=True, only=("value",))
+
+
+class MolecularFeatureDefinitionSchema(ma.Schema):
+    class Meta:
+        fields = ("attribute_definitions", "feature_def_id", "features", "name", "readable_name")
+    attribute_definitions = fields.Nested(FeatureAttributeDefinitionSchema, many=True, only=("name",))
+
+
+class MolecularFeatureSchema(ma.Schema):
+    class Meta:
+        fields = ("attributes", "feature_definition", "feature_id")
+    feature_definition = fields.Nested(MolecularFeatureDefinitionSchema, only=("name", "attribute_definitions",))
+    attributes = fields.Nested(FeatureAttributeSchema, many=True, only=("value",))

@@ -6,7 +6,7 @@ from sqlalchemy import and_, or_
 from almanac_browser.modules.models import \
     Assertion, AssertionSchema, \
     Source, SourceSchema, \
-    Feature, FeatureSchema, \
+    Feature, FeatureSchema, MolecularFeatureSchema, \
     FeatureDefinition, FeatureDefinitionSchema, \
     FeatureAttributeDefinition, FeatureAttributeDefinitionSchema, \
     FeatureAttribute, FeatureAttributeSchema
@@ -46,7 +46,7 @@ def get_feature_definitions():
 @api.route('/features/<int:feature_id>', methods=['GET'])
 def get_feature(feature_id):
     data = Feature.query.get_or_404(feature_id)
-    return FeatureSchema().jsonify(data)
+    return MolecularFeatureSchema().jsonify(data)  # exclude=['attributes']
 
 
 @api.route('/features', methods=['GET'])
