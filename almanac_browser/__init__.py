@@ -32,6 +32,7 @@ def create_app(name=__name__):
     app.register_blueprint(api, url_prefix='/api')
     # app.register_blueprint(editor, url_prefix='/editor')
     app.register_blueprint(portal)
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
     db.init_app(app)
     ma.init_app(app)  # must initialize after SQLAlchemy

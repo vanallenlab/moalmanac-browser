@@ -19,15 +19,44 @@ from db import db
 api = Blueprint('api', __name__)
 
 
+def reformat_attributes(feature_definition, attributes):
+    new_dictionary = {}
+    for i in range(0, len(attributes)):
+        key = feature_definition.attribute_definitions[i].name
+        value = attributes[i].value
+        new_dictionary[key] = value
+    new_dictionary['feature_type'] = feature_definition.name
+    return new_dictionary
+
+
+def reformat_feature(feature):
+    return {
+        'feature_type': feature.feature_definition.name,
+        'attributes': [reformat_attributes(feature.feature_definition, feature.attributes)]
+    }
+
+
+def reformat_features(list_features):
+    attributes = []
+    unique_features = []
+    for item in list_features:
+        if item['attributes'] not in attributes:
+            unique_features.append(item)
+            attributes.append(item['attributes'])
+    return unique_features
+
+
 @api.route('/assertions/<int:assertion_id>', methods=['GET'])
 def get_assertion(assertion_id):
     assertion = Assertion.query.get_or_404(assertion_id)
+    assertion.features = [reformat_feature(assertion.features[0])]
     return AssertionSchema().jsonify(assertion)
 
 
 @api.route('/assertions', methods=['GET'])
 def get_assertions():
     data = Assertion.query.all()
+
     return AssertionSchema(many=True).jsonify(data)
 
 
@@ -45,14 +74,17 @@ def get_feature_definitions():
 
 @api.route('/features/<int:feature_id>', methods=['GET'])
 def get_feature(feature_id):
-    data = Feature.query.get_or_404(feature_id)
-    return FeatureSchema().jsonify(data)
+    raw_data = Feature.query.get_or_404(feature_id)
+    data = reformat_feature(raw_data)
+    return jsonify(data)
 
 
 @api.route('/features', methods=['GET'])
 def get_features():
-    data = Feature.query.all()
-    return FeatureSchema(many=True).jsonify(data)
+    raw_data = Feature.query.all()
+    duplicate_data = [reformat_feature(item) for item in raw_data]
+    data = reformat_features(duplicate_data)
+    return jsonify(data)
 
 
 @api.route('/attribute_definitions/<int:attribute_def_id>', methods=['GET'])
