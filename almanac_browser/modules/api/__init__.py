@@ -6,7 +6,7 @@ from sqlalchemy import and_, or_
 from almanac_browser.modules.models import \
     Assertion, AssertionSchema, \
     Source, SourceSchema, \
-    Feature, FeatureSchema, MolecularFeatureSchema, \
+    Feature, FeatureSchema, \
     FeatureDefinition, FeatureDefinitionSchema, \
     FeatureAttributeDefinition, FeatureAttributeDefinitionSchema, \
     FeatureAttribute, FeatureAttributeSchema
@@ -34,19 +34,19 @@ def get_assertions():
 @api.route('/feature_definitions/<int:definition_id>', methods=['GET'])
 def get_feature_definition(definition_id):
     data = FeatureDefinition.query.get_or_404(definition_id)
-    return FeatureDefinitionSchema().jsonify(data)
+    return FeatureDefinitionSchema(exclude=("features",)).jsonify(data)
 
 
 @api.route('/feature_definitions', methods=['GET'])
 def get_feature_definitions():
     data = FeatureDefinition.query.all()
-    return FeatureDefinitionSchema(many=True).jsonify(data)
+    return FeatureDefinitionSchema(exclude=("features",), many=True).jsonify(data)
 
 
 @api.route('/features/<int:feature_id>', methods=['GET'])
 def get_feature(feature_id):
     data = Feature.query.get_or_404(feature_id)
-    return MolecularFeatureSchema().jsonify(data)  # exclude=['attributes']
+    return FeatureSchema().jsonify(data)
 
 
 @api.route('/features', methods=['GET'])
@@ -58,13 +58,13 @@ def get_features():
 @api.route('/attribute_definitions/<int:attribute_def_id>', methods=['GET'])
 def get_attribute_definition(attribute_def_id):
     data = FeatureAttributeDefinition.query.get_or_404(attribute_def_id)
-    return FeatureAttributeDefinitionSchema().jsonify(data)
+    return FeatureAttributeDefinitionSchema(only=("name", "attribute_def_id",)).jsonify(data)
 
 
 @api.route('/attribute_definitions', methods=['GET'])
 def get_attribute_definitions():
     data = FeatureAttributeDefinition.query.all()
-    return FeatureAttributeDefinitionSchema(many=True).jsonify(data)
+    return FeatureAttributeDefinitionSchema(only=("name", "attribute_def_id",), many=True).jsonify(data)
 
 
 @api.route('/attributes/<int:attribute_id>', methods=['GET'])

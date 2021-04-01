@@ -140,14 +140,6 @@ class SourceSchema(ma.Schema):
         fields = ("source_id", "source_type", "citation", "url", "doi", "pmid", "nct", "assertions")
 
 
-class AssertionSchema(ma.Schema):
-    class Meta:
-        fields = ("assertion_id", "disease", "context", "oncotree_term", "oncotree_code",
-                  "therapy_name", "therapy_strategy", "therapy_type", "therapy_sensitivity", "therapy_resistance",
-                  "favorable_prognosis", "predictive_implication", "description", "last_updated", "sources")
-    sources = fields.Nested(SourceSchema, many=True, exclude=("assertions",))
-
-
 class FeatureAttributeSchema(ma.Schema):
     class Meta:
         fields = ("attribute_id", "attribute_definition", "feature", "value")
@@ -162,35 +154,21 @@ class FeatureAttributeDefinitionSchema(ma.Schema):
 class FeatureDefinitionSchema(ma.Schema):
     class Meta:
         fields = ("attribute_definitions", "feature_def_id", "features", "name", "readable_name")
-    attribute_definitions = fields.Nested(FeatureAttributeDefinitionSchema, many=True)
+    attribute_definitions = fields.Nested(FeatureAttributeDefinitionSchema, many=True, only=("name",))
 
 
 class FeatureSchema(ma.Schema):
     class Meta:
         fields = ("attributes", "feature_definition", "feature_id")
-    feature_definition = fields.Nested(FeatureDefinitionSchema)
-    attributes = fields.Nested(FeatureAttributeSchema, many=True)
-
-
-class MolecularFeatureAttributeSchema(ma.Schema):
-    class Meta:
-        fields = ("attribute_id", "attribute_definition", "feature", "value")
-
-
-class MolecularFeatureAttributeDefinitionSchema(ma.Schema):
-    class Meta:
-        fields = ("attribute_def_id", "attributes", "feature_definition", "name", "readable_name", "type")
+    feature_definition = fields.Nested(FeatureDefinitionSchema, only=("name", "attribute_definitions",))
     attributes = fields.Nested(FeatureAttributeSchema, many=True, only=("value",))
 
 
-class MolecularFeatureDefinitionSchema(ma.Schema):
+class AssertionSchema(ma.Schema):
     class Meta:
-        fields = ("attribute_definitions", "feature_def_id", "features", "name", "readable_name")
-    attribute_definitions = fields.Nested(FeatureAttributeDefinitionSchema, many=True, only=("name",))
-
-
-class MolecularFeatureSchema(ma.Schema):
-    class Meta:
-        fields = ("attributes", "feature_definition", "feature_id")
-    feature_definition = fields.Nested(MolecularFeatureDefinitionSchema, only=("name", "attribute_definitions",))
-    attributes = fields.Nested(FeatureAttributeSchema, many=True, only=("value",))
+        fields = ("assertion_id", "disease", "context", "oncotree_term", "oncotree_code",
+                  "therapy_name", "therapy_strategy", "therapy_type", "therapy_sensitivity", "therapy_resistance",
+                  "favorable_prognosis", "predictive_implication", "description", "last_updated",
+                  "sources", "features")
+    sources = fields.Nested(SourceSchema, many=True, exclude=("assertions",))
+    features = fields.Nested(FeatureSchema, many=True)

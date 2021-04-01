@@ -254,10 +254,10 @@ def submit():
 def add():
     """Render the page through which clients can submit Assertion suggestions"""
 
-    features_definitions = FeatureDefinition.query.all()
+    feature_definitions = FeatureDefinition.query.all()
 
     return render_template('portal_add.html',
-                           feature_definitions=features_definitions,
+                           feature_definitions=feature_definitions,
                            nav_current_page='add',
                            )
 
