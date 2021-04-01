@@ -1,7 +1,7 @@
 from flask_sqlalchemy import declarative_base
 from almanac_browser import db, ma
 from datetime import datetime
-
+from marshmallow_sqlalchemy import fields
 
 Base = declarative_base()
 
@@ -135,31 +135,40 @@ class Version(Base, db.Model):
     release = db.Column('release', db.String)
 
 
-class AssertionSchema(ma.ModelSchema):
+class SourceSchema(ma.Schema):
     class Meta:
-        model = Assertion
+        fields = ("source_id", "source_type", "citation", "url", "doi", "pmid", "nct", "assertions")
 
 
-class SourceSchema(ma.ModelSchema):
+class FeatureAttributeSchema(ma.Schema):
     class Meta:
-        model = Source
+        fields = ("attribute_id", "attribute_definition", "feature", "value")
 
 
-class FeatureSchema(ma.ModelSchema):
+class FeatureAttributeDefinitionSchema(ma.Schema):
     class Meta:
-        model = Feature
+        fields = ("attribute_def_id", "attributes", "feature_definition", "name", "readable_name", "type")
+    attributes = fields.Nested(FeatureAttributeSchema, many=True)
 
 
-class FeatureDefinitionSchema(ma.ModelSchema):
+class FeatureDefinitionSchema(ma.Schema):
     class Meta:
-        model = FeatureDefinition
+        fields = ("attribute_definitions", "feature_def_id", "features", "name", "readable_name")
+    attribute_definitions = fields.Nested(FeatureAttributeDefinitionSchema, many=True, only=("name",))
 
 
-class FeatureAttributeDefinitionSchema(ma.ModelSchema):
+class FeatureSchema(ma.Schema):
     class Meta:
-        model = FeatureAttributeDefinition
+        fields = ("attributes", "feature_definition", "feature_id")
+    feature_definition = fields.Nested(FeatureDefinitionSchema, only=("name", "attribute_definitions",))
+    attributes = fields.Nested(FeatureAttributeSchema, many=True, only=("value",))
 
 
-class FeatureAttributeSchema(ma.ModelSchema):
+class AssertionSchema(ma.Schema):
     class Meta:
-        model = FeatureAttribute
+        fields = ("assertion_id", "disease", "context", "oncotree_term", "oncotree_code",
+                  "therapy_name", "therapy_strategy", "therapy_type", "therapy_sensitivity", "therapy_resistance",
+                  "favorable_prognosis", "predictive_implication", "description", "last_updated",
+                  "sources", "features")
+    sources = fields.Nested(SourceSchema, many=True, exclude=("assertions",))
+    features = fields.Nested(FeatureSchema, many=True)
