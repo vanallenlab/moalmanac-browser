@@ -19,6 +19,45 @@ from db import db
 api = Blueprint('api', __name__)
 
 
+def pop_assertions(list_of_assertions):
+    for assertion in list_of_assertions:
+        assertion.pop("_sa_instance_state", None)
+
+
+def pop_sources(list_of_assertions):
+    sources = []
+    for assertion in list_of_assertions:
+        for source in assertion['sources']:
+            if source not in sources:
+                sources.append(source)
+    [item.pop("_sa_instance_state", None) for item in sources]
+
+
+def reformat_assertion(assertion, pop=True):
+    dictionary = assertion.__dict__
+    new_dictionary = {}
+    for key, value in dictionary.items():
+        new_dictionary[key] = value
+    if pop:
+        new_dictionary.pop("_sa_instance_state", None)
+
+    sources = [item.__dict__ for item in assertion.sources]
+    if pop:
+        [item.pop("_sa_instance_state", None) for item in sources]
+    new_dictionary['sources'] = sources
+
+    features = [reformat_feature(item) for item in assertion.features]
+    new_dictionary['features'] = features
+    return new_dictionary
+
+
+def reformat_assertions(list_assertions):
+    reformatted_assertions = [reformat_assertion(assertion, pop=False) for assertion in list_assertions]
+    pop_sources(reformatted_assertions)
+    pop_assertions(reformatted_assertions)
+    return reformatted_assertions
+
+
 def reformat_attributes(feature_definition, attributes):
     new_dictionary = {}
     for i in range(0, len(attributes)):
@@ -48,16 +87,16 @@ def reformat_features(list_features):
 
 @api.route('/assertions/<int:assertion_id>', methods=['GET'])
 def get_assertion(assertion_id):
-    assertion = Assertion.query.get_or_404(assertion_id)
-    assertion.features = [reformat_feature(assertion.features[0])]
-    return AssertionSchema().jsonify(assertion)
+    raw_data = Assertion.query.get_or_404(assertion_id)
+    data = reformat_assertion(raw_data)
+    return jsonify(data)
 
 
 @api.route('/assertions', methods=['GET'])
 def get_assertions():
-    data = Assertion.query.all()
-
-    return AssertionSchema(many=True).jsonify(data)
+    raw_data = Assertion.query.all()
+    data = reformat_assertions(raw_data)
+    return jsonify(data)
 
 
 @api.route('/feature_definitions/<int:definition_id>', methods=['GET'])
