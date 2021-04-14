@@ -70,6 +70,7 @@ def reformat_attributes(feature_definition, attributes):
 
 def reformat_feature(feature):
     return {
+        'feature_id': feature.feature_id,
         'feature_type': feature.feature_definition.name,
         'attributes': [reformat_attributes(feature.feature_definition, feature.attributes)]
     }
