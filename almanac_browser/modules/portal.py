@@ -298,6 +298,11 @@ def privacy_policy():
     return render_template('PrivacyPolicy_Connector_publish.html')
 
 
+@portal.route('/terms')
+def terms():
+    return render_template('portal_terms.html')
+
+
 @portal.route('/export', methods=['GET'])
 def export():
     feature_defs = FeatureDefinition.query.all()
