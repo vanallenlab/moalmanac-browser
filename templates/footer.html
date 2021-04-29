@@ -1,7 +1,8 @@
 <footer class="footer">
 	<div class="container text-muted">
 		<p align="center">
-			Please review our <a href="{{ url_for('portal.privacy_policy') }}">privacy policy</a> and <a href="{{ url_for('portal.terms') }}">terms</a> before use.
+			Please review our <a href="{{ url_for('portal.privacy_policy') }}">privacy policy</a> and
+			<a href="{{ url_for('portal.terms') }}">terms</a> before use.
 			<br>
 			<a href="https://app.swaggerhub.com/apis-docs/vanallenlab/almanac-browser/0.2#/" target="_blank">API</a> |
 			<a href = "mailto: moalmanac@ds.dfci.harvard.edu" target="_blank">Contact</a> |
@@ -10,9 +11,16 @@
 		</p>
 		<br>
 		<ul id="logo-list" class="list-inline" align="center">
-			<li><img src="/static/img/broad.png" class="img-responsive" height=50></li>
-			<li><img src="/static/img/dana-farber.png" class="img-responsive" height=50></li>
+			<li>
+				<a href="https://www.broadinstitute.org/" target="_blank">
+					<img src="/static/img/broad.png" class="img-responsive" height=50>
+				</a>
+			</li>
+			<li>
+				<a href="https://www.dana-farber.org/" target="_blank">
+					<img src="/static/img/dana-farber.png" class="img-responsive" height=50>
+				</a>
+			</li>
 		</ul>
 	</div>
 </footer>
-
