@@ -295,7 +295,12 @@ def assertion(assertion_id=None):
 
 @portal.route('/privacy_policy')
 def privacy_policy():
-    return render_template('PrivacyPolicy_Connector_publish.html')
+    return render_template('portal_privacy_policy.html')
+
+
+@portal.route('/terms')
+def terms():
+    return render_template('portal_terms.html')
 
 
 @portal.route('/export', methods=['GET'])
