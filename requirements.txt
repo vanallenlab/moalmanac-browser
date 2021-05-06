@@ -3,7 +3,7 @@ dominate==2.2.1
 Flask==1.0.0
 Flask-BasicAuth==0.2.0
 Flask-Bootstrap==3.3.7.0
-Flask-Cors==3.0.6
+Flask-Cors==3.0.9
 flask-marshmallow==0.14.0
 Flask-SQLAlchemy==2.1
 Flask-WTF==0.13.1
