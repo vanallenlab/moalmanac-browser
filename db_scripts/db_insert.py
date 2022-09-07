@@ -1,6 +1,8 @@
 import os
 import sys
 import argparse
+import json
+import numpy as np
 import pandas as pd
 from datetime import datetime
 
@@ -17,7 +19,7 @@ parser = argparse.ArgumentParser(
     description='Convert human-generated Almanac TSV files into SQLite files for use by the Almanac Portal.'
 )
 parser.add_argument('--features_tsv', help='TSV file containing feature definitions')
-parser.add_argument('--assertions_folder', help='Folder containing assertion TSV files')
+parser.add_argument('--database', help='Database JSON')
 parser.add_argument('--db_filename', help='Output DB filename')
 parser.add_argument('--version_major', help='Major version number')
 parser.add_argument('--version_minor', help='Minor version number')
@@ -28,7 +30,7 @@ args = parser.parse_args()
 print(args)
 
 features_tsv = args.features_tsv
-assertions_folder = args.assertions_folder
+database = args.database
 db_name = args.db_filename
 v_major = args.version_major
 v_minor = args.version_minor
@@ -177,19 +179,15 @@ for index in feature_defs_df.index:
     session.add(new_feature_def)
     session.add(new_attribute_def)
 
-# Load assertions within each feature
-feature_defs = session.query(FeatureDefinition).all()
+# Load assertions
+f = open(database)
+assertions = json.load(f)
 assertions_counter = 0
-for feature_def in feature_defs:
-    feature_file = '%s.tsv' % feature_def.name
-    assertion_df = read_tsv(os.path.join(assertions_folder, feature_file))
-    assertion_df = sanitize_assertion_df(assertion_df, feature_def.name)
-    assertions_counter += len(assertion_df.index)
+for assertion in assertions:
+    assertions_counter += 1
 
-    for index in assertion_df.index:
-        series = assertion_df.loc[index, :]
-
-        new_assertion = Assertion(
+    series = pd.Series(assertion)
+    new_assertion = Assertion(
             disease=series.loc[assertion_tsv_map['oncotree_term']],
             oncotree_term=series.loc[assertion_tsv_map['oncotree_term']],
             oncotree_code=series.loc[assertion_tsv_map['oncotree_code']],
@@ -207,42 +205,53 @@ for feature_def in feature_defs:
             created_on=datetime.now().strftime("%D"),
             last_updated=datetime.strptime(series.loc[assertion_tsv_map['last_updated']], "%m/%d/%y").date()
         )
-        session.add(new_assertion)
+    session.add(new_assertion)
 
-        new_feature = Feature(feature_definition=feature_def)
-        session.add(new_feature)
+    feature_type = series.loc["feature_type"]
+    feature_definition = session.query(FeatureDefinition).filter(FeatureDefinition.readable_name == feature_type).all()
+    if len(feature_definition) > 1:
+        print(f"More than one feature type match for assertion")
+        print(f"{series}")
+        print(f", ".join([definition.readable_name for definition in feature_definition]))
+        sys.exit(0)
+    feature_def = feature_definition[0]
 
-        new_assertion_to_feature = AssertionToFeature(assertion=new_assertion, feature=new_feature)
-        session.add(new_assertion_to_feature)
+    new_feature = Feature(feature_definition=feature_def)
+    session.add(new_feature)
 
-        new_attributes = []
-        for attribute_def in feature_def.attribute_definitions:
-            if attribute_def.name not in series:
-                print('Warning: attribute "%s" not present for "%s" feature: %s' %
-                      attribute_def.name, feature_def.name, series)
-                continue
+    new_assertion_to_feature = AssertionToFeature(assertion=new_assertion, feature=new_feature)
+    session.add(new_assertion_to_feature)
 
-            this_value = series[attribute_def.name]
-            new_attribute = FeatureAttribute(feature=new_feature,
-                                             attribute_definition=attribute_def,
-                                             value=str(this_value) if this_value else None)
-            new_attributes.append(new_attribute)
-            session.add(new_attribute)
+    new_attributes = []
+    for attribute_def in feature_def.attribute_definitions:
+        if attribute_def.name not in series:
+            print('Warning: attribute "%s" not present for "%s" feature: %s' %
+                  attribute_def.name, feature_def.name, series)
+            continue
 
-            new_source = insert_if_new(
-                Source,
-                source_type=series[assertion_tsv_map['source_type']],
-                citation=series[assertion_tsv_map['citation']],
-                url=series[assertion_tsv_map['url']],
-                doi=series[assertion_tsv_map['doi']],
-                pmid=str(series[assertion_tsv_map['pmid']]),
-                nct=str(series[assertion_tsv_map['nct']])
-            )
-            session.add(new_source)
-        new_assertion_to_source = AssertionToSource(assertion=new_assertion, source=new_source)
-        session.add(new_assertion_to_source)
+        value = series.loc[attribute_def.name]
+        new_attribute = FeatureAttribute(
+            feature=new_feature,
+            attribute_definition=attribute_def,
+            value=str(value) if value else None
+        )
+        new_attributes.append(new_attribute)
+        session.add(new_attribute)
 
-        new_feature.attributes = new_attributes
+    new_source = insert_if_new(
+        Source,
+        source_type=series.loc[assertion_tsv_map['source_type']],
+        citation=series.loc[assertion_tsv_map['citation']],
+        url=series.loc[assertion_tsv_map['url']],
+        doi=series.loc[assertion_tsv_map['doi']],
+        pmid=str(series.loc[assertion_tsv_map['pmid']]),
+        nct=str(series.loc[assertion_tsv_map['nct']])
+    )
+    session.add(new_source)
+
+    new_assertion_to_source = AssertionToSource(assertion=new_assertion, source=new_source)
+    session.add(new_assertion_to_source)
+    new_feature.attributes = new_attributes
 
 session.commit()
 session.flush()
@@ -256,4 +265,4 @@ version = Version(
 
 commit_object(version)
 
-print('Imported %s assertions.' % assertions_counter)
+print(f'Imported {assertions_counter} assertions')
