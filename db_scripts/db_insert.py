@@ -225,8 +225,7 @@ for assertion in assertions:
     new_attributes = []
     for attribute_def in feature_def.attribute_definitions:
         if attribute_def.name not in series:
-            print('Warning: attribute "%s" not present for "%s" feature: %s' %
-                  attribute_def.name, feature_def.name, series)
+            print(f'Warning: attribute {attribute_def.name} not present for {feature_def.name} feature: {series}')
             continue
 
         value = series.loc[attribute_def.name]
