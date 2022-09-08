@@ -66,9 +66,9 @@ class Assertion(Base, db.Model):
     therapy_name = db.Column('therapy_name', db.Text)
     therapy_strategy = db.Column('therapy_strategy', db.Text)
     therapy_type = db.Column('therapy_type', db.Text)
-    therapy_sensitivity = db.Column('therapy_sensitivity', db.Boolean)
-    therapy_resistance = db.Column('therapy_resistance', db.Boolean)
-    favorable_prognosis = db.Column('favorable_prognosis', db.Boolean)
+    therapy_sensitivity = db.Column('therapy_sensitivity', db.Integer)
+    therapy_resistance = db.Column('therapy_resistance', db.Integer)
+    favorable_prognosis = db.Column('favorable_prognosis', db.Integer)
     predictive_implication = db.Column('predictive_implication', db.Enum('FDA-Approved',
                                                                          'Guideline',
                                                                          'Clinical trial',

@@ -7,7 +7,7 @@
 # Set create/drop locations below
 
 FEATURES_FILE="$1"
-ASSERTIONS_FOLDER="$2"
+DB="$2"
 DB_NAME="$3"
 V_MAJOR="$4"
 V_MINOR="$5"
@@ -49,7 +49,7 @@ echo -e "\tFeatures file  : ${FEATURES_FILE}"
 echo -e "\tAssertions folder: ${ASSERTIONS_FOLDER}"
 echo -e "\tOutput database: ${DB_NAME}"
 echo -e "\tVersion        : ${V_MAJOR}.${V_MINOR}.${V_PATCH} ${RELEASE}"
-python "$INSERT_SCRIPT" --features_tsv "$FEATURES_FILE" --assertions_folder "$ASSERTIONS_FOLDER" --db_filename "$DB_NAME" --version_major "$V_MAJOR" --version_minor "$V_MINOR" --version_patch "$V_PATCH" --version_data_release "$RELEASE"
+python "$INSERT_SCRIPT" --features_tsv "$FEATURES_FILE" --database "$DB" --db_filename "$DB_NAME" --version_major "$V_MAJOR" --version_minor "$V_MINOR" --version_patch "$V_PATCH" --version_data_release "$RELEASE"
 
 #OUTPUT_FILE=${DB_NAME}.${V_MAJOR}.${V_MINOR}.${V_PATCH}.${RELEASE}.sqlite3
 OUTPUT_FILE=${DB_NAME}.sqlite3
