@@ -193,7 +193,7 @@ def make_display_string(feature):
             gene = make_gene_link(gene)
 
         if exon:
-            exon = 'Exon {}'.format(exon.rstrip('0').rstrip('.'))
+            exon = f'Exon {exon}'
 
         pathogenic = None
         if feature_name == 'germline_variant':
