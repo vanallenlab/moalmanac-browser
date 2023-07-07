@@ -74,15 +74,26 @@
                 {% endif %}
                 </td>
 
-                <td>{% if row['therapy_sensitivity'] != None %}
-                    {% if row['therapy_sensitivity'] == 1 %}Sensitivity{% elif row['therapy_sensitivity'] == 0 %}Not
-                        sensitive{% endif %}
-                {% elif row['therapy_resistance'] != None %}
-                    {% if row['therapy_resistance'] == 1 %}Resistance{% elif row['therapy_resistance'] == 0 %}Not
-                        resistance{% endif %}
-                {% elif row['favorable_prognosis'] != None %}
-                    {% if row['favorable_prognosis'] %}Good{% else %}Poor{% endif %} prognosis
-                {% endif %}
+                <td>
+                    {% if row['therapy_sensitivity'] != "" %}
+                        {% if row['therapy_sensitivity'] == 1 %}
+                            Sensitivity
+                        {% elif row['therapy_sensitivity'] == 0 %}
+                            Not sensitive
+                        {% endif %}
+                    {% elif row['therapy_resistance'] != "" %}
+                        {% if row['therapy_resistance'] == 1 %}
+                            Resistance
+                        {% elif row['therapy_resistance'] == 0 %}
+                            Not resistance
+                        {% endif %}
+                    {% elif row['favorable_prognosis'] != "" %}
+                        {% if row['favorable_prognosis'] == 1 %}
+                            Favorable prognosis
+                        {% elif row['favorable_prognosis'] == 0 %}
+                            Poor prognosis
+                        {% endif %}
+                    {% endif %}
                 </td>
 
                 <td>{% if row['disease'] %}

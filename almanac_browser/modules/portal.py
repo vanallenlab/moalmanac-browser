@@ -289,6 +289,9 @@ def assertion(assertion_id=None):
         string = Markup(make_display_string(feature))
         features.append((feature, string))
 
+    print(assertion)
+    print(features)
+
     return render_template('portal_assertion.html',
                            assertion=assertion, features=features)
 

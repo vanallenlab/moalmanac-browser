@@ -14,22 +14,36 @@
     <div class="panel-heading">
         <h3 class="panel-title">
             <strong>Assertion:</strong>
-            {% if assertion.therapy_sensitivity is not none %}
-            {% if assertion.therapy_sensitivity %}Sensitivity{% else %}Not sensitive{% endif %} to
+            {% if assertion.therapy_sensitivity != "" %}
+                {% if assertion.therapy_sensitivity == 1 %}
+                    Sensitivity
+                {% elif assertion.therapy_sensitivity == 0 %}
+                    Not sensitive
+                {% endif %}
+                    to
                 {% if assertion.therapy_name is not none %}
                     {{assertion.therapy_name}}
                 {% else %}
                     {{assertion.therapy_type}}
                 {% endif %}
-            {% elif assertion.therapy_resistance is not none %}
-            {% if assertion.therapy_resistance %}Resistance{% else %}Not resistance{% endif %} to
+            {% elif assertion.therapy_resistance != "" %}
+                {% if assertion.therapy_resistance == 1 %}
+                    Resistance
+                {% elif assertion.therapy_resistance == 0 %}
+                    Not resistance
+                {% endif %} to
                 {% if assertion.therapy_name is not none %}
                     {{assertion.therapy_name}}
                 {% else %}
                     {{assertion.therapy_type}}
                 {% endif %}
-            {% elif assertion.favorable_prognosis is not none %}
-            {% if assertion.favorable_prognosis %}a favorable{% else %}an unfavorable{% endif %} prognosis
+            {% elif assertion.favorable_prognosis != "" %}
+                {% if assertion.favorable_prognosis == 1 %}
+                    a favorable
+                {% elif assertion.favorable_prognosis == 0 %}
+                    an unfavorable
+                {% endif %}
+                    prognosis
             {% endif %}
             {% if assertion.disease is not none %} (in {{assertion.disease}}){% endif %}
             {% if assertion.predictive_implication is not none %}
