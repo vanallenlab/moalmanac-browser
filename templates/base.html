@@ -6,6 +6,7 @@
 {% block head %}
     {{super()}}
     {{fixes.ie8()}}
+    {% include 'traffic.html' %}
 {% endblock %}
 
 {% block styles %}
