@@ -20,7 +20,7 @@
 {% block page_content %}
     <div id="index-title-block" class="jumbotron text-center">
         <h2 class="title">Molecular Oncology Almanac</h2>
-        <h3 class="title">Browser</h3>
+        <h3 class="subtitle">Browser</h3>
         <!--<img class="center-block" width="25%" src="static/img/almanac-browser-logo-long.png">-->
         <!--<h1 class="jumbotron-heading" id="index-title">{{ config['APP_NAME'] }}</h1>-->
         <p class="lead text-muted index-abbrev-explain" style="font-size: 10pt;">
@@ -58,8 +58,8 @@
 
     <div class="row">
         <div class="col-md-4">
-            <h3>Cancer Type</h3>
-            <p>Select from <strong>{{ diseases|length }}</strong> cancer types:</p>
+            <h3 class="category-title">Cancer Type</h3>
+            <p class="category-description">Select from <strong>{{ diseases|length }}</strong> cancer types:</p>
             <form action="search" method="get">
                 <select name="s" class="form-control browse-dropdown">
                     <option selected disabled hidden>Select cancer type</option>
@@ -75,26 +75,25 @@
         </div>
 
         <div class="col-md-4">
-            <h3>Predictive Implication Level</h3>
-            <p>Select from <strong>{{ pred_impls|length }}</strong> predictive implication levels</p>
+            <h3 class="category-title">Evidence</h3>
+            <p class="category-description">Select from <strong>{{ pred_impls|length }}</strong> types of evidence sources:</p>
             <form action="search" method="get">
                 <select name="s" class="form-control browse-dropdown">
-                    <option selected disabled hidden>Select predictive implication level</option>
+                    <option selected disabled hidden>Select evidence type</option>
                     {% for pred_impl in pred_impls %}
                         <option value="&quot;{{ pred_impl }}&quot;[pred]">{{ pred_impl }}</option>
                     {% endfor %}
                 </select>
                 <noscript>
-                    <button type="submit" class="btn btn-default btn-alt-search" type="button">Search by predictive
-                        implication level
+                    <button type="submit" class="btn btn-default btn-alt-search" type="button">Search by evidence type
                     </button>
                 </noscript>
             </form>
         </div>
 
         <div class="col-md-4">
-            <h3>Therapy</h3>
-            <p>Select from <strong>{{ therapy_names|length }}</strong> therapies:</p>
+            <h3 class="category-title">Therapy</h3>
+            <p class="category-description">Select from <strong>{{ therapy_names|length }}</strong> therapies:</p>
             <form action="search" method="get">
                 <select name="s" class="form-control browse-dropdown">
                     <option selected disabled hidden>Select therapy</option>
