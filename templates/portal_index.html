@@ -59,7 +59,7 @@
     <div class="row">
         <div class="col-md-4">
             <h3 class="category-title">Cancer Type</h3>
-            <p class="category-description">Select from <strong>{{ diseases|length }}</strong> cancer types:</p>
+            <p class="text-muted">Select from <strong>{{ diseases|length }}</strong> cancer types:</p>
             <form action="search" method="get">
                 <select name="s" class="form-control browse-dropdown">
                     <option selected disabled hidden>Select cancer type</option>
@@ -76,7 +76,7 @@
 
         <div class="col-md-4">
             <h3 class="category-title">Evidence</h3>
-            <p class="category-description">Select from <strong>{{ pred_impls|length }}</strong> types of evidence sources:</p>
+            <p class="text-muted">Select from <strong>{{ pred_impls|length }}</strong> types of evidence sources:</p>
             <form action="search" method="get">
                 <select name="s" class="form-control browse-dropdown">
                     <option selected disabled hidden>Select evidence type</option>
@@ -93,7 +93,7 @@
 
         <div class="col-md-4">
             <h3 class="category-title">Therapy</h3>
-            <p class="category-description">Select from <strong>{{ therapy_names|length }}</strong> therapies:</p>
+            <p class="text-muted">Select from <strong>{{ therapy_names|length }}</strong> therapies:</p>
             <form action="search" method="get">
                 <select name="s" class="form-control browse-dropdown">
                     <option selected disabled hidden>Select therapy</option>
