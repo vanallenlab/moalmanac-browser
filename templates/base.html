@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block styles %}
-    {{super()}}
+    {{ super() }}
     <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/almanac_browser.css')}}">
 {% endblock %}
 
@@ -31,5 +31,5 @@
         {% block page_content %}{% endblock %}
     </div>
 </section>
-{% include 'footer.html' %}
+{% include 'footer.html' %
 {% endblock %}
