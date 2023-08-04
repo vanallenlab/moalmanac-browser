@@ -3,7 +3,11 @@ body {
 }
 
 .title {
-    color: #A70C36;
+    color: #00629B;
+}
+
+.subtitle {
+     color: #FFA300;
 }
 
 .jumbotron {
@@ -14,27 +18,84 @@ body {
 	padding-bottom: 3em;
 }
 
+.navbar {
+	background-color: #00629B;
+}
+
+.navbar a:hover {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.navbar a {
+	color: #FFFFFF;
+}
+
+.navbar-brand:hover {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.navbar-nav .nav-link:hover {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.nav .dropdown-toggle {
+	color: #FFFFFF;
+	background-color: #00629B;
+}
+
+.nav .dropdown.open .dropdown-toggle {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.nav .dropdown-toggle:focus,
+.nav .dropdown-toggle:active {
+	color: #FFFFFF;
+	background-color: #00629B;
+}
+
 a {
-	color: #A70C36;
+	color: #00629B;
+}
+
+.footer-img {
+	max-height: 50px;
 }
 
 a:hover {
-	color: #A70C36;
+	color: #00629B;
 	text-decoration: underline;
 }
 
 /* footer */
 .footer {
 	padding: 3em;
-	background-color: #262228;
+	background-color: #eeeeee;
 }
 
 .footer img {
 	margin-right: 2em;
 }
 
+.center-text {
+	text-align: center;
+}
+
 #logo-list {
 	margin-top: 1em;
+	display: flex;
+    justify-content: center;
+}
+
+.category-title {
+	color: #FFA300
+}
+
+.category-description {
+	color: #636569;
 }
 
 /* front page */
@@ -108,6 +169,7 @@ a:hover {
 .search-instructions {
 	font-size: 9pt;
 	float: left;
+	color: #636569;
 }
 
 .select2-font {
@@ -141,13 +203,18 @@ a:hover {
 }
 
 .btn {
-	background-color: #282828;
 	color: #FFFFFF;
+    background-color: #00629B;
+}
+
+.btn:hover {
+	color: #00629B;
+    background-color: #EEEEEE;
 }
 
 .btn-delete {
-    background-color: black;
-    color: white;
+    background-color: #00629B;
+    color: #FFFFFF;
 }
 
 .btn-alt-search {
