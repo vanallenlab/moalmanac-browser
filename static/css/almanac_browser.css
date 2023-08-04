@@ -7,7 +7,6 @@ body {
 }
 
 .subtitle {
-	/*color: #4C91B9*/
      color: #FFA300;
 }
 
@@ -20,11 +19,7 @@ body {
 }
 
 .navbar {
-	/* background-color: #FFFFFF; */
-	/* background-color: #EEEEEE; */
-	/* background-color: #FFA300; */
 	background-color: #00629B;
-	/* background-color: #f0f0f1; */
 }
 
 .navbar a:hover {
@@ -33,13 +28,10 @@ body {
 }
 
 .navbar a {
-	/* color: #00629B; */
 	color: #FFFFFF;
 }
 
 .navbar-brand:hover {
-	/*color: #00629B;*/
-	/*background-color: #eeeeee;*/
 	color: #003354;
 	background-color: #FFA300;
 }
@@ -75,21 +67,21 @@ a {
 
 a:hover {
 	color: #00629B;
-	/* color: #41B6E6; */
-	/* color: #4C91B9 */
 	text-decoration: underline;
 }
 
 /* footer */
 .footer {
 	padding: 3em;
-	/* background-color: #919496; */
-	/* background-color: #f0f0f1; */
 	background-color: #eeeeee;
 }
 
 .footer img {
 	margin-right: 2em;
+}
+
+.center-text {
+	text-align: center;
 }
 
 #logo-list {
@@ -99,7 +91,6 @@ a:hover {
 }
 
 .category-title {
-	/* color: #41B6E6; */
 	color: #FFA300
 }
 
