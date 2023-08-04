@@ -7,7 +7,8 @@ body {
 }
 
 .subtitle {
-    color: #FFA300;
+	/*color: #4C91B9*/
+     color: #FFA300;
 }
 
 .jumbotron {
@@ -19,17 +20,49 @@ body {
 }
 
 .navbar {
+	/* background-color: #FFFFFF; */
+	/* background-color: #EEEEEE; */
+	/* background-color: #FFA300; */
 	background-color: #00629B;
 	/* background-color: #f0f0f1; */
 }
 
+.navbar a:hover {
+	color: #003354;
+	background-color: #FFA300;
+}
+
 .navbar a {
+	/* color: #00629B; */
 	color: #FFFFFF;
 }
 
 .navbar-brand:hover {
-	color: #00629B;
-	background-color: #eeeeee;
+	/*color: #00629B;*/
+	/*background-color: #eeeeee;*/
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.navbar-nav .nav-link:hover {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.nav .dropdown-toggle {
+	color: #FFFFFF;
+	background-color: #00629B;
+}
+
+.nav .dropdown.open .dropdown-toggle {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.nav .dropdown-toggle:focus,
+.nav .dropdown-toggle:active {
+	color: #FFFFFF;
+	background-color: #00629B;
 }
 
 a {
@@ -61,7 +94,7 @@ a:hover {
 
 .category-title {
 	/* color: #41B6E6; */
-	color: #4C91B9
+	color: #FFA300
 }
 
 .category-description {
