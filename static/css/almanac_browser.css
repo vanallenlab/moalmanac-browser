@@ -92,6 +92,12 @@ a:hover {
 	margin-right: 2em;
 }
 
+#logo-list {
+	margin-top: 1em;
+	display: flex;
+    justify-content: center;
+}
+
 .category-title {
 	/* color: #41B6E6; */
 	color: #FFA300
@@ -99,10 +105,6 @@ a:hover {
 
 .category-description {
 	color: #636569;
-}
-
-#logo-list {
-	margin-top: 1em;
 }
 
 /* front page */
