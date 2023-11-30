@@ -203,7 +203,7 @@ for assertion in assertions:
             submitted_by='breardon@broadinstitute.org',
             validated=1,
             created_on=datetime.now().strftime("%D"),
-            last_updated=datetime.strptime(series.loc[assertion_tsv_map['last_updated']], "%m/%d/%y").date()
+            last_updated=datetime.strptime(series.loc[assertion_tsv_map['last_updated']], "%Y-%m-%d").date()
         )
     session.add(new_assertion)
 
