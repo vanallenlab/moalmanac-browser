@@ -21,7 +21,8 @@ CREATE TABLE Assertion (
     description text,
     preferred_assertion boolean,
     validated boolean NOT NULL,
-    submitted_by text NOT NULL
+    submitted_by text NOT NULL,
+    deprecated boolean NOT NULL
 );
 
 -- Table: Assertion_To_Feature

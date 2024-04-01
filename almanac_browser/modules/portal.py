@@ -11,7 +11,8 @@ from .models import Assertion, Feature, FeatureAttribute, FeatureDefinition, Ass
 from .helper_functions import IMPLICATION_LEVELS_SORT, get_unapproved_assertion_rows, make_rows, http404response, \
     http200response, query_distinct_column, add_or_fetch_source, delete_assertion, amend_cite_text_for_assertion, \
     http400response, \
-    get_all_genes, unified_search, make_display_string
+    get_all_genes, get_assertion_count, get_cancer_types, get_therapy_names, \
+    unified_search, make_display_string
 
 portal = Blueprint('portal', __name__)
 
@@ -49,11 +50,11 @@ RESPONSES = [
 
 @portal.route('/')
 def index():
-    diseases = query_distinct_column(db, Assertion, 'disease')
-    therapy_names = query_distinct_column(db, Assertion, 'therapy_name')
+    diseases = get_cancer_types(db)
+    therapy_names = get_therapy_names(db)
 
     num_genes = len(get_all_genes(db))
-    num_assertions = db.session.query(Assertion).count()
+    num_assertions = get_assertion_count(db)
 
     major = query_distinct_column(db, Version, 'major')
     minor = query_distinct_column(db, Version, 'minor')
