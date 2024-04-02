@@ -5,6 +5,7 @@ from flask import jsonify, request, url_for
 from sqlalchemy import and_, or_
 from almanac_browser.modules.models import \
     Assertion, AssertionSchema, \
+    AssertionToSource, AssertionToFeature, \
     Source, SourceSchema, \
     Feature, FeatureSchema, \
     FeatureDefinition, FeatureDefinitionSchema, \
@@ -95,7 +96,13 @@ def get_assertion(assertion_id):
 
 @api.route('/assertions', methods=['GET'])
 def get_assertions():
-    raw_data = Assertion.query.all()
+    raw_data = (
+        Assertion
+        .query
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .all()
+    )
     data = reformat_assertions(raw_data)
     return jsonify(data)
 
@@ -121,7 +128,15 @@ def get_feature(feature_id):
 
 @api.route('/features', methods=['GET'])
 def get_features():
-    raw_data = Feature.query.all()
+    raw_data = (
+        Feature
+        .query
+        .join(AssertionToFeature)
+        .join(Assertion)
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .all()
+    )
     duplicate_data = [reformat_feature(item) for item in raw_data]
     data = reformat_features(duplicate_data)
     return jsonify(data)
@@ -175,7 +190,15 @@ def get_source(source_id):
 
 @api.route('/sources', methods=['GET'])
 def get_sources():
-    data = Source.query.all()
+    data = (
+        Source
+        .query
+        .join(AssertionToSource)
+        .join(Assertion)
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .all()
+    )
     return SourceSchema(exclude=['assertions'], many=True).jsonify(data)
 
 
@@ -187,19 +210,38 @@ def get_genes():
 
 @api.route('/diseases', methods=['GET'])
 def get_diseases():
-    data = flatten_sqlalchemy_singlets(db.session.query(Assertion.disease).distinct())
+    data = flatten_sqlalchemy_singlets(
+        db
+        .session
+        .query(Assertion.disease)
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .distinct()
+    )
     return jsonify(sorted(data))
 
 
 @api.route('/predictive_implications', methods=['GET'])
 def get_predictive_implications():
-    data = flatten_sqlalchemy_singlets(db.session.query(Assertion.predictive_implication).distinct())
+    data = flatten_sqlalchemy_singlets(
+        db
+        .session
+        .query(Assertion.predictive_implication)
+        .distinct()
+    )
     return jsonify(data)
 
 
 @api.route('/therapies', methods=['GET'])
 def get_therapies():
-    data = flatten_sqlalchemy_singlets(db.session.query(Assertion.therapy_name).distinct())
+    data = flatten_sqlalchemy_singlets(
+        db
+        .session
+        .query(Assertion.therapy_name)
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .distinct()
+    )
     return jsonify(sorted(data))
 
 
@@ -232,8 +274,14 @@ def select2_search():
         'genes': [],
     }
 
-    feature_defs = db.session.query(FeatureDefinition). \
-        filter(FeatureDefinition.readable_name.ilike('%%%s%%' % search_str)).distinct().all()
+    feature_defs = (
+        db
+        .session
+        .query(FeatureDefinition)
+        .filter(FeatureDefinition.readable_name.ilike('%%%s%%' % search_str))
+        .distinct()
+        .all()
+    )
     for feature_def in feature_defs:
         data['features'].append({
             'id': '"%s"[feature]' % feature_def.readable_name,
@@ -252,24 +300,58 @@ def select2_search():
     # has not specified a Value yet (and thus no colon is present).
     attribute_name_needle, _, attribute_value_needle = search_str.partition(':')
     if attribute_name_needle and attribute_value_needle:
-        attribute_def_with_attributes = db.session. \
-            query(FeatureAttributeDefinition.readable_name, FeatureAttribute.value). \
-            filter(and_(FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
-                        FeatureAttribute.value.ilike('%%%s%%' % attribute_value_needle))).distinct().all()
-
+        attribute_def_with_attributes = (
+            db
+            .session
+            .query(FeatureAttributeDefinition.readable_name, FeatureAttribute.value)
+            .join(FeatureAttribute)
+            .join(Feature)
+            .join(AssertionToFeature)
+            .join(Assertion)
+            .filter(Assertion.deprecated == False)
+            .filter(Assertion.validated == True)
+            .filter(and_(FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
+                        FeatureAttribute.value.ilike('%%%s%%' % attribute_value_needle)))
+            .distinct()
+            .all()
+        )
         for attribute_rname, attribute_value in attribute_def_with_attributes:
             data['attributes'].append(_make_attribute_data(attribute_rname, attribute_value))
     else:
-        attribute_info = db.session.query(FeatureAttributeDefinition.readable_name, FeatureAttribute.value).filter(
-            FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
-            FeatureAttribute.value != None,  # "is not" operator is not allowed in SQLAlchemy
-            or_(FeatureAttributeDefinition.name.ilike('%%%s%%' % attribute_name_needle),
-                FeatureAttributeDefinition.readable_name.ilike('%%%s%%' % attribute_name_needle))).distinct().all()
+        attribute_info = (
+            db
+            .session
+            .query(FeatureAttributeDefinition.readable_name, FeatureAttribute.value)
+            .join(FeatureAttribute)
+            .join(Feature)
+            .join(AssertionToFeature)
+            .join(Assertion)
+            .filter(Assertion.deprecated == False)
+            .filter(Assertion.validated == True)
+            .filter(
+                FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
+                FeatureAttribute.value != None,  # "is not" operator is not allowed in SQLAlchemy
+                or_(
+                    FeatureAttributeDefinition.name.ilike('%%%s%%' % attribute_name_needle),
+                    FeatureAttributeDefinition.readable_name.ilike('%%%s%%' % attribute_name_needle)
+                )
+            )
+            .distinct()
+            .all()
+        )
         for attribute_rname, attribute_value in attribute_info:
             data['attributes'].append(_make_attribute_data(attribute_rname, attribute_value))
 
-    disease_assertions = db.session.query(Assertion.disease). \
-        filter(Assertion.disease.ilike('%%%s%%' % search_str)).distinct().all()
+    disease_assertions = (
+        db
+        .session
+        .query(Assertion.disease)
+        .filter(Assertion.disease.ilike('%%%s%%' % search_str))
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .distinct()
+        .all()
+    )
 
     for disease in disease_assertions:
         disease = disease[0]
@@ -279,8 +361,15 @@ def select2_search():
             'category': 'disease',
         })
 
-    therapy_assertions = db.session.query(Assertion.therapy_name). \
-        filter(Assertion.therapy_name.ilike('%%%s%%' % search_str)).distinct().all()
+    therapy_assertions = (
+        db
+        .session.query(Assertion.therapy_name)
+        .filter(Assertion.therapy_name.ilike('%%%s%%' % search_str))
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .distinct()
+        .all()
+    )
     for therapy in therapy_assertions:
         therapy = therapy[0]
         data['therapies'].append({
@@ -289,8 +378,16 @@ def select2_search():
             'category': 'therapy',
         })
 
-    pred_assertions = db.session.query(Assertion.predictive_implication). \
-        filter(Assertion.predictive_implication.ilike('%%%s%%' % search_str)).distinct().all()
+    pred_assertions = (
+        db
+        .session
+        .query(Assertion.predictive_implication)
+        .filter(Assertion.predictive_implication.ilike('%%%s%%' % search_str))
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .distinct()
+        .all()
+    )
     for pred in pred_assertions:
         pred = pred[0]
         data['preds'].append({
@@ -300,10 +397,23 @@ def select2_search():
         })
 
     # As a last ditch, we search for gene names, which "technically" should be specified as an individual attribute.
-    genes = db.session.query(FeatureAttribute.value). \
-        filter(FeatureAttributeDefinition.type == "gene",
-               FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
-               FeatureAttribute.value.ilike('%%%s%%' % search_str)).distinct().all()
+    genes = (
+        db
+        .session
+        .query(FeatureAttribute.value)
+        .join(Feature)
+        .join(AssertionToFeature)
+        .join(Assertion)
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .filter(
+            FeatureAttributeDefinition.type == "gene",
+            FeatureAttributeDefinition.attribute_def_id == FeatureAttribute.attribute_def_id,
+            FeatureAttribute.value.ilike('%%%s%%' % search_str)
+        )
+        .distinct()
+        .all()
+    )
     for gene in genes:
         gene = gene[0]
         data['genes'].append({

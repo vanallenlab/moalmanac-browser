@@ -81,6 +81,7 @@ class Assertion(Base, db.Model):
     last_updated = db.Column('last_updated', db.Text, default=datetime.now)
     validated = db.Column('validated', db.Boolean, default=False)
     submitted_by = db.Column('submitted_by', db.Text)
+    deprecated = db.Column('deprecated', db.Boolean, default=False)
 
     features = db.relationship('Feature', secondary='Assertion_To_Feature', uselist=True)
     sources = db.relationship('Source', secondary='Assertion_To_Source', uselist=True)

@@ -201,9 +201,10 @@ for assertion in assertions:
             predictive_implication=series.loc[assertion_tsv_map['predictive_implication']],
             description=series.loc[assertion_tsv_map['description']],
             submitted_by='breardon@broadinstitute.org',
-            validated=1,
+            validated=True,
             created_on=datetime.now().strftime("%D"),
-            last_updated=datetime.strptime(series.loc[assertion_tsv_map['last_updated']], "%Y-%m-%d").date()
+            last_updated=datetime.strptime(series.loc[assertion_tsv_map['last_updated']], "%Y-%m-%d").date(),
+            deprecated=series.loc["_deprecated"]
         )
     session.add(new_assertion)
 

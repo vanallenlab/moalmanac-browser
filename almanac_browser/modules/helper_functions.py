@@ -35,16 +35,66 @@ def get_distinct_attribute_values(db, needle, search_column=FeatureAttributeDefi
     search within.
     """
 
-    values = db.session.query(FeatureAttribute.value).filter(
-        FeatureAttribute.attribute_def_id == FeatureAttributeDefinition.attribute_def_id,
-        search_column == needle
-    ).distinct().all()
+    values = (
+        db
+        .session
+        .query(FeatureAttribute.value)
+        .join(Feature)
+        .join(AssertionToFeature)
+        .join(Assertion, and_(AssertionToFeature.assertion_id == Assertion.assertion_id, Assertion.validated == True, Assertion.deprecated == False))
+        .filter(
+            FeatureAttribute.attribute_def_id == FeatureAttributeDefinition.attribute_def_id,
+            search_column == needle,
+        )
+        .distinct()
+        .all()
+    )
 
     return [value for value in flatten_sqlalchemy_singlets(values) if value.lower() != 'none']
 
 
 def get_all_genes(db):
     return get_distinct_attribute_values(db, 'gene', FeatureAttributeDefinition.type)
+
+
+def get_assertion_count(db):
+    return (
+        db
+        .session
+        .query(Assertion)
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+        .count()
+    )
+
+
+def get_cancer_types(db):
+    query = (
+        db
+        .session
+        .query(
+            getattr(Assertion, 'oncotree_term')
+            .distinct()
+            .label('oncotree_term')
+        )
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+    )
+    return filter_row_column(query, 'oncotree_term')
+
+
+def get_therapy_names(db):
+    query = (
+        db
+        .session
+        .query(
+            getattr(Assertion, 'therapy_name').distinct().label('therapy_name')
+        )
+        .filter(Assertion.deprecated == False)
+        .filter(Assertion.validated == True)
+    )
+    return filter_row_column(query, 'therapy_name')
+
 
 
 def add_or_fetch_source(db, doi, empty_text=''):
@@ -486,6 +536,7 @@ def unified_search(db, search_str):
         AssertionToFeature.assertion_id == Assertion.assertion_id,
         AssertionToFeature.feature_id == Feature.feature_id,
         Assertion.validated.is_(True),
+        Assertion.deprecated.is_(False),
     ]
 
     if query['feature']:
