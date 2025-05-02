@@ -1,0 +1,10 @@
+*.DS_Store
+*.idea*
+*__pycache__*
+
+# Old web browser files
+venv_old*
+update_db.sh*
+upload_db.sh*
+feature_definitions.tsv*
+secret_key.py
