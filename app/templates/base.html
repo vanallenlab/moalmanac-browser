@@ -8,8 +8,8 @@
 
         {% block styles %}
             {{ bootstrap.load_css() }}
-            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}"/>
             <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename=css_path) }}">
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}"/>
         {% endblock %}
 
         <title>

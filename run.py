@@ -3,8 +3,6 @@ import os
 
 from app import create_app
 
-app = create_app()
-
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser(
@@ -40,4 +38,5 @@ if __name__ == '__main__':
     else:
         raise ValueError(f'Invalid mode: {args.mode}')
 
+    app = create_app(config_path=args.config)
     app.run(host=host, port=port, debug=debug)

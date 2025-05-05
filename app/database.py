@@ -33,7 +33,7 @@ def read_config_ini(path: str) -> configparser.ConfigParser():
     return config
 
 
-def init_db(config_path: str) -> tuple[Engine, sessionmaker]:
+def init_db(config: configparser.ConfigParser()) -> tuple[Engine, sessionmaker]:
     """
     Initializes the sqlite database connection and session.
 
@@ -41,7 +41,7 @@ def init_db(config_path: str) -> tuple[Engine, sessionmaker]:
     creates an SQLAlchemy engine, and configures a session for database interactions.
 
     Args:
-        config_path (str): The path to the database configuration file.
+        config (configparser.ConfigParser()): A ConfigParser object containing the configuration data.
 
     Returns:
         tuple[sqqlalchemy.orm.engine, sqlalchemy.orm.Session]: A tuple containing the SQLAlchemy engine
@@ -51,9 +51,9 @@ def init_db(config_path: str) -> tuple[Engine, sessionmaker]:
         FileNotFoundError: If the specified configuration file does not exist.
         KeyError: If the database path is not found within the configuration file.
     """
-    config = read_config_ini(path=config_path)
     try:
-        path = config['database']['path']
+        file = config['app'].get('cache', 'cache.sqlite3')
+        path = os.path.join("data", file)
     except KeyError:
         raise KeyError("Database path not found within configuration file.")
     path = os.path.abspath(path)
