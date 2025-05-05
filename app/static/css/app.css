@@ -1,0 +1,121 @@
+.jumbotron {
+    background-color: transparent;
+    margin-bottom: 0;
+    margin-top: 60px;
+}
+
+.content {
+    padding-bottom: 3em;
+}
+
+* {
+    margin: 0;
+}
+
+.navbar {
+    padding-left: 50px;
+    padding-right: 50px;
+    height: 56px;
+}
+
+.navbar .nav-brand {
+    display: block;
+    height: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.navbar .nav-link {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+html {
+    position: relative;
+    height: 100%
+}
+
+body {
+    /* Margin bottom by footer height */
+    height: 100%;
+    margin-bottom: 60px;
+}
+
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    padding: 2em;
+    background-color: #EEEEEE;
+    margin-top: 50px;
+}
+
+.footer img {
+    margin-right: 2em;
+}
+
+.logo-container img {
+    height: 50px;
+    width: auto;
+}
+
+#logo-list {
+    margin-top: 1em;
+    display: flex;
+    justify-content: center;
+}
+
+.center-text {
+    text-align: center;
+}
+
+.status {
+    margin: 0px auto;
+    text-align: center;
+    width: 50%;
+}
+
+.setup table {
+    display: inline-block;
+    padding: 20px;
+}
+
+#browsebutton {
+    background-color: white;
+}
+
+#my-file-selector {
+    display: none;
+}
+
+.row{
+    margin-top: 0px;
+    padding: 0 10px;
+    width:100%
+}
+
+.panel-heading span {
+    margin-top: -20px;
+    font-size: 15px;
+}
+
+.panel > .panel-heading {
+    background-image: none;
+}
+
+.table {
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+#or-browse-by {
+    margin-top: 2em;
+}
+
+div.p-3:hover {
+    background-color: #f8f9fa; /* Slightly darker background on hover */
+    cursor: pointer;
+}
