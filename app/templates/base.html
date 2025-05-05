@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        {% block head %}
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        {% endblock %}
+
+        {% block styles %}
+            {{ bootstrap.load_css() }}
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/app.css') }}"/>
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename=css_path) }}">
+        {% endblock %}
+
+        <title>
+            {% block title %}
+                Molecular Oncology Almanac - Browser
+            {% endblock %}
+        </title>
+    </head>
+
+    <body>
+        <div id="content">
+            {% include "navbar.html" %}
+            <section class="container-fluid">
+                <div class="container">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </section>
+        </div>
+
+        <div id="footer">
+            {% block footer %}
+                {% include "footer.html" %}
+            {% endblock %}
+        </div>
+
+        {% block scripts %}
+            {{ bootstrap.load_js() }}
+        {% endblock %}
+    </body>
+</html>

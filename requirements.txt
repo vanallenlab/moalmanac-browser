@@ -1,7 +1,8 @@
-Flask==3.1.0
-Flask-SQLAlchemy==3.1.1
+bootstrap-flask==2.5.0
+flask==3.1.0
+flask-sqlalchemy==3.1.1
 gunicorn==23.0.0
 pandas==2.2.3
-SQLAlchemy==2.0.35
+sqlalchemy==2.0.35
 requests==2.32.3
 werkzeug==3.1.3
