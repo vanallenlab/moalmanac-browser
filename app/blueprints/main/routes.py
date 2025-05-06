@@ -9,7 +9,6 @@ from . import requests
 def index():
     about = requests.Local.get_about()
     terms = requests.Local.get_terms()
-    print(terms)
     return flask.render_template(
         template_name_or_list='index.html',
         about=about,
