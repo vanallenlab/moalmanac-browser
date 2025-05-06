@@ -1,3 +1,115 @@
+/* ====================
+   1. Global / Resets
+   ==================== */
+html, body {
+    height: 100%;
+}
+
+html {
+    position: relative;
+}
+
+body {
+    margin-bottom: 60px; /* Space for footer */
+}
+
+/* ====================
+   2. Typography
+   ==================== */
+.center-text {
+    text-align: center;
+}
+
+.title {
+    color: var(--primary-color);
+}
+
+.subtitle {
+    color: var(--secondary-color);
+}
+
+.category-title {
+    color: var(--secondary-color);
+}
+
+.row h4 {
+    color: var(--tertiary-color);
+}
+
+/* ====================
+   3. Navbar
+   ==================== */
+.navbar {
+    background-color: var(--primary-color);
+    align-items: stretch;
+    display: flex;
+    height: 56px;
+    padding: 0 50px;
+}
+
+.navbar .container-fluid {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+}
+
+.navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 1rem;
+}
+
+.navbar .navbar-brand:hover {
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.navbar a {
+    color: #FFFFFF;
+}
+
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 1rem;
+}
+
+.navbar-nav .nav-item {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    text-decoration: none;
+}
+
+/* Collapsed navbar background */
+.navbar-collapse.collapsing,
+.navbar-collapse.collapse.show {
+    background-color: var(--primary-color);
+}
+
+/* ====================
+   4. Footer
+   ==================== */
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    padding: 2em;
+    background-color: #EEEEEE;
+    margin-top: 50px;
+}
+
+/* ====================
+   5. Page Layout / Utility
+   ==================== */
 .jumbotron {
     background-color: transparent;
     margin-bottom: 0;
@@ -8,77 +120,25 @@
     padding-bottom: 3em;
 }
 
-* {
-    margin: 0;
-}
-
-.navbar {
-    padding-left: 50px;
-    padding-right: 50px;
-    height: 56px;
-}
-
-.navbar .nav-brand {
-    display: block;
-    height: 100%;
-    padding-left: 1rem;
-    padding-right: 1rem;
-}
-
-.navbar .nav-link {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    padding-left: 1rem;
-    padding-right: 1rem;
-}
-
-html {
-    position: relative;
-    height: 100%
-}
-
-body {
-    /* Margin bottom by footer height */
-    height: 100%;
-    margin-bottom: 60px;
-}
-
-footer {
-    position: relative;
-    bottom: 0;
-    width: 100%;
-    padding: 2em;
-    background-color: #EEEEEE;
-    margin-top: 50px;
-}
-
-.logo-container img {
-    height: 50px;
-    width: auto;
-}
-
-#logo-list {
-    margin-top: 1em;
-    display: flex;
-    justify-content: center;
-}
-
-.center-text {
-    text-align: center;
-}
-
 .status {
-    margin: 0px auto;
+    margin: 0 auto;
     text-align: center;
     width: 50%;
 }
 
-.setup table {
-    display: inline-block;
-    padding: 20px;
+#or-browse-by {
+    margin-top: 2em;
 }
 
+.row {
+    margin-top: 0;
+    padding: 0 10px;
+    width: 100%;
+}
+
+/* ====================
+   6. Buttons / Inputs
+   ==================== */
 #browsebutton {
     background-color: white;
 }
@@ -87,10 +147,12 @@ footer {
     display: none;
 }
 
-.row{
-    margin-top: 0px;
-    padding: 0 10px;
-    width:100%
+/* ====================
+   7. Tables
+   ==================== */
+.setup table {
+    display: inline-block;
+    padding: 20px;
 }
 
 .panel-heading span {
@@ -107,72 +169,34 @@ footer {
     word-wrap: break-word;
 }
 
-#or-browse-by {
-    margin-top: 2em;
-}
-
+/* ====================
+   8. Hover Effects
+   ==================== */
 div.p-3:hover {
-    background-color: #f8f9fa; /* Slightly darker background on hover */
+    background-color: #f8f9fa;
     cursor: pointer;
-}
-
-.title {
-    color: var(--primary-color);
-}
-
-.subtitle {
-     color: var(--secondary-color);
 }
 
 a {
     color: var(--primary-color);
+    text-decoration: none;
 }
 
 a:hover {
     color: var(--primary-color);
-    text-decoration: underline;
-}
-
-.navbar {
-    background-color: var(--primary-color);
-}
-
-.navbar a {
-    color: #FFFFFF;
-}
-
-.navbar .navbar-brand:hover {
-    color: var(--primary-color);
-    background-color: var(--secondary-color);
     text-decoration: none;
 }
 
-.navbar-nav .nav-link:hover {
-    color: var(--primary-color);
-    background-color: var(--secondary-color);
-    text-decoration: none;
+/* ====================
+   9. Logos
+   ==================== */
+.logo-container img {
+    height: 50px;
+    width: auto;
 }
 
-.nav .dropdown-toggle {
-    color: #FFFFFF;
-    background-color: var(--primary-color);
-}
-
-.nav .dropdown.open .dropdown-toggle {
-    color: var(--primary-color);
-    background-color: var(--secondary-color);
-}
-
-.nav .dropdown-toggle:focus,
-.nav .dropdown-toggle:active {
-    color: #FFFFFF;
-    background-color: var(--primary-color);
-}
-
-.row h4 {
-    color: var(--tertiary-color);
-}
-
-.category-title {
-    color: var(--secondary-color)
+#logo-list {
+    margin-top: 1em;
+    display: flex;
+    justify-content: center;
 }
