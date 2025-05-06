@@ -117,45 +117,38 @@ class BaseHandler:
         raise NotImplementedError("Subclasses should implement this method.")
 
     @classmethod
-    def serialize_single_instance(cls, instance: models.Base, **kwargs) -> dict[str, typing.Any]:
+    def serialize_single_instance(cls, instance: models.Documents) -> dict[str, typing.Any]:
         """
-        Performs operations needed to serialize a single instance of the SQLAlchemy model. At minimum, it will serialize
-        the primary instance and then any secondary instances that are populated by relationships with other tables. It
-        will also remove any keys that are not needed after serialization.
-
-        This is Step 6.1 of managing the query.
-
-        Args:
-            instance (models.Base): A SQLAlchemy model instance to serialize.
-
-        Returns:
-            dict[str, typing.Any]: A list of dictionaries with all keys serialized.
-
-        Raises:
-            NotImplementedError: If the route's Handler class does not implement this method.
-        """
-        raise NotImplementedError("Subclasses should implement this method.")
-
-
-class About(BaseHandler):
-    """
-    Handler class to manage queries against the About table.
-    """
-    @classmethod
-    def serialize_single_instance(cls, instance: models.About) -> dict[str, typing.Any]:
-        """
-        Serializes a single instance of the About table.
+        Serializes a single instance of the Documents table.
 
         This method extends the base class implementation by serializing the instance and any related tables. The key
         `id` is removed after serialization.
 
-        This is Step 6.1 of managing the query.
-
         Args:
-            instance (models.Agents): A SQLAlchemy model instance to serialize.
+            instance (models.Documents): A SQLAlchemy model instance to serialize.
 
         Returns:
             dict[str, typing.Any]: A list of dictionaries with all keys serialized.
         """
         serialized_record = cls.serialize_primary_instance(instance=instance)
         return serialized_record
+
+
+
+class About(BaseHandler):
+    """
+    Handler class to manage queries against the About table.
+    """
+
+
+class Documents(BaseHandler):
+    """
+    Handler class to manage queries against the About table.
+    """
+
+
+class Terms(BaseHandler):
+    """
+    Handler class to manage queries against the About table.
+    """
+

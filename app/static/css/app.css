@@ -169,6 +169,19 @@ footer {
     word-wrap: break-word;
 }
 
+/* Override DataTables pagination active button */
+.dataTables_wrapper .dataTables_paginate .pagination .page-item.active .page-link {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+/* Override default page buttons */
+.dataTables_wrapper .dataTables_paginate .pagination .page-link {
+    color: var(--primary-color) !important;
+}
+
+
 /* ====================
    8. Hover Effects
    ==================== */
