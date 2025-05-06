@@ -391,7 +391,7 @@ class SQL:
     def add_about(cls, record, session):
         about = models.About(
             last_updated=record.get('last_updated'),
-            release_date=record.get('release'),
+            release=record.get('release'),
             propositions_count=record.get('propositions_count'),
             statements_count=record.get('statements_count')
         )
@@ -459,6 +459,27 @@ class SQL:
                 statements_count=record.get('statements_count')
             )
             session.add(indication)
+
+    @classmethod
+    def add_terms(cls, results, session):
+        tables = [
+            'biomarkers',
+            'diseases',
+            'documents',
+            'genes',
+            'therapies'
+        ]
+        count = 0
+        for table in tables:
+            for record in results[table]:
+                term = models.Terms(
+                    id=count,
+                    table=table,
+                    record_id=record.get('id'),
+                    record_name=record.get('name')
+                )
+                session.add(term)
+                count += 1
 
     @classmethod
     def add_therapies(cls, records, session):
@@ -529,6 +550,9 @@ def main(config_path, api_url="https://api.moalmanac.org", drop=False):
             session.commit()
 
             SQL.add_therapies(records=results['therapies'], session=session)
+            session.commit()
+
+            SQL.add_terms(results=results, session=session)
             session.commit()
         except Exception as e:
             print(f"Error occurred: {e}")

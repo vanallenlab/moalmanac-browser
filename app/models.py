@@ -10,7 +10,7 @@ class About(Base):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
     last_updated = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    release_date = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    release = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
@@ -71,3 +71,11 @@ class Therapies(Base):
     therapy_type = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+
+class Terms(Base):
+    __tablename__ = "terms"
+
+    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    table = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    record_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    record_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
