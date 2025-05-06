@@ -5,11 +5,12 @@ Documents | Molecular Oncology Almanac
 {% endblock %}
 
 {% block content %}
+    <br>
+
     <div class="row mb-3">
       <div class="col-md-3">
-        <label for="organizationFilter" class="form-label">Filter by Organization</label>
         <select id="organizationFilter" class="form-select form-select-sm">
-          <option value="">All</option>
+          <option value="">{{ all_organizations.__len__() }} organizations</option>
           {% for s in all_organizations %}
             <option value="{{ s }}">{{ s }}</option>
           {% endfor %}
