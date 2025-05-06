@@ -388,10 +388,11 @@ class Requests:
 
 class SQL:
     @classmethod
-    def add_about(cls, record, session):
+    def add_about(cls, record, documents, session):
         about = models.About(
             last_updated=record.get('last_updated'),
             release=record.get('release'),
+            documents_count=len(documents),
             propositions_count=record.get('propositions_count'),
             statements_count=record.get('statements_count')
         )
@@ -531,7 +532,7 @@ def main(config_path, api_url="https://api.moalmanac.org", drop=False):
 
         session = flask.current_app.config['SESSION_FACTORY']()
         try:
-            SQL.add_about(record=about, session=session)
+            SQL.add_about(record=about, documents=results['documents'], session=session)
             session.commit()
 
             SQL.add_biomarkers(records=results['biomarkers'], session=session)
