@@ -19,7 +19,10 @@ def index():
 @main_bp.route('/documents/<document_id>', endpoint='documents')
 def documents(document_id: str = None):
     records = requests.Local.get_documents()
+    print(records[0])
+    all_organizations = sorted(set(record['organization_name'] for record in records))
     return flask.render_template(
         template_name_or_list='documents.html',
-        documents=records
+        documents=records,
+        all_organizations=all_organizations
     )
