@@ -8,12 +8,21 @@
         <div class="collapse navbar-collapse " id="navbarMain">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('main.documents') }}">Documents</a>
+                    <a class="nav-link" href="{{ url_for('main.index') }}">API</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}">Approvals</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.documents') }}">Organizations</a>
                 </li>
             </ul>
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link" href="https://www.moalmanac.org/about">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}">Contact</a>
                 </li>
             </ul>
         </div>

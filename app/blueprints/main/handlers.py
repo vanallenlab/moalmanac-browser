@@ -141,9 +141,27 @@ class About(BaseHandler):
     """
 
 
+class Biomarkers(BaseHandler):
+    """
+    Handler class to manage queries against the Biomarker table.
+    """
+
+
+class Diseases(BaseHandler):
+    """
+    Handler class to manage queries against the Disease table.
+    """
+
+
 class Documents(BaseHandler):
     """
     Handler class to manage queries against the About table.
+    """
+
+
+class Genes(BaseHandler):
+    """
+    Handler class to manage queries against the Genes table.
     """
 
 
@@ -152,3 +170,8 @@ class Terms(BaseHandler):
     Handler class to manage queries against the About table.
     """
 
+
+class Therapies(BaseHandler):
+    """
+    Handler class to manage queries against the Therapies table.
+    """

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Genes | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+    <table id="genes-table-result" class="table table-striped table-hover table-sm small w-100">
+        <thead>
+            <tr>
+                <th style="width: 10%">Symbol</th>
+                <th style="width: 10%">Biomarkers</th>
+                <th style="width: 10%">Propositions</th>
+                <th style="width: 10%">Statements</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for gene in genes %}
+                <tr>
+                    <td>{{ gene.name }}</td>
+                    <td>{{ gene.biomarkers_count }}</td>
+                    <td>{{ gene.propositions_count }}</td>
+                    <td>{{ gene.statements_count }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
