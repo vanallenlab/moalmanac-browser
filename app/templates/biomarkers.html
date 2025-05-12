@@ -17,7 +17,7 @@ Biomarkers | Molecular Oncology Almanac
         <tbody>
             {% for biomarker in biomarkers %}
                 <tr>
-                    <td>...</td>
+                    <td>{{ biomarker.type }}</td>
                     <td>{{ biomarker.name }}</td>
                     <td>{{ biomarker.propositions_count }}</td>
                     <td>{{ biomarker.statements_count }}</td>
