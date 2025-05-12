@@ -17,19 +17,19 @@ class Process:
     @classmethod
     def biomarkers(cls, biomarker_records):
         biomarker_to_proposition_count = cls.get_counts(
-            ids=biomarker_records['id'].unique(),
+            ids=biomarker_records.get('id').unique(),
             dataframe=biomarker_records,
             id_column='id',
             count_column='proposition_id'
         )
         biomarker_to_statement_count = cls.get_counts(
-            ids=biomarker_records['id'].unique(),
+            ids=biomarker_records.get('id').unique(),
             dataframe=biomarker_records,
             id_column='id',
             count_column='statement_id'
         )
-        biomarker_records['propositions_count'] = biomarker_records['id'].replace(biomarker_to_proposition_count)
-        biomarker_records['statements_count'] = biomarker_records['id'].replace(biomarker_to_statement_count)
+        biomarker_records['propositions_count'] = biomarker_records.get('id').replace(biomarker_to_proposition_count)
+        biomarker_records['statements_count'] = biomarker_records.get('id').replace(biomarker_to_statement_count)
         return (
             biomarker_records
             .drop(['proposition_id', 'statement_id'], axis='columns')
@@ -39,19 +39,19 @@ class Process:
     @classmethod
     def diseases(cls, disease_records):
         disease_to_proposition_count = cls.get_counts(
-            ids=disease_records['id'].unique(),
+            ids=disease_records.get('id').unique(),
             dataframe=disease_records,
             id_column='id',
             count_column='proposition_id'
         )
         disease_to_statement_count = cls.get_counts(
-            ids=disease_records['id'].unique(),
+            ids=disease_records.get('id').unique(),
             dataframe=disease_records,
             id_column='id',
             count_column='statement_id'
         )
-        disease_records['propositions_count'] = disease_records['id'].replace(disease_to_proposition_count)
-        disease_records['statements_count'] = disease_records['id'].replace(disease_to_statement_count)
+        disease_records['propositions_count'] = disease_records.get('id').replace(disease_to_proposition_count)
+        disease_records['statements_count'] = disease_records.get('id').replace(disease_to_statement_count)
         return (
             disease_records
             .drop(['proposition_id', 'statement_id'], axis='columns')
@@ -61,19 +61,19 @@ class Process:
     @classmethod
     def documents(cls, document_records, indication_records):
         document_to_statement_count = cls.get_counts(
-            ids=document_records['id'].unique(),
+            ids=document_records.get('id').unique(),
             dataframe=document_records,
             id_column='id',
             count_column='statement_id'
         )
         document_to_indication_count = cls.get_counts(
-            ids=document_records['id'].unique(),
+            ids=document_records.get('id').unique(),
             dataframe=indication_records,
             id_column='document_id',
             count_column='id'
         )
-        document_records['indications_count'] = document_records['id'].replace(document_to_indication_count)
-        document_records['statements_count'] = document_records['id'].replace(document_to_statement_count)
+        document_records['indications_count'] = document_records.get('id').replace(document_to_indication_count)
+        document_records['statements_count'] = document_records.get('id').replace(document_to_statement_count)
         return (
             document_records
             .drop('statement_id', axis='columns')
@@ -83,26 +83,26 @@ class Process:
     @classmethod
     def genes(cls, gene_records):
         gene_to_biomarker_count = cls.get_counts(
-            ids=gene_records['id'].unique(),
+            ids=gene_records.get('id').unique(),
             dataframe=gene_records,
             id_column='id',
             count_column='biomarker_id'
         )
         gene_to_proposition_count = cls.get_counts(
-            ids=gene_records['id'].unique(),
+            ids=gene_records.get('id').unique(),
             dataframe=gene_records,
             id_column='id',
             count_column='proposition_id'
         )
         gene_to_statement_count = cls.get_counts(
-            ids=gene_records['id'].unique(),
+            ids=gene_records.get('id').unique(),
             dataframe=gene_records,
             id_column='id',
             count_column='statement_id'
         )
-        gene_records['biomarkers_count'] = gene_records['id'].replace(gene_to_biomarker_count)
-        gene_records['propositions_count'] = gene_records['id'].replace(gene_to_proposition_count)
-        gene_records['statements_count'] = gene_records['id'].replace(gene_to_statement_count)
+        gene_records['biomarkers_count'] = gene_records.get('id').replace(gene_to_biomarker_count)
+        gene_records['propositions_count'] = gene_records.get('id').replace(gene_to_proposition_count)
+        gene_records['statements_count'] = gene_records.get('id').replace(gene_to_statement_count)
         return (
             gene_records
             .drop(['biomarker_id', 'proposition_id', 'statement_id'], axis='columns')
@@ -111,9 +111,12 @@ class Process:
 
     @classmethod
     def get_biomarker(cls, record, proposition_id, statement_id):
+        extensions = record.get('extensions')
+        biomarker_type = cls.get_value_by_name(data=extensions, name='biomarker_type')
         return {
-            'id': record['id'],
-            'name': record['name'],
+            'id': record.get('id'),
+            'name': record.get('name'),
+            'type': biomarker_type,
             'proposition_id': proposition_id,
             'statement_id': statement_id
         }
@@ -129,8 +132,8 @@ class Process:
     @classmethod
     def get_disease(cls, record, proposition_id, statement_id):
         return {
-            'id': record['id'],
-            'name': record['name'],
+            'id': record.get('id'),
+            'name': record.get('name'),
             'proposition_id': proposition_id,
             'statement_id': statement_id
         }
@@ -138,20 +141,40 @@ class Process:
     @classmethod
     def get_document(cls, record, statement_id):
         return {
-            'id': record['id'],
-            'name': record['name'],
-            'citation': record['citation'],
-            'url': record['url'],
-            'organization_id': record['organization']['id'],
-            'organization_name': record['organization']['name'],
+            'id': record.get('id'),
+            'name': record.get('name'),
+            'citation': record.get('citation'),
+            'url': record.get('url'),
+            'organization_id': record.get('organization').get('id'),
+            'organization_name': record.get('organization').get('name'),
             'statement_id': statement_id
         }
+
+    @staticmethod
+    def get_value_by_name(data, name):
+        """
+        Retrieve the 'value' corresponding to the given 'name' from a list of dictionaries.
+
+        Parameters:
+            data (list of dict): List containing dictionaries with 'name' and 'value' keys.
+            name (str): The name to search for.
+
+        Returns:
+            The value associated with the given name.
+
+        Raises:
+            ValueError: If the name is not found in the list.
+        """
+        for item in data:
+            if item.get("name") == name:
+                return item.get("value")
+        raise ValueError(f"Name '{name}' not found in data.")
 
     @classmethod
     def get_gene(cls, record, biomarker_id, proposition_id, statement_id):
         return {
-            'id': record['id'],
-            'name': record['name'],
+            'id': record.get('id'),
+            'name': record.get('name'),
             'biomarker_id': biomarker_id,
             'proposition_id': proposition_id,
             'statement_id': statement_id
@@ -160,11 +183,11 @@ class Process:
     @classmethod
     def get_indication(cls, record, statement_id):
         return {
-            'id': record['id'],
-            'indication': record['indication'],
-            'document_id': record['document']['id'],
-            'organization_id': record['document']['organization']['id'],
-            'organization_name': record['document']['organization']['name'],
+            'id': record.get('id'),
+            'indication': record.get('indication'),
+            'document_id': record.get('document').get('id'),
+            'organization_id': record.get('document').get('organization').get('id'),
+            'organization_name': record.get('document').get('organization').get('name'),
             'statement_id': statement_id
         }
 
@@ -172,11 +195,11 @@ class Process:
     def get_therapeutic(cls, record, proposition_id, statement_id):
         if 'therapies' in record:
             therapies = []
-            for therapy in record['therapies']:
-                therapy_type = [ext['value'] for ext in therapy['extensions'] if ext['name'] == 'therapy_type'][0]
+            for therapy in record.get('therapies'):
+                therapy_type = [ext.get('value') for ext in therapy.get('extensions') if ext.get('name') == 'therapy_type'][0]
                 therapies.append({
-                    'id': therapy['id'],
-                    'name': therapy['name'],
+                    'id': therapy.get('id'),
+                    'name': therapy.get('name'),
                     # therapy strategy
                     'therapy_type': therapy_type,
                     'proposition_id': proposition_id,
@@ -185,10 +208,10 @@ class Process:
             return therapies
         else:
             therapy = record
-            therapy_type = [ext['value'] for ext in therapy['extensions'] if ext['name'] == 'therapy_type'][0]
+            therapy_type = [ext.get('value') for ext in therapy.get('extensions') if ext.get('name') == 'therapy_type'][0]
             return [{
-                'id': therapy['id'],
-                'name': therapy['name'],
+                'id': therapy.get('id'),
+                'name': therapy.get('name'),
                 # therapy _strategy
                 'therapy_type': therapy_type,
                 'proposition_id': proposition_id,
@@ -198,12 +221,12 @@ class Process:
     @classmethod
     def indications(cls, indication_records):
         indication_to_statement_count = cls.get_counts(
-            ids=indication_records['id'].unique(),
+            ids=indication_records.get('id').unique(),
             dataframe=indication_records,
             id_column='id',
             count_column='statement_id'
         )
-        indication_records['statements_count'] = indication_records['id'].replace(indication_to_statement_count)
+        indication_records['statements_count'] = indication_records.get('id').replace(indication_to_statement_count)
         return (
             indication_records
             .drop('statement_id', axis='columns')
@@ -243,7 +266,7 @@ class Process:
 
     @classmethod
     def propositions(cls, statements):
-        return {statement['proposition']['id'] for statement in statements}
+        return {statement.get('proposition').get('id') for statement in statements}
 
     @classmethod
     def statements(cls, records):
@@ -254,42 +277,42 @@ class Process:
         indication_records = []
         therapy_records = []
         for record in records:
-            statement_id = record['id']
-            for document in record['reportedIn']:
+            statement_id = record.get('id')
+            for document in record.get('reportedIn'):
                 record_document = cls.get_document(record=document, statement_id=statement_id)
                 document_records.append(record_document)
 
-            record_indication = cls.get_indication(record=record['indication'], statement_id=statement_id)
+            record_indication = cls.get_indication(record=record.get('indication'), statement_id=statement_id)
             indication_records.append(record_indication)
 
-            proposition = record['proposition']
-            for biomarker in proposition['biomarkers']:
+            proposition = record.get('proposition')
+            for biomarker in proposition.get('biomarkers'):
                 record_biomarker = cls.get_biomarker(
                     record=biomarker,
-                    proposition_id=proposition['id'],
+                    proposition_id=proposition.get('id'),
                     statement_id=statement_id
                 )
                 biomarker_records.append(record_biomarker)
                 if 'genes' in biomarker:
-                    for gene in biomarker['genes']:
+                    for gene in biomarker.get('genes'):
                         record_gene = cls.get_gene(
                             record=gene,
-                            biomarker_id=biomarker['id'],
-                            proposition_id=proposition['id'],
+                            biomarker_id=biomarker.get('id'),
+                            proposition_id=proposition.get('id'),
                             statement_id=statement_id
                         )
                         gene_records.append(record_gene)
 
             record_disease = cls.get_disease(
-                record=proposition['conditionQualifier'],
-                proposition_id=proposition['id'],
+                record=proposition.get('conditionQualifier'),
+                proposition_id=proposition.get('id'),
                 statement_id=statement_id
             )
             disease_records.append(record_disease)
 
             record_therapeutic = cls.get_therapeutic(
-                record=proposition['objectTherapeutic'],
-                proposition_id=proposition['id'],
+                record=proposition.get('objectTherapeutic'),
+                proposition_id=proposition.get('id'),
                 statement_id=statement_id
             )
             therapy_records.extend(record_therapeutic)
@@ -329,19 +352,19 @@ class Process:
     @classmethod
     def therapies(cls, therapy_records):
         therapy_to_proposition_count = cls.get_counts(
-            ids=therapy_records['id'].unique(),
+            ids=therapy_records.get('id').unique(),
             dataframe=therapy_records,
             id_column='id',
             count_column='proposition_id'
         )
         therapy_to_statement_count = cls.get_counts(
-            ids=therapy_records['id'].unique(),
+            ids=therapy_records.get('id').unique(),
             dataframe=therapy_records,
             id_column='id',
             count_column='statement_id'
         )
-        therapy_records['propositions_count'] = therapy_records['id'].astype(int).replace(therapy_to_proposition_count)
-        therapy_records['statements_count'] = therapy_records['id'].astype(int).replace(therapy_to_statement_count)
+        therapy_records['propositions_count'] = therapy_records.get('id').astype(int).replace(therapy_to_proposition_count)
+        therapy_records['statements_count'] = therapy_records.get('id').astype(int).replace(therapy_to_statement_count)
         return (
             therapy_records
             .drop(['proposition_id', 'statement_id'], axis='columns')
@@ -401,9 +424,11 @@ class SQL:
     @classmethod
     def add_biomarkers(cls, records, session):
         for record in records:
+            biomarker_type = []
             biomarker = models.Biomarkers(
                 id=record.get('id'),
                 name=record.get('name'),
+                type=record.get('biomarker_type'),
                 propositions_count=record.get('propositions_count'),
                 statements_count=record.get('statements_count')
             )
