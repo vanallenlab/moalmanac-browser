@@ -424,11 +424,10 @@ class SQL:
     @classmethod
     def add_biomarkers(cls, records, session):
         for record in records:
-            biomarker_type = []
             biomarker = models.Biomarkers(
                 id=record.get('id'),
                 name=record.get('name'),
-                type=record.get('biomarker_type'),
+                type=record.get('type'),
                 propositions_count=record.get('propositions_count'),
                 statements_count=record.get('statements_count')
             )
@@ -557,25 +556,25 @@ def main(config_path, api_url="https://api.moalmanac.org", drop=False):
 
         session = flask.current_app.config['SESSION_FACTORY']()
         try:
-            SQL.add_about(record=about, documents=results['documents'], session=session)
+            SQL.add_about(record=about, documents=results.get('documents'), session=session)
             session.commit()
 
-            SQL.add_biomarkers(records=results['biomarkers'], session=session)
+            SQL.add_biomarkers(records=results.get('biomarkers'), session=session)
             session.commit()
 
-            SQL.add_diseases(records=results['diseases'], session=session)
+            SQL.add_diseases(records=results.get('diseases'), session=session)
             session.commit()
 
-            SQL.add_documents(records=results['documents'], session=session)
+            SQL.add_documents(records=results.get('documents'), session=session)
             session.commit()
 
-            SQL.add_genes(records=results['genes'], session=session)
+            SQL.add_genes(records=results.get('genes'), session=session)
             session.commit()
 
-            SQL.add_indications(records=results['indications'], session=session)
+            SQL.add_indications(records=results.get('indications'), session=session)
             session.commit()
 
-            SQL.add_therapies(records=results['therapies'], session=session)
+            SQL.add_therapies(records=results.get('therapies'), session=session)
             session.commit()
 
             SQL.add_terms(results=results, session=session)
