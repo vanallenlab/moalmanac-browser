@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // DOCUMENTS TABLE SETUP
   const documentsTableEl = document.querySelector('#documents-table-result');
   const organizationFilter = document.getElementById('organizationFilter');
-
   if (documentsTableEl && organizationFilter) {
     // Custom filter function
     $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
@@ -12,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       return !selectedOrganization || rowOrganization === selectedOrganization;
     });
-
     const documentsTable = new DataTable(documentsTableEl, {
       autoWidth: false,
       classes: {
@@ -27,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function () {
       pageLength: 10,
       responsive: true
     });
-
     organizationFilter.addEventListener('change', () => documentsTable.draw());
   }
 
@@ -90,8 +87,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // THERAPIES TABLE SETUP
   const therapiesTableEl = document.querySelector('#therapies-table-result');
-  if (therapiesTableEl) {
-    new DataTable(therapiesTableEl, {
+  const therapyTypeFilter = document.getElementById('therapyTypeFilter');
+  if (therapiesTableEl && therapyTypeFilter) {
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      const selectedTherapyType = therapyTypeFilter.value;
+      const row = settings.aoData[dataIndex].nTr;
+      const rowTherapyType = row.getAttribute('data-therapyType');
+
+      return !selectedTherapyType || rowTherapyType === selectedTherapyType;
+    });
+    const therapiesTable = new DataTable(therapiesTableEl, {
       autoWidth: false,
       classes: {
         table: 'table table-striped'
@@ -105,5 +110,6 @@ document.addEventListener('DOMContentLoaded', function () {
       pageLength: 10,
       responsive: true
     });
+    therapyTypeFilter.addEventListener('change',  () => therapiesTable.draw());
   }
 });
