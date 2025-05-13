@@ -19,9 +19,11 @@ def index():
 @main_bp.route('/biomarkers/<biomarker_id>', endpoint='biomarkers')
 def biomarkers(biomarker_id: str = None):
     records = requests.Local.get_biomarkers()
+    all_biomarker_types = sorted(set(record['type'] for record in records))
     return flask.render_template(
         template_name_or_list='biomarkers.html',
-        biomarkers=records
+        biomarkers=records,
+        all_biomarker_types=all_biomarker_types
     )
 
 @main_bp.route('/diseases', defaults={'disease_id': None}, methods=['GET', 'POST'])

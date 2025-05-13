@@ -30,8 +30,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // BIOMARKERS TABLE SETUP
   const biomarkersTableEl = document.querySelector('#biomarkers-table-result');
-  if (biomarkersTableEl) {
-    new DataTable(biomarkersTableEl, {
+  const biomarkerTypeFilter = document.getElementById('biomarkerTypeFilter');
+  if (biomarkersTableEl && biomarkerTypeFilter) {
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      const selectedBiomarkerType = biomarkerTypeFilter.value;
+      const row = settings.aoData[dataIndex].nTr;
+      const rowBiomarkerType = row.getAttribute('data-biomarkerType');
+
+      return !selectedBiomarkerType || rowBiomarkerType === selectedBiomarkerType;
+    });
+    const biomarkersTable = new DataTable(biomarkersTableEl, {
       autoWidth: false,
       classes: {
         table: 'table table-striped'
@@ -45,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
       pageLength: 10,
       responsive: true
     });
+    biomarkerTypeFilter.addEventListener('change',  () => biomarkersTable.draw());
   }
 
   // DISEASES TABLE SETUP
