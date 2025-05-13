@@ -34,6 +34,19 @@ class API:
             # return genes with "gene symbol not found message"
             return ""
 
+    @classmethod
+    def get_therapy(cls, name: str = None):
+        if name:
+            response = cls.get(request=f"therapies/{name}")
+            if response.status_code == 200:
+                data = response.json()['data']
+                return data[0]
+            else:
+                return response.json()
+        else:
+            # return genes with "gene symbol not found message"
+            return ""
+
 
 class Local:
     """
@@ -58,25 +71,29 @@ class Local:
     def get_biomarkers(cls):
         handler = handlers.Biomarkers()
         statement = handler.construct_base_query(model=models.Biomarkers)
-        return cls.get(handler=handler, statement=statement)
+        results = cls.get(handler=handler, statement=statement)
+        return cls.sort(data=results, sort_key='name')
 
     @classmethod
     def get_diseases(cls):
         handler = handlers.Diseases()
         statement = handler.construct_base_query(model=models.Diseases)
-        return cls.get(handler=handler, statement=statement)
+        results = cls.get(handler=handler, statement=statement)
+        return cls.sort(data=results, sort_key='name')
 
     @classmethod
     def get_documents(cls):
         handler = handlers.Documents()
         statement = handler.construct_base_query(model=models.Documents)
-        return cls.get(handler=handler, statement=statement)
+        results = cls.get(handler=handler, statement=statement)
+        return cls.sort(data=results, sort_key='name')
 
     @classmethod
     def get_genes(cls):
         handler = handlers.Genes()
         statement = handler.construct_base_query(model=models.Genes)
-        return cls.get(handler=handler, statement=statement)
+        results = cls.get(handler=handler, statement=statement)
+        return cls.sort(data=results, sort_key='name')
 
     @classmethod
     def get_terms(cls):
@@ -88,4 +105,26 @@ class Local:
     def get_therapies(cls):
         handler = handlers.Therapies()
         statement = handler.construct_base_query(model=models.Therapies)
-        return cls.get(handler=handler, statement=statement)
+        results = cls.get(handler=handler, statement=statement)
+        return cls.sort(data=results, sort_key='name')
+
+    @classmethod
+    def sort(cls, data, sort_key='name', reverse=False):
+        """
+        Sort a list of dictionaries by the value associated with sort_key.
+
+        Parameters:
+            data (list of dict): List of dictionaries to sort.
+            sort_key (str): The key to sort the dictionaries by.
+            reverse (bool): If True, sort in descending order. Default is ascending.
+
+        Returns:
+            list of dict: The sorted list of dictionaries.
+
+        Raises:
+            KeyError: If any dictionary in the list lacks the sort_key.
+        """
+        try:
+            return sorted(data, key=lambda d: d[sort_key], reverse=reverse)
+        except KeyError as e:
+            raise KeyError(f"Missing key '{sort_key}' in one or more dictionaries.") from e

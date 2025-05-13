@@ -65,10 +65,17 @@ def genes(gene_name: str = None):
 @main_bp.route('/therapies', defaults={'therapy_name': None}, methods=['GET', 'POST'])
 @main_bp.route('/therapies/<therapy_name>', endpoint='therapies')
 def therapies(therapy_name: str = None):
-    records = requests.Local.get_therapies()
-    all_therapy_types = sorted(set(record['therapy_type'] for record in records))
-    return flask.render_template(
-        template_name_or_list='therapies.html',
-        therapies=records,
-        all_therapy_types=all_therapy_types
-    )
+    if therapy_name:
+        record = requests.API.get_therapy(name=therapy_name)
+        return flask.render_template(
+            template_name_or_list='therapy.html',
+            therapy=record
+        )
+    else:
+        records = requests.Local.get_therapies()
+        all_therapy_types = sorted(set(record['therapy_type'] for record in records))
+        return flask.render_template(
+            template_name_or_list='therapies.html',
+            therapies=records,
+            all_therapy_types=all_therapy_types
+        )
