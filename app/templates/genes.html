@@ -17,7 +17,7 @@ Genes | Molecular Oncology Almanac
     <tbody>
       {% for gene in genes %}
         <tr>
-          <td><a href="{{ url_for('main.genes', gene_name=gene.name) }}">{{ gene.name }}</a></td>
+          <td><a href="{{ url_for('main.genes', gene_name=gene.name) }}"><em>{{ gene.name }}</em></a></td>
           <td>{{ gene.biomarkers_count }}</td>
           <td>{{ gene.propositions_count }}</td>
           <td>{{ gene.statements_count }}</td>
