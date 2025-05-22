@@ -1,3 +1,9 @@
+"""
+handlers.py
+
+Functions for serializing SQLAlchemy model instances into JSON-serializable dictionaries.
+"""
+
 import datetime
 import sqlalchemy
 import typing

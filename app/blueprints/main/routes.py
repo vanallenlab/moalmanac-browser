@@ -1,8 +1,13 @@
+"""
+routes.py
+
+Routes for the main blueprint.
+"""
 import flask
-import sqlalchemy
 
 from . import main_bp
 from . import requests
+from . import services
 
 @main_bp.route('/', endpoint='index')
 @main_bp.route('/index', methods=['GET', 'POST'])
@@ -61,6 +66,15 @@ def genes(gene_name: str = None):
             template_name_or_list='genes.html',
             genes=records
         )
+
+@main_bp.route('/propositions', methods=['GET'])
+def propositions():
+    records = requests.API.get_propositions()
+    processed = services.process_propositions(records=records)
+    return flask.render_template(
+        template_name_or_list='propositions.html',
+        propositions_by_category=processed
+    )
 
 @main_bp.route('/therapies', defaults={'therapy_name': None}, methods=['GET', 'POST'])
 @main_bp.route('/therapies/<therapy_name>', endpoint='therapies')

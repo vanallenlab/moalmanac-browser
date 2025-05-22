@@ -1,8 +1,19 @@
+"""
+requests.py
+
+Defines unified interfaces for retrieving data from two sources:
+
+1. The external Molecular Oncology Almanac API service (via the `API` class).
+2. The local SQLite database cache (via the `Local` class).
+
+- The `API` class manages outbound HTTP requests to the live MOAlmanac API.
+- The `Local` class manages queries to the locally cached database using SQLAlchemy handlers.
+
+Each class provides helper methods for retrieving and processing relevant resources such as genes, therapies, propositions, and documents.
+"""
 import flask
 import requests
-import sqlalchemy
 
-from . import main_bp
 from . import handlers
 from app import models
 
@@ -33,6 +44,32 @@ class API:
         else:
             # return genes with "gene symbol not found message"
             return ""
+
+    @classmethod
+    def get_config_organization_filters(cls):
+        config = flask.current_app.config['INI_CONFIG']
+        agencies = config['agencies']
+        print(agencies)
+        return ''
+
+    @classmethod
+    def get_propositions(cls):
+        response = cls.get(request="propositions")
+        if response.status_code == 200:
+            data = response.json()['data']
+            return data
+        else:
+            return response.json()
+
+    @classmethod
+    def get_statements(cls):
+        organization_filters = cls.get_config_organization_filters()
+        response = cls.get(request="statements")
+        if response.status_code == 200:
+            data = response.json()['data']
+            return data
+        else:
+            return response.json()
 
     @classmethod
     def get_therapy(cls, name: str = None):
