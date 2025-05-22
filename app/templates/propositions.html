@@ -29,10 +29,7 @@ Propositions | Molecular Oncology Almanac
                 <td>{{ proposition['cancer_type']['name'] }}</td>
                 <td>
                   {% for therapy in proposition['therapies'] %}
-                    <a href="{{ url_for('main.therapies', therapy_name=therapy.name) }}">
-                      {{ therapy.name }}
-                    </a>
-                    {% if not loop.last %}, {% endif %}
+                    <a href="{{ url_for('main.therapies', therapy_name=therapy.name) }}">{{ therapy.name }}</a>{% if not loop.last %},{% endif %}
                   {% endfor %}
                 </td>
                 <td>{{ proposition.id }}</td>
