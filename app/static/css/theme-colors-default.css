@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #00629B;
-    --secondary-color: #FFA300;
-    --tertiary-color: #41B6E6;
+    --primary-color: #00629B; /* Dana-Farber Blue - for navbar, titles, logo, and hyperlinks */
+    --secondary-color: #FFA300; /* Dana-Farber Orange - for navbar hover, subtitles  */
+    --tertiary-color: #41B6E6; /* Dana-Farber Light Blue - for h4 */
 }

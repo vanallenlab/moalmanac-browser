@@ -1,5 +1,5 @@
 :root {
-    --primary-color: #005335;
-    --secondary-color: #FFA300;
-    --tertiary-color: #003726;
+    --primary-color: #005335; /* University of Limerick Green - for navbar, titles, logo, and hyperlinks */
+    --secondary-color: #FFA300; /* Golden Leaf - for navbar hover, subtitles  */
+    --tertiary-color: #003726; /* University of Limerick Heritage Green - for navbar, titles, logo, and hyperlinks */
 }
