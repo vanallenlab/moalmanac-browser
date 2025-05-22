@@ -94,6 +94,25 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  // PROPOSITIONS - THERAPEUTIC RESPONSE TABLE SET UP
+  const propositionsTherapeuticResponseTableEl = document.querySelector('#propositions-therapeutic-response-table-result');
+  if (propositionsTherapeuticResponseTableEl) {
+    new DataTable(propositionsTherapeuticResponseTableEl, {
+      autoWidth: false,
+      classes: {
+        table: 'table table-striped'
+      },
+      layout: {
+        topStart: 'search',
+        topEnd: 'pageLength',
+        bottomStart: 'info',
+        bottomEnd: 'paging'
+      },
+      pageLength: 10,
+      responsive: true
+    });
+  }
+
   // THERAPIES TABLE SETUP
   const therapiesTableEl = document.querySelector('#therapies-table-result');
   const therapyTypeFilter = document.getElementById('therapyTypeFilter');
