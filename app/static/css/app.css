@@ -169,6 +169,14 @@ footer {
     word-wrap: break-word;
 }
 
+table.dataTable th {
+  text-align: left !important;
+}
+
+table.dataTable td {
+  text-align: left !important;
+}
+
 /* Override DataTables pagination active button */
 .dataTables_wrapper .dataTables_paginate .pagination .page-item.active .page-link {
     background-color: var(--primary-color) !important;

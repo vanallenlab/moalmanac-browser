@@ -1,4 +1,4 @@
-function addFilter({ filterEl, attributeName, filterKey }) {
+function addFilter({ filterEl, attributeName }) {
   $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
     const selectedValue = filterEl.value;
     const row = settings.aoData[dataIndex].nTr;
@@ -8,18 +8,46 @@ function addFilter({ filterEl, attributeName, filterKey }) {
   });
 
   filterEl.addEventListener('change', () => {
-    // Force all tables to redraw when a shared filter changes
-    $('.dataTable').DataTable().draw();
+    // Redraw all tables on filter change
+    $('.dataTable').each(function () {
+      $(this).DataTable().draw();
+    });
   });
 }
 
+function initTable(selector) {
+  const el = document.querySelector(selector);
+  if (el) {
+    $(el).DataTable({
+      autoWidth: false,
+      classes: { table: 'table table-striped' },
+      layout: {
+        topStart: 'search',
+        topEnd: 'pageLength',
+        bottomStart: 'info',
+        bottomEnd: 'paging'
+      },
+      pageLength: 10,
+      responsive: true
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+  // Shared filters
   const organizationFilter = document.getElementById('organizationFilter');
   if (organizationFilter) {
     addFilter({
       filterEl: organizationFilter,
-      attributeName: 'data-organization',
-      filterKey: 'organization'
+      attributeName: 'data-organization'
+    });
+  }
+
+  const biomarkerTypeFilter = document.getElementById('biomarkerTypeFilter');
+  if (biomarkerTypeFilter) {
+    addFilter({
+      filterEl: biomarkerTypeFilter,
+      attributeName: 'data-biomarkerType'
     });
   }
 
@@ -27,12 +55,11 @@ document.addEventListener('DOMContentLoaded', function () {
   if (therapyTypeFilter) {
     addFilter({
       filterEl: therapyTypeFilter,
-      attributeName: 'data-therapyType',
-      filterKey: 'therapyType'
+      attributeName: 'data-therapyType'
     });
   }
 
-  // Table setup
+  // Table selectors
   const tableSelectors = [
     '#biomarkers-table-result',
     '#diseases-table-result',
@@ -43,21 +70,5 @@ document.addEventListener('DOMContentLoaded', function () {
     '#therapies-table-result'
   ];
 
-  tableSelectors.forEach(selector => {
-    const el = document.querySelector(selector);
-    if (el) {
-      new DataTable(el, {
-        autoWidth: false,
-        classes: { table: 'table table-striped' },
-        layout: {
-          topStart: 'search',
-          topEnd: 'pageLength',
-          bottomStart: 'info',
-          bottomEnd: 'paging'
-        },
-        pageLength: 10,
-        responsive: true
-      });
-    }
-  });
+  tableSelectors.forEach(initTable);
 });
