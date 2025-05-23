@@ -23,7 +23,7 @@ Documents | Molecular Oncology Almanac
   <table id="documents-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
     <thead>
         <tr>
-            <th style="width: 80%">Citation</th>
+            <th style="width: 80%">Name</th>
             <th style="width: 10%">Indications</th>
             <th style="width: 10%">Statements</th>
         </tr>
@@ -31,7 +31,7 @@ Documents | Molecular Oncology Almanac
     <tbody>
         {% for document in documents %}
             <tr data-organization="{{ document.organization_name }}">
-                <td>{{ document.citation }}</td>
+                <td><a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.name }}</a></td>
                 <td>{{ document.indications_count }}</td>
                 <td>{{ document.statements_count }}</td>
             </tr>
