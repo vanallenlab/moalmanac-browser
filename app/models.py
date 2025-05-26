@@ -35,7 +35,7 @@ class Diseases(Base):
 class Documents(Base):
     __tablename__ = "documents"
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     citation = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     url = sqlalchemy.Column(sqlalchemy.String, nullable=False)
@@ -56,12 +56,21 @@ class Genes(Base):
 class Indications(Base):
     __tablename__ = "indications"
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     document_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     document_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     organization_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     organization_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+
+class Organizations(Base):
+    __tablename__ = "organizations"
+
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
+    name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    documents_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    indications_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
 class Therapies(Base):

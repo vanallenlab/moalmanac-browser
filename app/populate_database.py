@@ -72,8 +72,22 @@ class Process:
             id_column='document_id',
             count_column='id'
         )
-        document_records['indications_count'] = document_records.get('id').replace(document_to_indication_count)
-        document_records['statements_count'] = document_records.get('id').replace(document_to_statement_count)
+        # this is required for python 3.12 and pandas 2.2 to opt into future behavior for type downcasting
+        with pandas.option_context("future.no_silent_downcasting", True):
+            document_records['indications_count'] = (
+                document_records
+                .get('id')
+                .astype(str)
+                .replace(document_to_indication_count)
+                .astype(int)
+            )
+            document_records['statements_count'] = (
+                document_records
+                .get('id')
+                .astype(str)
+                .replace(document_to_statement_count)
+                .astype(int)
+            )
         return (
             document_records
             .drop('statement_id', axis='columns')
@@ -226,7 +240,15 @@ class Process:
             id_column='id',
             count_column='statement_id'
         )
-        indication_records['statements_count'] = indication_records.get('id').replace(indication_to_statement_count)
+        # this is required for python 3.12 and pandas 2.2 to opt into future behavior for type downcasting
+        with pandas.option_context("future.no_silent_downcasting", True):
+            indication_records['statements_count'] = (
+                indication_records
+                .get('id')
+                .astype(str)
+                .replace(indication_to_statement_count)
+                .astype(int)
+            )
         return (
             indication_records
             .drop('statement_id', axis='columns')
@@ -486,6 +508,18 @@ class SQL:
             session.add(indication)
 
     @classmethod
+    def add_organizations(cls, records, session):
+        for record in records:
+            organization = models.Organizations(
+                id=record.get('id'),
+                name=record.get('name'),
+                documents_count=record.get('documents_count'),
+                indications_count=record.get('indications_count'),
+                statements_count=record.get('statements_count')
+            )
+            session.add(organization)
+
+    @classmethod
     def add_terms(cls, results, session):
         tables = [
             'biomarkers',
@@ -532,7 +566,7 @@ class Service:
 class Statements:
     @staticmethod
     def make_organization_filter(settings):
-        return [f'organization={agency.replace(" ", "%20")}' for agency, value in settings.items() if value == 'true']
+        return [f'organization={agency.lower()}' for agency, value in settings.items() if value == 'true']
 
     @classmethod
     def get(cls, agency_preferences, api):
@@ -572,6 +606,9 @@ def main(config_path, api_url="https://api.moalmanac.org", drop=False):
             session.commit()
 
             SQL.add_indications(records=results.get('indications'), session=session)
+            session.commit()
+
+            SQL.add_organizations(records=results.get('organizations'), session=session)
             session.commit()
 
             SQL.add_therapies(records=results.get('therapies'), session=session)
