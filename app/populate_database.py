@@ -209,33 +209,6 @@ class Process:
             'statement_id': statement_id
         }
 
-    """
-    @classmethod
-    def get_organization(cls, document):
-        document_id = document.get('id')
-        org = document.get('organization', {})
-        if org:
-            org['document_id'] = document_id
-            return org
-        else:
-            return {}
-
-    @classmethod
-    def get_organizations(cls, record, statement_id, ):
-        organizations = set()
-        for document in record.get('reportedIn', []):
-            org = document.get('organization', {})
-            if org:
-                organizations.add(frozenset(org.items()))
-        indication = record.get('indication', {})
-        document = indication.get('document', {})
-        org = document.get('organization', {})
-        if org:
-            organizations.add(frozenset(org.items()))
-        unique_organizations = [dict(org) for org in organizations]
-        return unique_organizations
-    """
-
     @classmethod
     def get_therapeutic(cls, record, proposition_id, statement_id):
         if 'therapies' in record:
