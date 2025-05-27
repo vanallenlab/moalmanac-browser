@@ -4,7 +4,36 @@ services.py
 Service-layer functions for intermediate processing of data retrieved from handlers or API requests.
 """
 import collections
-import sys
+
+def append_field_from_matching_records(
+        target_list: list[dict],
+        source_list: list[dict],
+        source_field: str,
+        new_field_name: str,
+        match_key: str = 'id'
+):
+    """
+    Appends a field from one list of records, source_list, to another, target_list, based on matching keys.
+
+    Args:
+        target_list (list[dict]): The list of records to be updated.
+        source_list (list[dict]): The list of records containing the values to add.
+        source_field (str): The field from the source records to append.
+        new_field_name (str): The name of the new field to add to the target records.
+        match_key (str): The key to match between target and source records.
+
+    Returns:
+        list[dict]: The updated list of target records with the appended field.
+    """
+    source_lookup = {item[match_key]: item[source_field] for item in source_list if match_key in item and source_field in item}
+
+    for record in target_list:
+        record_id = record.get(match_key)
+        if record_id in source_lookup:
+            record[new_field_name] = source_lookup[record_id]
+
+    return target_list
+
 
 def categorize_propositions(records: list[dict]):
     """
@@ -79,6 +108,19 @@ def map_predict(string: str):
         return 'Resistance'
     else:
         return 'ERROR'
+
+def process_statements(records: list[dict]):
+    """
+    Processes statement records from the API response into a simplified format for the statements view.
+
+    Args:
+        records (list[dict]): A list of statement records from the API.
+
+    Returns:
+        dict: A dictionary of proposition types and their corresponding simplified records.
+    """
+
+
 
 def process_propositions(records: list[dict]):
     """

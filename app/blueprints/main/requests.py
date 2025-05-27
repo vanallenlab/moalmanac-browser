@@ -29,8 +29,48 @@ class API:
     def get(cls, request):
         root = cls.get_api_url()
         request = f"{root}/{request}"
+        print(request)
         response = requests.get(request)
         return response
+
+    @classmethod
+    def get_config_organization_filters(cls):
+        config = flask.current_app.config['INI_CONFIG']
+        enabled_agencies = [agency for agency, enabled in config['agencies'].items() if enabled.lower() == 'true']
+        agency_statements = [f"organization={agency}" for agency in enabled_agencies]
+        string = '&'.join(agency_statements)
+        return string.replace(' ', '%20')
+
+    @classmethod
+    def get_document(cls, document_id: str):
+        if document_id:
+            response = cls.get(request=f"documents/{document_id}")
+            if response.status_code == 200:
+                data = response.json()['data']
+                return data[0]
+            else:
+                return response.json()
+        else:
+            # Return "document id not found" message
+            return ""
+
+    @classmethod
+    def get_documents(cls, config_organization_filter:bool = False, filters:str = None):
+        request = "documents"
+        filters_to_apply = []
+        if config_organization_filter:
+            organization_filters = cls.get_config_organization_filters()
+            filters_to_apply.append(organization_filters)
+        if filters:
+            filters_to_apply.append(filters)
+        if filters_to_apply:
+            request = f"{request}?{'&'.join(filters_to_apply)}"
+        response = cls.get(request=request)
+        if response.status_code == 200:
+            data = response.json()['data']
+            return data
+        else:
+            return response.json()
 
     @classmethod
     def get_gene(cls, name: str = None):
@@ -46,11 +86,35 @@ class API:
             return ""
 
     @classmethod
-    def get_config_organization_filters(cls):
-        config = flask.current_app.config['INI_CONFIG']
-        agencies = config['agencies']
-        print(agencies)
-        return ''
+    def get_indication(cls, indication_id: str):
+        response = cls.get(request=f"indications/{indication_id}")
+        if response.status_code == 200:
+            data = response.json()['data']
+            return data[0]
+        else:
+            return response.json()
+
+    @classmethod
+    def get_indications(cls, filters:str = None):
+        organization_filters = cls.get_config_organization_filters()
+        request=f"indications?{organization_filters}"
+        if filters:
+            request=f"{request}&{filters}"
+        response = cls.get(request=request)
+        if response.status_code == 200:
+            data = response.json()['data']
+            return data
+        else:
+            return response.json()
+
+    @classmethod
+    def get_organization(cls, organization_id: str):
+        response = cls.get(request=f"organizations/{organization_id}")
+        if response.status_code == 200:
+            data = response.json()['data']
+            return data[0]
+        else:
+            return response.json()
 
     @classmethod
     def get_propositions(cls):
@@ -62,9 +126,17 @@ class API:
             return response.json()
 
     @classmethod
-    def get_statements(cls):
-        organization_filters = cls.get_config_organization_filters()
-        response = cls.get(request="statements")
+    def get_statements(cls, config_organization_filter:bool = False, filters:str = None):
+        request = "statements"
+        filters_to_apply = []
+        if config_organization_filter:
+            organization_filters = cls.get_config_organization_filters()
+            filters_to_apply.append(organization_filters)
+        if filters:
+            filters_to_apply.append(filters)
+        if filters_to_apply:
+            request = f"{request}?{'&'.join(filters_to_apply)}"
+        response = cls.get(request=request)
         if response.status_code == 200:
             data = response.json()['data']
             return data
@@ -129,6 +201,20 @@ class Local:
     def get_genes(cls):
         handler = handlers.Genes()
         statement = handler.construct_base_query(model=models.Genes)
+        results = cls.get(handler=handler, statement=statement)
+        return cls.sort(data=results, sort_key='name')
+
+    @classmethod
+    def get_indications(cls):
+        handler = handlers.Indications()
+        statement = handler.construct_base_query(model=models.Indications)
+        results = cls.get(handler=handler, statement=statement)
+        return cls.sort(data=results, sort_key='id')
+
+    @classmethod
+    def get_organizations(cls):
+        handler = handlers.Organizations()
+        statement = handler.construct_base_query(model=models.Organizations)
         results = cls.get(handler=handler, statement=statement)
         return cls.sort(data=results, sort_key='name')
 

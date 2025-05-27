@@ -170,12 +170,20 @@ class Genes(BaseHandler):
     Handler class to manage queries against the Genes table.
     """
 
+class Indications(BaseHandler):
+    """
+    Handler class to manage queries against the Indications table.
+    """
+
+class Organizations(BaseHandler):
+    """
+    Handler class to manage queries against the Organizations table.
+    """
 
 class Terms(BaseHandler):
     """
     Handler class to manage queries against the About table.
     """
-
 
 class Therapies(BaseHandler):
     """
