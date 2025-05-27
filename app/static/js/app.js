@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
     '#genes-table-result',
     '#indications-table-result',
     '#propositions-therapeutic-response-table-result',
+    '#statements-table-result',
     '#therapies-table-result'
   ];
 
