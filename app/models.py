@@ -69,6 +69,8 @@ class Organizations(Base):
 
     id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    last_updated = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     documents_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     indications_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)

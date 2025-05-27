@@ -161,6 +161,8 @@ class Process:
             'url': record.get('url'),
             'organization_id': record.get('organization').get('id'),
             'organization_name': record.get('organization').get('name'),
+            'organization_description': record.get('organization').get('description'),
+            'organization_last_updated': record.get('organization').get('last_updated'),
             'statement_id': statement_id
         }
 
@@ -202,8 +204,37 @@ class Process:
             'document_id': record.get('document').get('id'),
             'organization_id': record.get('document').get('organization').get('id'),
             'organization_name': record.get('document').get('organization').get('name'),
+            'organization_description': record.get('document').get('organization').get('description'),
+            'organization_last_updated': record.get('document').get('organization').get('last_updated'),
             'statement_id': statement_id
         }
+
+    """
+    @classmethod
+    def get_organization(cls, document):
+        document_id = document.get('id')
+        org = document.get('organization', {})
+        if org:
+            org['document_id'] = document_id
+            return org
+        else:
+            return {}
+
+    @classmethod
+    def get_organizations(cls, record, statement_id, ):
+        organizations = set()
+        for document in record.get('reportedIn', []):
+            org = document.get('organization', {})
+            if org:
+                organizations.add(frozenset(org.items()))
+        indication = record.get('indication', {})
+        document = indication.get('document', {})
+        org = document.get('organization', {})
+        if org:
+            organizations.add(frozenset(org.items()))
+        unique_organizations = [dict(org) for org in organizations]
+        return unique_organizations
+    """
 
     @classmethod
     def get_therapeutic(cls, record, proposition_id, statement_id):
@@ -263,10 +294,16 @@ class Process:
             if counts_by_documents[organization] != counts_by_indications[organization]:
                 raise ValueError(f"Statements counts for {organization} do not match between documents and indications")
 
+        organization_columns = {
+            'organization_id': 'id',
+            'organization_name': 'name',
+            'organization_description': 'description',
+            'organization_last_updated': 'last_updated'
+        }
         counts_by_organization = (
                 document_records
-                .loc[:, ['organization_id', 'organization_name']]
-                .rename(columns={'organization_id': 'id', 'organization_name': 'name'})
+                .loc[:, list(organization_columns)]
+                .rename(columns=organization_columns)
                 .drop_duplicates()
         )
         counts_by_organization['documents_count'] = counts_by_organization['name'].map(
@@ -297,6 +334,7 @@ class Process:
         document_records = []
         gene_records = []
         indication_records = []
+        organization_records = []
         therapy_records = []
         for record in records:
             statement_id = record.get('id')
@@ -348,7 +386,10 @@ class Process:
 
         biomarker_records = cls.biomarkers(biomarker_records=biomarker_records)
         disease_records = cls.diseases(disease_records=disease_records)
-        document_records = cls.documents(document_records=document_records, indication_records=indication_records)
+        document_records = cls.documents(
+            document_records=document_records,
+            indication_records=indication_records
+        )
         gene_records =cls.genes(gene_records=gene_records)
         indication_records = cls.indications(indication_records=indication_records)
         organization_records = cls.organizations(
@@ -417,6 +458,15 @@ class Requests:
         return cls.check_request(
             response=response,
             failure_message=f"Failed to get service information from moalmanac api at {root_url}"
+        )
+
+    @classmethod
+    def get_organizations(cls, root_url):
+        request = f"{root_url}/organizations"
+        response = cls.get_request(request=request)
+        return cls.check_request(
+            response=response,
+            failure_message=f"Failed to get organizations from moalmanac api at {root_url}"
         )
 
     @classmethod
@@ -513,6 +563,8 @@ class SQL:
             organization = models.Organizations(
                 id=record.get('id'),
                 name=record.get('name'),
+                description=record.get('description'),
+                last_updated=record.get('last_updated'),
                 documents_count=record.get('documents_count'),
                 indications_count=record.get('indications_count'),
                 statements_count=record.get('statements_count')
@@ -584,6 +636,7 @@ def main(config_path, api_url="https://api.moalmanac.org", drop=False):
         config = database.read_config_ini(path=config_path)
         about = Service.get(api=api_url)
         statements = Statements.get(agency_preferences=config['agencies'], api=api_url)
+        #organizations = Requests.get_organizations(root_url=api_url)
         results = Process.statements(records=statements)
         about['propositions_count'] = results['propositions_count']
         about['statements_count'] = results['statements_count']
