@@ -11,7 +11,9 @@ class About(Base):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
     last_updated = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     release = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    documents_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    documents_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+    indications_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+    organizations_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 

@@ -381,6 +381,9 @@ class Process:
             'indications': indication_records.to_dict(orient='records'),
             'organizations': organization_records.to_dict(orient='records'),
             'therapies': therapy_records.to_dict(orient='records'),
+            'documents_count': document_records.to_dict(orient='records').__len__(),
+            'indications_count': indication_records.to_dict(orient='records').__len__(),
+            'organizations_count': organization_records.to_dict(orient='records').__len__(),
             'propositions_count': propositions.__len__(),
             'statements_count': records.__len__(),
         }
@@ -456,11 +459,12 @@ class Requests:
 
 class SQL:
     @classmethod
-    def add_about(cls, record, documents, session):
+    def add_about(cls, record, session):
         about = models.About(
             last_updated=record.get('last_updated'),
             release=record.get('release'),
-            documents_count=len(documents),
+            documents_count=record.get('documents_count'),
+            indications_count=record.get('indications_count'),
             propositions_count=record.get('propositions_count'),
             statements_count=record.get('statements_count')
         )
@@ -609,14 +613,20 @@ def main(config_path, api_url="https://api.moalmanac.org", drop=False):
         config = database.read_config_ini(path=config_path)
         about = Service.get(api=api_url)
         statements = Statements.get(agency_preferences=config['agencies'], api=api_url)
-        #organizations = Requests.get_organizations(root_url=api_url)
         results = Process.statements(records=statements)
-        about['propositions_count'] = results['propositions_count']
-        about['statements_count'] = results['statements_count']
+        count_columns = [
+            'documents_count',
+            'indications_count',
+            'organizations_count',
+            'propositions_count',
+            'statements_count'
+        ]
+        for column in count_columns:
+            about[column] = results[column]
 
         session = flask.current_app.config['SESSION_FACTORY']()
         try:
-            SQL.add_about(record=about, documents=results.get('documents'), session=session)
+            SQL.add_about(record=about, session=session)
             session.commit()
 
             SQL.add_biomarkers(records=results.get('biomarkers'), session=session)
