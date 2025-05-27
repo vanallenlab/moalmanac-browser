@@ -117,10 +117,18 @@ def process_statements(records: list[dict]):
         records (list[dict]): A list of statement records from the API.
 
     Returns:
-        dict: A dictionary of proposition types and their corresponding simplified records.
+        dict: A dictionary of statements and their corresponding simplified records.
     """
-
-
+    new_records = []
+    for record in records:
+        new_record = {
+            'id': record['id'],
+            'proposition': simplify_proposition_record(record=record['proposition']),
+            'direction': '+' if record['direction'] == 'supports' else '-',
+            'documents': [(doc['id'], doc['name']) for doc in record['reportedIn']]
+        }
+        new_records.append(new_record)
+    return new_records
 
 def process_propositions(records: list[dict]):
     """
@@ -135,6 +143,33 @@ def process_propositions(records: list[dict]):
     simplified = simplify_proposition_records(records=records)
     return categorize_propositions(records=simplified)
 
+def simplify_proposition_record(record: dict):
+    """
+    Processes a proposition record from the API response into a simplified format, keeping only the necessary fields
+    for the propositions view and reformatting some values.
+
+    Args:
+        record (dict): A proposition record from the API.
+
+    Returns:
+        new_record (dict): A simplified proposition record.
+    """
+    new_record = {
+        'id': record['id'],
+        'type': record['type'],
+        'predicate': map_predict(string=record['predicate'])
+    }
+    if record['type'] == 'VariantTherapeuticResponseProposition':
+        biomarkers = extract_biomarkers(biomarkers=record['biomarkers'])
+        new_record['biomarkers'] = sort_dicts_by_key(data=biomarkers, key='name')
+        new_record['cancer_type'] = extract_diseases(disease=record['conditionQualifier'])
+        therapies = extract_therapies(object_therapeutic=record['objectTherapeutic'])
+        new_record['therapies'] = sort_dicts_by_key(data=therapies, key='name')
+    else:
+        # We'll add if else statements as we support additional proposition types
+        print('This should not happen!')
+    return new_record
+
 def simplify_proposition_records(records: list[dict]):
     """
     Processes the proposition records from the API response into a simplified format, keeping only the necessary fields
@@ -148,20 +183,7 @@ def simplify_proposition_records(records: list[dict]):
     """
     new_records = []
     for record in records:
-        new_record = {
-            'id': record['id'],
-            'type': record['type'],
-            'predicate': map_predict(string=record['predicate'])
-        }
-        if record['type'] == 'VariantTherapeuticResponseProposition':
-            biomarkers = extract_biomarkers(biomarkers=record['biomarkers'])
-            new_record['biomarkers'] = sort_dicts_by_key(data=biomarkers, key='name')
-            new_record['cancer_type'] = extract_diseases(disease=record['conditionQualifier'])
-            therapies = extract_therapies(object_therapeutic=record['objectTherapeutic'])
-            new_record['therapies'] = sort_dicts_by_key(data=therapies, key='name')
-        else:
-            # We'll add if else statements as we support additional proposition types
-            print('This should not happen!')
+        new_record = simplify_proposition_record(record=record)
         new_records.append(new_record)
     return new_records
 

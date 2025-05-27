@@ -129,13 +129,14 @@ def organizations(organization_id):
         )
 
         organization_statements = requests.API.get_statements(filters=f"organization={organization_id}")
-
+        processed_statements = services.process_statements(records=organization_statements)
 
         return flask.render_template(
             template_name_or_list='organization.html',
             organization=record,
             documents=organization_documents,
-            indications=organization_indications
+            indications=organization_indications,
+            statements=processed_statements
         )
     else:
         records = requests.Local.get_organizations()
