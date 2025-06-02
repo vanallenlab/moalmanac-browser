@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Statement {{ statement.id }} | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">{{ statement.proposition.proposition_type.title()  }}</h2>

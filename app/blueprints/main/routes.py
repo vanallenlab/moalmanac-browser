@@ -203,7 +203,7 @@ def statements(statement_id):
         processed = services.process_statements(records=records)
         return flask.render_template(
             template_name_or_list='statements.html',
-            statements_by_category=processed
+            statements=processed
         )
 
 @main_bp.route('/therapies', defaults={'therapy_name': None}, methods=['GET', 'POST'])
