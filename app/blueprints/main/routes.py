@@ -137,7 +137,10 @@ def organizations(organization_id):
         )
 
         cached_indications = requests.Local.get_indications()
-        organization_indications = requests.API.get_indications(filters=f"organization={organization_id}")
+        organization_indications = requests.API.get_indications(
+            filters=f"organization={organization_id}",
+            config_organization_filter=False
+        )
         organization_indications = services.append_field_from_matching_records(
             target_list=organization_indications,
             source_list=cached_indications,

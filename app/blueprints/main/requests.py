@@ -95,11 +95,16 @@ class API:
             return response.json()
 
     @classmethod
-    def get_indications(cls, filters:str = None):
-        organization_filters = cls.get_config_organization_filters()
-        request=f"indications?{organization_filters}"
+    def get_indications(cls, config_organization_filter:bool = False, filters:str = None):
+        request = "indications"
+        filters_to_apply = []
+        if config_organization_filter:
+            organization_filters = cls.get_config_organization_filters()
+            filters_to_apply.append(organization_filters)
         if filters:
-            request=f"{request}&{filters}"
+            filters_to_apply.append(filters)
+        if filters_to_apply:
+            request = f"{request}?{'&'.join(filters_to_apply)}"
         response = cls.get(request=request)
         if response.status_code == 200:
             data = response.json()['data']
