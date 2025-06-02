@@ -97,9 +97,14 @@ def genes(gene_name: str = None):
 def indications(indication_id: str = None):
     if indication_id:
         record = requests.API.get_indication(indication_id=indication_id)
+
+        indication_statements = requests.API.get_statements(filters=f"indication={indication_id}")
+        processed_statements = services.process_statements(records=indication_statements)
+
         return flask.render_template(
             template_name_or_list='indication.html',
-            indication=record
+            indication=record,
+            statements=processed_statements
         )
     else:
         records = requests.API.get_indications()
