@@ -7,7 +7,7 @@
 {% block content %}
   <br>
   <h2 class="title">{{ document.name }}</h2>
-  <p><strong>{{ document.subtype }}</strong> published by the {{ document.organization.name }}.</p>
+  <p><a href="{{ url_for('main.indications') }}">{{ document.subtype }}</a> published by the <a href="{{ url_for('main.organizations', organization_id=document.organization.id) }}">{{ document.organization.name }}</a>.</p>
 
   <h4 class="subtitle">Citation</h4>
   <a href="{{ document.url }}" target="_blank">{{ document.citation }}</a>
@@ -27,7 +27,7 @@
     <tbody>
       {% for indication in indications %}
         <tr data-organization="{{ indication.document.organization.name }}">
-          <td>{{ indication.indication }}</td>
+          <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.indication }}</a></td>
           <td>{{ indication.statements_count }}</td>
         </tr>
         {% endfor %}

@@ -108,10 +108,18 @@ def indications(indication_id: str = None):
         )
     else:
         records = requests.API.get_indications()
+        cached_indications = requests.Local.get_indications()
+        processed_indications = services.append_field_from_matching_records(
+            target_list=records,
+            source_list=cached_indications,
+            source_field='statements_count',
+            new_field_name='statements_count',
+            match_key='id'
+        )
         all_organizations = sorted(set(record['document']['organization']['name'] for record in records))
         return flask.render_template(
             template_name_or_list='indications.html',
-            indications=records,
+            indications=processed_indications,
             all_organizations=all_organizations
         )
 
