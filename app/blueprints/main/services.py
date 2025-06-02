@@ -92,6 +92,19 @@ def extract_therapies(object_therapeutic: dict):
     else:
         return [{'id': object_therapeutic['id'], 'name': object_therapeutic['name']}]
 
+def get_extension(list_of_extensions: list, name: str):
+    """
+    Subsets `list_of_extensions` to retrieve the extension whose name matches `name`.
+
+    Args:
+        - list_of_extensions (list): A list of dictionaries representing extensions.
+        - name (str): The name of the extension to retrieve.
+
+    Returns:
+        - list: A list of extensions whose name value matches `name`.
+    """
+    return [extension for extension in list_of_extensions if extension.get('name') == name]
+
 def map_predict(string: str):
     """
     Maps the predicate string from the values required by VA-Spec to the chosen string to display within the view.
@@ -108,6 +121,19 @@ def map_predict(string: str):
         return 'Resistance'
     else:
         return 'ERROR'
+
+def process_propositions(records: list[dict]):
+    """
+    Processes proposition records from the API response into a simplified format for the propositions view.
+
+    Args:
+        records (list[dict]): A list of proposition records from the API.
+
+    Returns:
+        dict: A dictionary of proposition types and their corresponding simplified records.
+    """
+    simplified = simplify_proposition_records(records=records)
+    return categorize_propositions(records=simplified)
 
 def process_statement(record: dict):
     """
@@ -142,18 +168,24 @@ def process_statements(records: list[dict]):
         new_records.append(new_record)
     return new_records
 
-def process_propositions(records: list[dict]):
+def process_therapies(record: dict):
     """
-    Processes proposition records from the API response into a simplified format for the propositions view.
+    Process a therapy record from the API for use within the therapies view. Currently, this simply extracts the
+    therapy strategies and therapy type.
 
     Args:
-        records (list[dict]): A list of proposition records from the API.
+        record (dict): A therapy record from the API.
 
     Returns:
-        dict: A dictionary of proposition types and their corresponding simplified records.
+        record (dict): A dictionary of the original record with extensions moved to the root.
     """
-    simplified = simplify_proposition_records(records=records)
-    return categorize_propositions(records=simplified)
+    therapy_strategy = get_extension(list_of_extensions=record.get('extensions'), name='therapy_strategy')
+    record['therapy_strategy'] = ', '.join(therapy_strategy[0]['value'])
+
+    therapy_type = get_extension(list_of_extensions=record.get('extensions'), name='therapy_type')
+    record['therapy_type'] = therapy_type[0]['value']
+
+    return record
 
 def simplify_proposition_record(record: dict):
     """

@@ -235,3 +235,14 @@ blockquote p {
   display: inline-block;
   font-size: 16px;
 }
+
+/* ====================
+   11. Cards
+   ==================== */
+.compact-card-text p.card-text {
+  margin-bottom: 0.25rem; /* or any value smaller than the default ~1rem */
+}
+.card-header-primary {
+  background-color: var(--primary-color);
+  color: white;
+}

@@ -7,27 +7,62 @@
 {% block content %}
   <br>
   <h2 class="title">{{ therapy.name }}</h2>
+  <p><!-- Placeholder for description on the therapy record --></p>
 
-  <table id="therapies-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="card mb-3">
+        <h5 class="card-header">About</h5>
+        <div class="card-body compact-card-text">
+          <p class="card-text"><strong>Therapy type</strong>: {{ therapy.therapy_type }}</p>
+          <p class="card-text"><strong>Therapy strategy</strong>: {{ therapy.therapy_strategy }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6">
+      <div class="card mb-3">
+        <h5 class="card-header">Mappings</h5>
+        <div class="card-body compact-card-text">
+          <p class="card-text"><strong>NCI Thesaurus</strong>: <a href="{{ therapy.primaryCoding.iris[0] }}" target="_blank">{{ therapy.primaryCoding.name }} ({{ therapy.primaryCoding.id }})</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="subtitle">Therapeutic response</h4>
+  Precision oncology relationships for therapeutic response involving this therapy.
+  <br><br>
+
+  <table id="statements-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
     <thead>
       <tr>
-        <th style="width: 10%">Name</th>
-        <th style="width: 10%">Therapy strategies</th>
-        <th style="width: 10%">Therapy type</th>
-        <th style="width: 10%">Propositions</th>
-        <th style="width: 10%">Statements</th>
+        <!--<th style="width: 10%>Implication</th>-->
+        <th style="width: 10%">Type</th>
+        <th style="width: 25%">Biomarker(s)</th>
+        <th style="width: 25%">Cancer type</th>
+        <th style="width: 25%">Therapy(ies)</th>
+        <th style="width: 5%"></th>
       </tr>
     </thead>
     <tbody>
-      {% for therapy in therapies %}
-        <tr data-therapyType="{{ therapy.therapy_type }}">
-          <td>{{ therapy.name }}</td>
-          <td>{{ therapy.therapy_strategy }}</td>
-          <td>{{ therapy.therapy_type }}</td>
-          <td>{{ therapy.propositions_count }}</td>
-          <td>{{ therapy.statements_count }}</td>
+      {% for statement in statements %}
+        <tr>
+          <td>{{ statement.proposition.predicate }} ({{ statement.direction }})</td>
+          <td>{{ statement.proposition['biomarkers'] | map(attribute='name') | join(', ') }}</td>
+          <td>{{ statement.proposition['cancer_type']['name'] }}</td>
+          <td>
+            {% for therapy in statement.proposition['therapies'] %}
+              <a href="{{ url_for('main.therapies', therapy_name=therapy.name) }}">{{ therapy.name }}</a>{% if not loop.last %},{% endif %}
+            {% endfor %}
+          </td>
+          <td>
+            <a href="{{ url_for('main.index') }}" class="btn btn-sm" title="More information" data-bs-toggle="tooltip">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+            </a>
+          </td>
         </tr>
-      {% endfor %}
-    </tbody>
+        {% endfor %}
+      </tbody>
   </table>
+  <br>
 {% endblock %}

@@ -56,8 +56,7 @@ def documents(document_id: str = None):
             new_field_name='statements_count',
             match_key='id'
         )
-        print(len(cached_indications))
-        print(len(document_indications))
+
         document_statements = requests.API.get_statements(filters=f"document={document_id}")
         processed_statements = services.process_statements(records=document_statements)
 
@@ -190,7 +189,7 @@ def propositions():
 
 @main_bp.route('/statements', defaults={'statement_id': None}, methods=['GET'])
 @main_bp.route('/statements/<statement_id>', endpoint='statements')
-def statements(statement_id):
+def statements(statement_id: str = None):
     if statement_id:
         record = requests.API.get_statement(statement_id=statement_id)
         processed = services.process_statement(records=record)
@@ -211,9 +210,18 @@ def statements(statement_id):
 def therapies(therapy_name: str = None):
     if therapy_name:
         record = requests.API.get_therapy(name=therapy_name)
+        processed_record = services.process_therapies(record=record)
+
+        therapy_statements = requests.API.get_statements(
+            config_organization_filter=True,
+            filters=f"therapy={therapy_name}"
+        )
+        processed_statements = services.process_statements(records=therapy_statements)
+
         return flask.render_template(
             template_name_or_list='therapy.html',
-            therapy=record
+            therapy=processed_record,
+            statements=processed_statements
         )
     else:
         records = requests.Local.get_therapies()
