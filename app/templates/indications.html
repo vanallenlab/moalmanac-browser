@@ -31,7 +31,7 @@ Approvals | Molecular Oncology Almanac
       <tbody>
           {% for indication in indications %}
               <tr data-organization="{{ indication.document.organization.name }}">
-                <td>{{ indication.document.name }}</td>
+                <td><a href="{{ url_for('main.documents', document_id=indication.document.id) }}">{{ indication.document.name }}</a></td>
                 <td>{{ indication.indication }}</td>
                 <td>5</td>
               </tr>
