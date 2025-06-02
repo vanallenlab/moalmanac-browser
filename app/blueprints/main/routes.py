@@ -4,6 +4,7 @@ routes.py
 Routes for the main blueprint.
 """
 import flask
+from pandas.core.dtypes.cast import can_hold_element
 
 from . import main_bp
 from . import requests
@@ -45,9 +46,26 @@ def diseases(disease_id: str = None):
 def documents(document_id: str = None):
     if document_id:
         record = requests.API.get_document(document_id=document_id)
+
+        cached_indications = requests.Local.get_indications()
+        document_indications = requests.API.get_indications(filters=f"document={document_id}")
+        document_indications = services.append_field_from_matching_records(
+            target_list=document_indications,
+            source_list=cached_indications,
+            source_field='statements_count',
+            new_field_name='statements_count',
+            match_key='id'
+        )
+        print(len(cached_indications))
+        print(len(document_indications))
+        document_statements = requests.API.get_statements(filters=f"document={document_id}")
+        processed_statements = services.process_statements(records=document_statements)
+
         return flask.render_template(
             template_name_or_list='document.html',
-            document=record
+            document=record,
+            indications=document_indications,
+            statements=processed_statements
         )
     else:
         records = requests.Local.get_documents()
@@ -154,14 +172,23 @@ def propositions():
         propositions_by_category=processed
     )
 
-@main_bp.route('/statements', methods=['GET'])
-def statements():
-    records = requests.API.get_statements(config_organization_filter=True)
-    processed = services.process_statements(records=records)
-    return flask.render_template(
-        template_name_or_list='statements.html',
-        statements_by_category=processed
-    )
+@main_bp.route('/statements', defaults={'statement_id': None}, methods=['GET'])
+@main_bp.route('/statements/<statement_id>', endpoint='statements')
+def statements(statement_id):
+    if statement_id:
+        record = requests.API.get_statement(statement_id=statement_id)
+        processed = services.process_statement(records=record)
+        return flask.render_template(
+            template_name_or_list='statement.html',
+            statement=processed
+        )
+    else:
+        records = requests.API.get_statements(config_organization_filter=True)
+        processed = services.process_statements(records=records)
+        return flask.render_template(
+            template_name_or_list='statements.html',
+            statements_by_category=processed
+        )
 
 @main_bp.route('/therapies', defaults={'therapy_name': None}, methods=['GET', 'POST'])
 @main_bp.route('/therapies/<therapy_name>', endpoint='therapies')

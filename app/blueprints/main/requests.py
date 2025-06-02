@@ -37,7 +37,7 @@ class API:
     def get_config_organization_filters(cls):
         config = flask.current_app.config['INI_CONFIG']
         enabled_agencies = [agency for agency, enabled in config['agencies'].items() if enabled.lower() == 'true']
-        agency_statements = [f"organization={agency}" for agency in enabled_agencies]
+        agency_statements = [f"organization={agency.lower()}" for agency in enabled_agencies]
         string = '&'.join(agency_statements)
         return string.replace(' ', '%20')
 
@@ -122,6 +122,15 @@ class API:
         if response.status_code == 200:
             data = response.json()['data']
             return data
+        else:
+            return response.json()
+
+    @classmethod
+    def get_statement(cls, statement_id):
+        response = cls.get(request=f"statements/{statement_id}")
+        if response.status_code == 200:
+            data = response.json()['data']
+            return data[0]
         else:
             return response.json()
 

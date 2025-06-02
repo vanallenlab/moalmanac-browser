@@ -109,6 +109,23 @@ def map_predict(string: str):
     else:
         return 'ERROR'
 
+def process_statement(record: dict):
+    """
+    Processes a single statement record from the API response into a simplified format for the statements view.
+
+    Args:
+        record (dict): A list of statement records from the API.
+
+    Returns:
+        dict: A dictionary of statements and their corresponding simplified records.
+    """
+    return {
+        'id': record['id'],
+        'proposition': simplify_proposition_record(record=record['proposition']),
+        'direction': '+' if record['direction'] == 'supports' else '-',
+        'documents': [(doc['id'], doc['name']) for doc in record['reportedIn']]
+    }
+
 def process_statements(records: list[dict]):
     """
     Processes statement records from the API response into a simplified format for the statements view.
@@ -121,12 +138,7 @@ def process_statements(records: list[dict]):
     """
     new_records = []
     for record in records:
-        new_record = {
-            'id': record['id'],
-            'proposition': simplify_proposition_record(record=record['proposition']),
-            'direction': '+' if record['direction'] == 'supports' else '-',
-            'documents': [(doc['id'], doc['name']) for doc in record['reportedIn']]
-        }
+        new_record = process_statement(record=record)
         new_records.append(new_record)
     return new_records
 
@@ -165,6 +177,7 @@ def simplify_proposition_record(record: dict):
         new_record['cancer_type'] = extract_diseases(disease=record['conditionQualifier'])
         therapies = extract_therapies(object_therapeutic=record['objectTherapeutic'])
         new_record['therapies'] = sort_dicts_by_key(data=therapies, key='name')
+        new_record['proposition_type'] = "Therapeutic response"
     else:
         # We'll add if else statements as we support additional proposition types
         print('This should not happen!')
