@@ -20,7 +20,7 @@ Cancer types | Molecular Oncology Almanac
     <tbody>
       {% for disease in diseases %}
         <tr>
-          <td>{{ disease.name }}</td>
+          <td><a href="{{ url_for('main.diseases', disease_name=disease.name) }}">{{ disease.name }}</a></td>
           <td>{{ disease.propositions_count }}</td>
           <td>{{ disease.statements_count }}</td>
         </tr>
