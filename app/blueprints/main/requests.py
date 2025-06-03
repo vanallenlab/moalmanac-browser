@@ -42,6 +42,19 @@ class API:
         return string.replace(' ', '%20')
 
     @classmethod
+    def get_disease(cls, name: str = None):
+        if name:
+            response = cls.get(request=f"diseases/{name}")
+            if response.status_code == 200:
+                data = response.json()['data']
+                return data[0]
+            else:
+                return response.json()
+        else:
+            # return disease with "disease name not found message"
+            return ""
+
+    @classmethod
     def get_document(cls, document_id: str):
         if document_id:
             response = cls.get(request=f"documents/{document_id}")
@@ -167,7 +180,7 @@ class API:
             else:
                 return response.json()
         else:
-            # return genes with "gene symbol not found message"
+            # return therapies with "therapy name not found message"
             return ""
 
 

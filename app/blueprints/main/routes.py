@@ -32,14 +32,31 @@ def biomarkers(biomarker_id: str = None):
         all_biomarker_types=all_biomarker_types
     )
 
-@main_bp.route('/diseases', defaults={'disease_id': None}, methods=['GET', 'POST'])
-@main_bp.route('/diseases/<disease_id>', endpoint='diseases')
-def diseases(disease_id: str = None):
-    records = requests.Local.get_diseases()
-    return flask.render_template(
-        template_name_or_list='diseases.html',
-        diseases=records
-    )
+@main_bp.route('/diseases', defaults={'disease_name': None}, methods=['GET', 'POST'])
+@main_bp.route('/diseases/<disease_name>', endpoint='diseases')
+def diseases(disease_name: str = None):
+    if disease_name:
+        record = requests.API.get_disease(name=disease_name)
+        processed_record = record
+        #processed_record = services.process_disease(record=record)
+
+        disease_statements = requests.API.get_statements(
+            config_organization_filter=True,
+            filters=f"disease={disease_name}"
+        )
+        processed_statements = services.process_statements(records=disease_statements)
+
+        return flask.render_template(
+            template_name_or_list='disease.html',
+            disease=processed_record,
+            statements=processed_statements
+        )
+    else:
+        records = requests.Local.get_diseases()
+        return flask.render_template(
+            template_name_or_list='diseases.html',
+            diseases=records
+        )
 
 @main_bp.route('/documents', defaults={'document_id': None}, methods=['GET', 'POST'])
 @main_bp.route('/documents/<document_id>', endpoint='documents')
@@ -75,14 +92,23 @@ def documents(document_id: str = None):
             all_organizations=all_organizations
         )
 
-@main_bp.route('/genes', defaults={'gene_name': None}, methods=['GET', 'POST'])
-@main_bp.route('/genes/<gene_name>', endpoint='genes')
-def genes(gene_name: str = None):
-    if gene_name:
-        record = requests.API.get_gene(name=gene_name)
+@main_bp.route('/genes', defaults={'gene_symbol': None}, methods=['GET', 'POST'])
+@main_bp.route('/genes/<gene_symbol>', endpoint='genes')
+def genes(gene_symbol: str = None):
+    if gene_symbol:
+        record = requests.API.get_gene(name=gene_symbol)
+        processed_record = services.process_gene(record=record)
+
+        gene_statements = requests.API.get_statements(
+            config_organization_filter=True,
+            filters=f"gene={gene_symbol}"
+        )
+        processed_statements = services.process_statements(records=gene_statements)
+
         return flask.render_template(
             template_name_or_list='gene.html',
-            gene=record
+            gene=processed_record,
+            statements=processed_statements
         )
     else:
         records = requests.Local.get_genes()
@@ -210,7 +236,7 @@ def statements(statement_id: str = None):
 def therapies(therapy_name: str = None):
     if therapy_name:
         record = requests.API.get_therapy(name=therapy_name)
-        processed_record = services.process_therapies(record=record)
+        processed_record = services.process_therapy(record=record)
 
         therapy_statements = requests.API.get_statements(
             config_organization_filter=True,

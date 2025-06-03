@@ -122,6 +122,21 @@ def map_predict(string: str):
     else:
         return 'ERROR'
 
+def process_gene(record: list[dict]):
+    """
+    Process a gene record from the API for use within the genes view.
+    Currently, this simply extracts the gene's location.
+
+    Args:
+        record (dict): A gene record from the API.
+
+    Returns:
+        record (dict): A dictionary of the original record with extensions moved to the root.
+    """
+    location = get_extension(list_of_extensions=record.get('extensions'), name='location')
+    record['location'] = location[0]['value']
+    return record
+
 def process_propositions(records: list[dict]):
     """
     Processes proposition records from the API response into a simplified format for the propositions view.
@@ -168,7 +183,7 @@ def process_statements(records: list[dict]):
         new_records.append(new_record)
     return new_records
 
-def process_therapies(record: dict):
+def process_therapy(record: dict):
     """
     Process a therapy record from the API for use within the therapies view. Currently, this simply extracts the
     therapy strategies and therapy type.
@@ -181,10 +196,8 @@ def process_therapies(record: dict):
     """
     therapy_strategy = get_extension(list_of_extensions=record.get('extensions'), name='therapy_strategy')
     record['therapy_strategy'] = ', '.join(therapy_strategy[0]['value'])
-
     therapy_type = get_extension(list_of_extensions=record.get('extensions'), name='therapy_type')
     record['therapy_type'] = therapy_type[0]['value']
-
     return record
 
 def simplify_proposition_record(record: dict):
