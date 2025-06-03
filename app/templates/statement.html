@@ -6,4 +6,15 @@ Statement {{ statement.id }} | Molecular Oncology Almanac
 
 {% block content %}
   <br>
-  <h2 class="title">{{ statement.proposition.proposition_type.title()  }}</h2>
+  <h2 class="title">{{ statement.proposition.proposition_type.title()  }} Statement</h2>
+  <p>This statement <strong>{{ statement.raw.direction }}</strong> the </p>
+
+  <p>{{ statement.description }}</p>
+
+  <h4 class="subtitle">Citation</h4>
+  {% for document in statement.documents %}
+    <a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.citation }}</a>
+  {% endfor %}
+  <br><br>
+
+{% endblock %}

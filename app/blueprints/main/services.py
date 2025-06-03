@@ -163,8 +163,10 @@ def process_statement(record: dict):
     return {
         'id': record['id'],
         'proposition': simplify_proposition_record(record=record['proposition']),
+        'description': record['description'],
         'direction': '+' if record['direction'] == 'supports' else '-',
-        'documents': [(doc['id'], doc['name']) for doc in record['reportedIn']]
+        'documents': [{'id': doc['id'], 'name': doc['name'], 'citation': doc['citation']} for doc in record['reportedIn']],
+        'raw': record
     }
 
 def process_statements(records: list[dict]):

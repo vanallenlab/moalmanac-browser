@@ -256,7 +256,7 @@ def propositions():
 def statements(statement_id: str = None):
     if statement_id:
         record = requests.API.get_statement(statement_id=statement_id)
-        processed = services.process_statement(records=record)
+        processed = services.process_statement(record=record)
         return flask.render_template(
             template_name_or_list='statement.html',
             statement=processed
