@@ -21,16 +21,33 @@ def index():
         terms=terms
     )
 
-@main_bp.route('/biomarkers', defaults={'biomarker_id': None}, methods=['GET', 'POST'])
-@main_bp.route('/biomarkers/<biomarker_id>', endpoint='biomarkers')
-def biomarkers(biomarker_id: str = None):
-    records = requests.Local.get_biomarkers()
-    all_biomarker_types = sorted(set(record['type'] for record in records))
-    return flask.render_template(
-        template_name_or_list='biomarkers.html',
-        biomarkers=records,
-        all_biomarker_types=all_biomarker_types
-    )
+@main_bp.route('/biomarkers', defaults={'biomarker_name': None}, methods=['GET', 'POST'])
+@main_bp.route('/biomarkers/<biomarker_name>', endpoint='biomarkers')
+def biomarkers(biomarker_name: str = None):
+    if biomarker_name:
+        record = requests.API.get_biomarker(biomarker_name=biomarker_name)
+        # processed_record = services.process_biomarker(record=record)
+        processed_record = record
+
+        biomarker_statements = requests.API.get_statements(
+            config_organization_filter=True,
+            filters=f"biomarker={biomarker_name}"
+        )
+        processed_statements = services.process_statements(records=biomarker_statements)
+
+        return flask.render_template(
+            template_name_or_list='biomarker.html',
+            biomarker=processed_record,
+            statements=processed_statements
+        )
+    else:
+        records = requests.Local.get_biomarkers()
+        all_biomarker_types = sorted(set(record['type'] for record in records))
+        return flask.render_template(
+            template_name_or_list='biomarkers.html',
+            biomarkers=records,
+            all_biomarker_types=all_biomarker_types
+        )
 
 @main_bp.route('/diseases', defaults={'disease_name': None}, methods=['GET', 'POST'])
 @main_bp.route('/diseases/<disease_name>', endpoint='diseases')
@@ -99,6 +116,26 @@ def genes(gene_symbol: str = None):
         record = requests.API.get_gene(name=gene_symbol)
         processed_record = services.process_gene(record=record)
 
+        cached_biomarkers = requests.Local.get_biomarkers()
+        gene_biomarkers = requests.API.get_biomarkers(
+            config_organization_filter=True,
+            filters=f"gene={gene_symbol}"
+        )
+        gene_biomarkers = services.append_field_from_matching_records(
+            target_list=gene_biomarkers,
+            source_list=cached_biomarkers,
+            source_field='propositions_count',
+            new_field_name='propositions_count',
+            match_key='id'
+        )
+        gene_biomarkers = services.append_field_from_matching_records(
+            target_list=gene_biomarkers,
+            source_list=cached_biomarkers,
+            source_field='statements_count',
+            new_field_name='statements_count',
+            match_key='id'
+        )
+
         gene_statements = requests.API.get_statements(
             config_organization_filter=True,
             filters=f"gene={gene_symbol}"
@@ -108,6 +145,7 @@ def genes(gene_symbol: str = None):
         return flask.render_template(
             template_name_or_list='gene.html',
             gene=processed_record,
+            biomarkers=gene_biomarkers,
             statements=processed_statements
         )
     else:

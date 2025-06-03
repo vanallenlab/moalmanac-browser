@@ -34,6 +34,37 @@ class API:
         return response
 
     @classmethod
+    def get_biomarker(cls, biomarker_name: str = None):
+        if biomarker_name:
+            response = cls.get(request=f"biomarkers/{biomarker_name}")
+            if response.status_code == 200:
+                data = response.json()['data']
+                return data[0]
+            else:
+                return response.json()
+        else:
+            # return biomarker with "biomarker name not found message"
+            return ""
+
+    @classmethod
+    def get_biomarkers(cls, config_organization_filter: bool = False, filters: str = None):
+        request = "biomarkers"
+        filters_to_apply = []
+        if config_organization_filter:
+            organization_filters = cls.get_config_organization_filters()
+            filters_to_apply.append(organization_filters)
+        if filters:
+            filters_to_apply.append(filters)
+        if filters_to_apply:
+            request = f"{request}?{'&'.join(filters_to_apply)}"
+        response = cls.get(request=request)
+        if response.status_code == 200:
+            data = response.json()['data']
+            return data
+        else:
+            return response.json()
+
+    @classmethod
     def get_config_organization_filters(cls):
         config = flask.current_app.config['INI_CONFIG']
         enabled_agencies = [agency for agency, enabled in config['agencies'].items() if enabled.lower() == 'true']

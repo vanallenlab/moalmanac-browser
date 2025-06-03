@@ -13,11 +13,15 @@
     {% for statement in statements %}
       <tr>
         <td>{{ statement.proposition.predicate }} ({{ statement.direction }})</td>
-        <td>{{ statement.proposition.biomarkers | map(attribute='name') | join(', ') }}</td>
-        <td><a href="{{ url_for('main.diseases', disease_name=statement.proposition.cancer_type.name) }}">{{ statement.proposition.cancer_type.name }}</a></td>
+        <td>
+          {% for biomarker in statement.proposition.biomarkers %}
+            <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{% if not loop.last %}, {% endif %}
+          {% endfor %}
+        </td>
+        <td><a href="{{ url_for('main.diseases', disease_name=statement.proposition.cancer_type.name | urlencode) }}">{{ statement.proposition.cancer_type.name }}</a></td>
         <td>
           {% for therapy in statement.proposition['therapies'] %}
-            <a href="{{ url_for('main.therapies', therapy_name=therapy.name) }}">{{ therapy.name }}</a>{% if not loop.last %},{% endif %}
+            <a href="{{ url_for('main.therapies', therapy_name=therapy.name | urlencode) }}">{{ therapy.name }}</a>{% if not loop.last %},{% endif %}
           {% endfor %}
         </td>
         <td>
