@@ -21,11 +21,11 @@
         <td><a href="{{ url_for('main.diseases', disease_name=statement.proposition.cancer_type.name | urlencode) }}">{{ statement.proposition.cancer_type.name }}</a></td>
         <td>
           {% for therapy in statement.proposition['therapies'] %}
-            <a href="{{ url_for('main.therapies', therapy_name=therapy.name | urlencode) }}">{{ therapy.name }}</a>{% if not loop.last %},{% endif %}
+            <a href="{{ url_for('main.therapies', therapy_name=therapy.name | urlencode) }}">{{ therapy.name }}</a>{% if not loop.last %}, {% endif %}
           {% endfor %}
         </td>
         <td>
-          <a href="{{ url_for('main.index') }}" class="btn btn-sm" title="More information" data-bs-toggle="tooltip">
+          <a href="{{ url_for('main.statements', statement_id=statement.id) }}" class="btn btn-sm" title="More information" data-bs-toggle="tooltip">
             <i class="bi bi-info-circle" aria-hidden="true"></i>
           </a>
         </td>

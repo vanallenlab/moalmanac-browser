@@ -11,7 +11,7 @@
 
   <p>{{ indication.description }}</p>
 
-  This is written in the <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">approval document</a> as:
+  <p>This is written in the <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">approval document</a> as:</p>
   <blockquote class="blockquote">
     <p>{{ indication.indication }}</p>
   </blockquote>
