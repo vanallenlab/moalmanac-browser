@@ -7,7 +7,7 @@
       <strong>{{ terms | selectattr("table", "equalto", "biomarkers") | list | length }}</strong> biomarkers:
     </p>
     <form action="{{ url_for('main.documents') }}" method="get">
-      <select name="biomarker" class="form-select browse-dropdown">
+      <select name="biomarker" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/biomarkers/' + encodeURIComponent(this.value);">
         <option selected disabled hidden>Select biomarker</option>
         {% for term in terms | selectattr("table", "equalto", "biomarkers") | sort(attribute="record_name") %}
           <option value="{{ term.record_name }}">{{ term.record_name }}</option>
@@ -29,18 +29,17 @@
       <strong>{{ terms | selectattr("table", "equalto", "genes") | list | length }}</strong> genes:
     </p>
     <form action="{{ url_for('main.documents') }}" method="get" onsubmit="return false;">
-      <select name="gene" class="form-select browse-dropdown"
-            onchange="if (this.value) window.location.href = '/genes/' + encodeURIComponent(this.value);">
-      <option selected disabled hidden>Select gene</option>
-      {% for term in terms | selectattr("table", "equalto", "genes") | sort(attribute="record_name") %}
-        <option value="{{ term.record_name }}">{{ term.record_name }}</option>
-      {% endfor %}
-    </select>
-    <noscript>
-      <button type="submit" class="btn btn-outline-secondary mt-2">
-        Search by gene
-      </button>
-    </noscript>
+      <select name="gene" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/genes/' + encodeURIComponent(this.value);">
+        <option selected disabled hidden>Select gene</option>
+        {% for term in terms | selectattr("table", "equalto", "genes") | sort(attribute="record_name") %}
+          <option value="{{ term.record_name }}">{{ term.record_name }}</option>
+        {% endfor %}
+      </select>
+      <noscript>
+        <button type="submit" class="btn btn-outline-secondary mt-2">
+          Search by gene
+        </button>
+      </noscript>
   </form>
 </div>
 
@@ -52,15 +51,15 @@
       <strong>{{ terms | selectattr("table", "equalto", "diseases") | list | length }}</strong> cancer types:
     </p>
     <form action="{{ url_for('main.documents') }}" method="get">
-      <select name="disease" class="form-select browse-dropdown">
-        <option selected disabled hidden>Select cancer types</option>
+      <select name="disease" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/diseases/' + encodeURIComponent(this.value);">
+        <option selected disabled hidden>Select cancer type</option>
         {% for term in terms | selectattr("table", "equalto", "diseases") | sort(attribute="record_name") %}
           <option value="{{ term.record_name }}">{{ term.record_name }}</option>
         {% endfor %}
       </select>
       <noscript>
         <button type="submit" class="btn btn-outline-secondary mt-2">
-          Search by cancer types
+          Search by cancer type
         </button>
       </noscript>
     </form>
@@ -74,7 +73,7 @@
       <strong>{{ terms | selectattr("table", "equalto", "therapies") | list | length }}</strong> therapies:
     </p>
     <form action="{{ url_for('main.documents') }}" method="get">
-      <select name="therapy_name" class="form-select browse-dropdown">
+      <select name="therapy" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/therapies/' + encodeURIComponent(this.value);">
         <option selected disabled hidden>Select therapy</option>
         {% for term in terms | selectattr("table", "equalto", "therapies") | sort(attribute="record_name") %}
           <option value="{{ term.record_name }}">{{ term.record_name }}</option>
