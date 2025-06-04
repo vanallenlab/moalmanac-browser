@@ -30,12 +30,13 @@ def create_app(config_path=os.path.join('config', 'default.ini'), api="https://a
         footer_logos_path = config['app'].get('logos', 'default-footer.html')
         subtitle = config['homepage'].get('subtitle', 'Browser')
         caption = config['homepage'].get('caption', 'An open-source knowledgebase for precision cancer medicine.')
-        print(css_path, footer_logos_path, subtitle, caption)
+        url = app.config['INI_CONFIG']['app'].get('url', 'dev.moalmanac.org')
         return dict(
             css_path=css_path,
             footer_logos_path=footer_logos_path,
             subtitle=subtitle,
-            caption=caption
+            caption=caption,
+            url=url
         )
 
     return app
