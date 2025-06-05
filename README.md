@@ -26,6 +26,20 @@ source activate venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Usage
+The Molecular Oncology Almanac makes use of [config files](/config) to support custom instances of the application. Relevant content from the API is [cached into a local sqlite3 instance](/data) based on the preferences specified within the config.
+
+To update a local cache, run:
+```bash
+python -m app.populate_database --api https://api.moalmanac.org --config config/default.ini --drop-tables
+```
+
+To update multiple local caches, append `--config` multiple times. For example:
+```bash
+python -m app.populate_database --api https://api.moalmanac.org --config config/config.ini --config config/ie.ini --drop-tables
+```
+
+
 To launch the application for development:
 ```bash
 python run.py --mode development

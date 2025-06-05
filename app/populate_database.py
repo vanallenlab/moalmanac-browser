@@ -610,8 +610,13 @@ class Statements:
 
 def delete_sqlite_db(path):
     if os.path.exists(path):
-        os.remove(path)
-        print(f"Deleted database at: {path}")
+        try:
+            os.remove(path)
+        except Exception as e:
+            raise RuntimeError(f"Failed to delete database at {path}: {e}")
+
+        if os.path.exists(path):
+            raise RuntimeError(f"Database at {path} still exists after attempted deletion.")
     else:
         print(f"No database found at: {path}")
 
@@ -680,6 +685,7 @@ if __name__ == "__main__":
     )
     arg_parser.add_argument(
         '-c', '--config',
+        action='append',
         help='Path to config file',
         required=True
     )
@@ -689,10 +695,14 @@ if __name__ == "__main__":
         action='store_true'
     )
     args = arg_parser.parse_args()
-    if args.drop_tables:
-        cache_path = database.read_config_ini(path=args.config)['app']['cache']
-        delete_sqlite_db(path=cache_path)
-    main(
-        config_path=args.config,
-        api_url=args.api
-    )
+
+    for config_file in args.config:
+        if args.drop_tables:
+            cache_file_name = database.read_config_ini(path=config_file)['app']['cache']
+            cache_path = os.path.join("data", cache_file_name)
+            delete_sqlite_db(path=cache_path)
+        print(f"Populating database for {config_file}...")
+        main(
+            config_path=config_file,
+            api_url=args.api
+        )
