@@ -1,40 +1,14 @@
-import argparse
-import dotenv
+from almanac_browser import create_app
 import os
 
-from app import create_app
-
-dotenv.load_dotenv(override=False)
-
-def main():
-    """
-    Configure and run application when calling run.py directly, for development.
-    """
-    arg_parser = argparse.ArgumentParser(
-        prog='Molecular Oncology Almanac Browser',
-        description='Web browser the Molecular Oncology Almanac database'
-    )
-    arg_parser.add_argument(
-        '-a', '--api',
-        choices=['http://localhost:8000', 'https://api.moalmanac.org'],
-        default=os.environ.get('API_URL', 'http://localhost:8000'),
-        help='URL for the MOAlmanac API'
-    )
-    arg_parser.add_argument(
-        '-c', '--config',
-        default='config.ini'
-    )
-    args = arg_parser.parse_args()
-
-    host = os.environ.get('FLASK_HOST', 'localhost')
-    port = os.environ.get('FLASK_PORT', 4000)
-    debug = True
-
-    app = create_app(config_path=args.config, api=args.api)
-    app.run(host=host, port=port, debug=debug)
+app = create_app(__name__)
 
 if __name__ == '__main__':
-    main()
 
-api_url = os.environ.get('API_URL', 'https://api.moalmanac.org')
-app = create_app(api=api_url)
+	# for debugging
+	#if os.environ['FLASK_ENV'] == 'development':
+	#app.run('localhost', 8080, debug=True, use_debugger=False, use_reloader=False, passthrough_errors=True)
+
+	# for hosting
+	#else:
+	app.run(host='0.0.0.0', debug=False)

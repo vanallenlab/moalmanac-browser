@@ -1,0 +1,127 @@
+{%- extends 'base.html' %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/select2.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/select2-bootstrap.min.css')}}">
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script src="{{url_for('static', filename='js/underscore-min.js')}}"></script>
+<script src="{{url_for('static', filename='js/select2.full.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/portal-init-datatable.js')}}"></script>
+<script src="{{url_for('static', filename='js/portal-json.js')}}"></script>
+<script src="{{url_for('static', filename='js/portal-add.js')}}"></script>
+<script type="text/javascript"></script>
+{% endblock %}
+
+{% block title %}{{ config['APP_NAME'] }}: Suggest addition{% endblock %}
+
+{% block page_content %}
+<h1>Submit Entry to {{ config['APP_NAME'] }}</h1>
+<div class="panel panel-default" id="success-panel" hidden>
+    <div class="panel-heading green">
+        <h3 class="panel-title green"><strong>Success</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            Entry was submitted for review: <span id="success-text"></span>
+        </p>
+    </div>
+</div>
+<div class="panel panel-default" id="error-panel" hidden>
+    <div class="panel-heading pink">
+        <h3 class="panel-title pink"><strong>Error</strong></h3>
+    </div>
+    <div class="panel-body">
+        <p>
+            There was an error processing your submission: <span id="error-text"></span>.<br/>
+            Please review the fields below.
+        </p>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12">
+                <p>
+                    For more information on our curation process, please view our <a href="https://github.com/vanallenlab/moalmanac-db/blob/main/docs/sop.md" target="_blank">standard operating procedure for data curation</a>. Entries can also be recommended through the <a href="https://chrome.google.com/webstore/detail/molecular-oncology-almana/jliaipolchffpaccagodphgjpfdpcbcm?hl=en" target="_blank">Molecular Oncology Almanac connector</a>, a Google Chrome extension.
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <h3>Source*</h3>
+                <p>DOI, e.g. 10.1126/science.1062538</p>
+                <input id="source-input" name="g" type="text" class="form-control" placeholder="">
+            </div>
+            <div class="col-md-4">
+                <h3>Cancer Type*</h3>
+                <p>Select cancer type:</p>
+                <select id="type-select" name="d" class="form-control">
+                    <option><!-- empty option required for placeholder --></option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Feature Type*</h3>
+                <p>Select the feature asserted in the source:</p>
+                <select id="feature-definition-input" name="feature-def">
+                    <option><!-- empty option required for placeholder --></option>
+                </select>
+            </div>
+        </div>
+        {%  for feature_definition in feature_definitions %}
+        <div id="feature-{{ feature_definition.feature_def_id }}-row" class="row add-feature-row">
+            {%  for attribute_definition in feature_definition.attribute_definitions %}
+            <div class="col-md-3">
+                <h3>{{ attribute_definition.readable_name }}</h3>
+                <select id="{{ feature_definition.feature_def_id }}-{{ attribute_definition.attribute_def_id }}-input"
+                        {% if attribute_definition.type == 'gene' %}
+                        class="gene-select2 attribute-select2"
+                        {%  else %}
+                        class="nongene-select2 attribute-select2"
+                        {%  endif %}
+                        data-feature-def-id="{{ feature_definition.feature_def_id }}"
+                        data-attribute-def-id="{{ attribute_definition.attribute_def_id }}"
+                        name="{{ feature_definition.name }}-{{ attribute_definition.name }}">
+                    <option><!-- empty option required for placeholder --></option>
+                </select>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Predictive Implication Level*</h3>
+                <p>Select a predictive implication level</p>
+                <select id="implication-select" name="p" class="form-control">
+                    <option><!-- empty option required for placeholder --></option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <h3>Therapy</h3>
+                <p>Select or enter a therapy:</p>
+                <select id="therapy-select" name="t" class="form-control">
+                    <option><!-- empty option required for placeholder --></option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <h3>Email Address*</h3>
+                <p>We may contact you to ask you about your experience with this portal.</p>
+                <input id="email-input" name="e" type="text" class="form-control" placeholder="">
+            </div>
+        </div>
+        <div>
+            <span class="input-group-btn">
+                <button type="submit" class="btn btn-default" id="btn-sub" style="float:right; margin-top: 10px;">Submit</button>
+            </span>
+        </div>
+    </div>
+</div>
+{%- endblock %}
