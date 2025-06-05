@@ -1,0 +1,269 @@
+body {
+	color: #000000;
+}
+
+.title {
+    color: #00629B;
+}
+
+.subtitle {
+     color: #FFA300;
+}
+
+.jumbotron {
+	background: transparent;
+}
+
+.target-content {
+	padding-bottom: 3em;
+}
+
+.navbar {
+	background-color: #00629B;
+}
+
+.navbar a:hover {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.navbar a {
+	color: #FFFFFF;
+}
+
+.navbar-brand:hover {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.navbar-nav .nav-link:hover {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.nav .dropdown-toggle {
+	color: #FFFFFF;
+	background-color: #00629B;
+}
+
+.nav .dropdown.open .dropdown-toggle {
+	color: #003354;
+	background-color: #FFA300;
+}
+
+.nav .dropdown-toggle:focus,
+.nav .dropdown-toggle:active {
+	color: #FFFFFF;
+	background-color: #00629B;
+}
+
+a {
+	color: #00629B;
+}
+
+.footer-img {
+	max-height: 50px;
+}
+
+a:hover {
+	color: #00629B;
+	text-decoration: underline;
+}
+
+/* footer */
+.footer {
+	padding: 3em;
+	background-color: #eeeeee;
+}
+
+.footer img {
+	margin-right: 2em;
+}
+
+.center-text {
+	text-align: center;
+}
+
+#logo-list {
+	margin-top: 1em;
+	display: flex;
+    justify-content: center;
+}
+
+.category-title {
+	color: #FFA300
+}
+
+.category-description {
+	color: #636569;
+}
+
+/* front page */
+#index-title-block {
+	padding-top: 0 !important;
+	padding-bottom: 1em !important;
+	margin-bottom: 0;
+}
+
+#index-title {
+	margin-bottom: 0;
+}
+
+.index-abbrev {
+	color: #333333;
+}
+
+.index-abbrev-explain {
+	padding-bottom: 1em;
+}
+
+#or-browse-by {
+	margin-top: 2em;
+}
+
+#or-browse-by p {
+	margin-bottom: 0 !important;
+}
+
+/* Submit entry page */
+#btn-sub {
+    float: right;
+	margin-top: 10px;
+}
+
+.editable {
+    cursor: pointer;
+    color: blue;
+
+}
+
+.green {
+    background: #85b785;
+    background-color: #85b785 !important;
+}
+
+.pink {
+    background: #bb5555;
+    background-color: #bb5555 !important;
+}
+
+/* front page gene search bar */
+.input-group-btn {
+	vertical-align: top;
+}
+
+#search {
+	width: 100%;
+}
+
+#search-container-outer {
+	width: 80%;
+	margin: 0 auto;
+	text-align: center;
+}
+
+#search-container-inner {
+	display: inline-table;
+}
+
+.search-instructions {
+	font-size: 9pt;
+	float: left;
+	color: #636569;
+}
+
+.select2-font {
+	font-weight: bold;
+}
+
+.select2-category-feature, .select2-category-attribute {
+	background-color: #DAEEFF !important;
+}
+
+.select2-category-disease {
+	background-color: #FFF2DD !important;
+}
+
+.select2-category-therapy {
+	background-color: #F6FEDC !important;
+}
+
+.select2-category-pred {
+	background-color: #DFDCF9 !important;
+}
+
+.select2-category-gene {
+	background-color: #FFEDED !important;
+}
+
+@media (min-width: 768px) {
+	#jumbo-gene-search-group {
+		width: 60%;
+	}
+}
+
+.btn {
+	color: #FFFFFF;
+    background-color: #00629B;
+}
+
+.btn:hover {
+	color: #00629B;
+    background-color: #EEEEEE;
+}
+
+.btn-delete {
+    background-color: #00629B;
+    color: #FFFFFF;
+}
+
+.btn-alt-search {
+    width: 100%;
+}
+
+/* browse page */
+.pagination .active a, .pagination .active a:hover {
+	background-color: #ffcf00;
+	border-color: #ffcf00;
+	color: #000000;
+}
+
+#browse-search-row {
+	margin-bottom: 1em;
+}
+
+.results-table {
+	border-top: 1px solid #adadad;
+}
+
+.results-table tr {
+	background-color: #FFFFFF;
+}
+
+/* gene page */
+
+@media (min-width: 768px) {
+	.panel-title .gene-panel-level {
+		float: right;
+	}
+}
+
+@media (max-width: 767px) {
+	h1 .relationship-count {
+		display: block;
+	}
+}
+
+/* add page */
+.gene-select2 {
+	width: 100%;
+}
+
+.add-feature-row {
+	display: none;
+}
+
+.cover-image {
+    display:block;
+    margin:auto;
+}
