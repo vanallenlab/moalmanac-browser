@@ -20,7 +20,7 @@ fi
 
 ln -sf "cache-$INSTANCE.sqlite3" data/cache.sqlite3
 ln -sf "deploy/$INSTANCE/config.ini" config.ini
-ln -sf "deploy/$INSTANCE/nginx.conf" service/moalmanac-browser
-ln -sf "deploy/$INSTANCE/secure-application.sh" service/secure-application.sh
+ln -sf "../deploy/$INSTANCE/nginx.conf" service/moalmanac-browser
+ln -sf "../deploy/$INSTANCE/secure-application.sh" service/secure-application.sh
 
 echo "Switched to instance: $INSTANCE"
