@@ -37,4 +37,5 @@ if __name__ == '__main__':
     main()
 
 api_url = os.environ.get('API_URL', 'https://api.moalmanac.org')
-app = create_app(api=api_url)
+config_path = os.environ.get('APP_CONFIG', 'config.ini')
+app = create_app(config_path=config_path, api=api_url)
