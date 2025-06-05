@@ -27,8 +27,9 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-The Molecular Oncology Almanac makes use of [config files](/config) to support custom instances of the application. Relevant content from [our API](https://github.com/vanallenlab/moalmanac-api) is [cached into a local sqlite3 instance](/data) based on the preferences specified within the config.
+The Molecular Oncology Almanac web browser supports multiple configurable instances, each defined by a folder under [`deploy/](deploy). Each instance has its own configuration file, https set up, and dedicated SQLite cache. [Our API](https://github.com/vanallenlab/moalmanac-api) provides the data source for the local SQLite3 cache, which is populated according to the settings in the selected config file.
 
+### Updating local caches
 To update a local cache, run:
 ```bash
 python -m app.populate_database --api https://api.moalmanac.org --config config/default.ini --drop-tables
@@ -36,14 +37,20 @@ python -m app.populate_database --api https://api.moalmanac.org --config config/
 
 To update multiple local caches, append `--config` multiple times. For example:
 ```bash
-python -m app.populate_database --api https://api.moalmanac.org --config deploy/default/config.ini --config deploy/ie/config.ini --drop-tables
+python -m app.populate_database \ 
+  --api https://api.moalmanac.org \
+  --config deploy/default/config.ini \
+  --config deploy/ie/config.ini \
+  --drop-tables
 ```
 
 ### Instances
-New instances of this application can be supported by creating a new folder under [deploy/](deploy) and editing the files contained. To swap to a different instance of this application, run `switch_instance.sh` with the instance's folder as the first argument:
+Each instance is defined under the [`deploy/`](deploy) directory. To activate a specific instance, run:
 ```bash
 bash switch_instance.sh default
 ```
+
+This command updates internal symlinks so that the app and deployment scripts point to the correct files for that instance.
 
 ### Environment configuration
 Flask configuration variables are managed using environment files:
