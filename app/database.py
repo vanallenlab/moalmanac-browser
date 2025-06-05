@@ -51,13 +51,12 @@ def init_db(config: configparser.ConfigParser()) -> tuple[Engine, sessionmaker]:
         FileNotFoundError: If the specified configuration file does not exist.
         KeyError: If the database path is not found within the configuration file.
     """
-    try:
-        #file = config['app'].get('cache', 'cache.sqlite3')
-        file = 'cache.sqlite3'
-        path = os.path.join("data", file)
-    except KeyError:
-        raise KeyError("Database path not found within configuration file.")
+    path = os.path.join("data", "cache.sqlite3")
     path = os.path.abspath(path)
+    print(path)
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"SQLite database file not found: {path}")
+
     engine = sqlalchemy.create_engine(f"sqlite:///{path}")
     session_factory = sessionmaker(bind=engine)
     return engine, session_factory
