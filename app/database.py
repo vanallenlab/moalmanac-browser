@@ -52,7 +52,8 @@ def init_db(config: configparser.ConfigParser()) -> tuple[Engine, sessionmaker]:
         KeyError: If the database path is not found within the configuration file.
     """
     try:
-        file = config['app'].get('cache', 'cache.sqlite3')
+        #file = config['app'].get('cache', 'cache.sqlite3')
+        file = 'cache.sqlite3'
         path = os.path.join("data", file)
     except KeyError:
         raise KeyError("Database path not found within configuration file.")

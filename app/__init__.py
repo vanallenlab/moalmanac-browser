@@ -6,7 +6,7 @@ from . import database
 from . import models
 from .blueprints import main
 
-def create_app(config_path=os.path.join('config', 'default.ini'), api="https://api.moalmanac.org"):
+def create_app(config_path='config.ini', api='https://api.moalmanac.org'):
     app = flask.Flask(__name__)
     app.json.sort_keys = False
 

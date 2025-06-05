@@ -1,7 +1,5 @@
 #!/bin/bash
 
-SITE=$1
-
 sudo apt update -y
 sudo apt install -y build-essential libssl-dev libffi-dev nginx python3-certbot-nginx
 sudo ufw disable
@@ -16,7 +14,7 @@ sudo cp moalmanac-browser.service /etc/systemd/system/moalmanac-browser.service
 sudo systemctl start moalmanac-browser
 sudo systemctl enable moalmanac-browser
 
-sudo cp "$SITE" /etc/nginx/sites-available/moalmanac-browser
+sudo cp moalmanac-browser /etc/nginx/sites-available/moalmanac-browser
 sudo ln -s /etc/nginx/sites-available/moalmanac-browser /etc/nginx/sites-enabled
 sudo systemctl restart nginx
 

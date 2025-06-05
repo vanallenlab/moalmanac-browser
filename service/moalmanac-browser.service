@@ -8,7 +8,7 @@ Group=www-data
 WorkingDirectory=/home/breardon/moalmanac-browser
 EnvironmentFile=/home/breardon/moalmanac-browser/.env.production
 Environment="PATH=/home/breardon/mambaforge-pypy3/envs/moalmanac-browser/bin"
-ExecStart=/home/breardon/mambaforge-pypy3/envs/moalmanac-browser/bin/gunicorn --workers 5 --bind unix:moalmanac-api.sock -m 007 run:app
+ExecStart=/home/breardon/mambaforge-pypy3/envs/moalmanac-browser/bin/gunicorn --workers 5 --bind unix:moalmanac-browser.sock -m 007 run:app
 
 [Install]
 WantedBy=multi-user.target

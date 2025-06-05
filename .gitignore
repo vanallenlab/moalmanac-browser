@@ -2,6 +2,12 @@
 *.idea*
 *__pycache__*
 
+# symlinks for instances
+/config.ini
+/data/cache.sqlite3
+/service/moalmanac-browser
+/service/secure-application.sh
+
 # Old web browser files
 venv_old*
 update_db.sh*

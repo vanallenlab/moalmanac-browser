@@ -698,8 +698,8 @@ if __name__ == "__main__":
 
     for config_file in args.config:
         if args.drop_tables:
-            cache_file_name = database.read_config_ini(path=config_file)['app']['cache']
-            cache_path = os.path.join("data", cache_file_name)
+            cache_file = database.read_config_ini(path=config_file)['app']['cache']
+            cache_path = os.path.join('data', cache_file)
             delete_sqlite_db(path=cache_path)
         print(f"Populating database for {config_file}...")
         main(
