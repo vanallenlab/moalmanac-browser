@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ indication.id }} | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">Regulatory approval</h2>
+  <p>Published by the <a href="{{ url_for('main.organizations', organization_id=indication.document.organization.id) }}">{{ indication.document.organization.name }}</a>.</p>
+
+  <p>{{ indication.description }}</p>
+
+  <p>This is written in the <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">approval document</a> as:</p>
+  <blockquote class="blockquote">
+    <p>{{ indication.indication }}</p>
+  </blockquote>
+
+  <h4 class="subtitle">Citation</h4>
+  <a href="{{ indication.document.url }}" target="_blank">{{ indication.document.citation }}</a>
+  <br><br>
+
+  <h4 class="subtitle">Therapeutic response</h4>
+  Precision oncology relationships for therapeutic response derived from this regulatory approval.
+  <br><br>
+
+  {% include "statements_table.html" %}
+  <br>
+
+{% endblock %}

@@ -1,0 +1,248 @@
+/* ====================
+   1. Global / Resets
+   ==================== */
+html, body {
+    height: 100%;
+}
+
+html {
+    position: relative;
+}
+
+body {
+    margin-bottom: 60px; /* Space for footer */
+}
+
+/* ====================
+   2. Typography
+   ==================== */
+.center-text {
+    text-align: center;
+}
+
+.title {
+    color: var(--primary-color);
+}
+
+.subtitle {
+    color: var(--secondary-color);
+}
+
+.category-title {
+    color: var(--secondary-color);
+}
+
+.row h4 {
+    color: var(--tertiary-color);
+}
+
+/* ====================
+   3. Navbar
+   ==================== */
+.navbar {
+    background-color: var(--primary-color);
+    align-items: stretch;
+    display: flex;
+    height: 56px;
+    padding: 0 50px;
+}
+
+.navbar .container-fluid {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+}
+
+.navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 1rem;
+}
+
+.navbar .navbar-brand:hover {
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    text-decoration: none;
+}
+
+.navbar a {
+    color: #FFFFFF;
+}
+
+.navbar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 1rem;
+}
+
+.navbar-nav .nav-item {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--primary-color);
+    background-color: var(--secondary-color);
+    text-decoration: none;
+}
+
+/* Collapsed navbar background */
+.navbar-collapse.collapsing,
+.navbar-collapse.collapse.show {
+    background-color: var(--primary-color);
+}
+
+/* ====================
+   4. Footer
+   ==================== */
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    padding: 2em;
+    background-color: #EEEEEE;
+    margin-top: 50px;
+}
+
+/* ====================
+   5. Page Layout / Utility
+   ==================== */
+.jumbotron {
+    background-color: transparent;
+    margin-bottom: 0;
+    margin-top: 60px;
+}
+
+.content {
+    padding-bottom: 3em;
+}
+
+.status {
+    margin: 0 auto;
+    text-align: center;
+    width: 50%;
+}
+
+#or-browse-by {
+    margin-top: 2em;
+}
+
+.row {
+    margin-top: 0;
+    padding: 0 10px;
+    width: 100%;
+}
+
+/* ====================
+   6. Buttons / Inputs
+   ==================== */
+#browsebutton {
+    background-color: white;
+}
+
+#my-file-selector {
+    display: none;
+}
+
+/* ====================
+   7. Tables
+   ==================== */
+.setup table {
+    display: inline-block;
+    padding: 20px;
+}
+
+.panel-heading span {
+    margin-top: -20px;
+    font-size: 15px;
+}
+
+.panel > .panel-heading {
+    background-image: none;
+}
+
+.table {
+    table-layout: fixed;
+    word-wrap: break-word;
+}
+
+table.dataTable th {
+  text-align: left !important;
+}
+
+table.dataTable td {
+  text-align: left !important;
+}
+
+/* Override DataTables pagination active button */
+.dataTables_wrapper .dataTables_paginate .pagination .page-item.active .page-link {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+/* Override default page buttons */
+.dataTables_wrapper .dataTables_paginate .pagination .page-link {
+    color: var(--primary-color) !important;
+}
+
+
+/* ====================
+   8. Hover Effects
+   ==================== */
+div.p-3:hover {
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* ====================
+   9. Logos
+   ==================== */
+.logo-container img {
+    height: 50px;
+    width: auto;
+}
+
+#logo-list {
+    margin-top: 1em;
+    display: flex;
+    justify-content: center;
+}
+
+/* ====================
+   10. Logos
+   ==================== */
+blockquote {
+  background: #f9f9f9;
+  border-left: 3px solid #ccc;
+  margin: 0.5em 10px;
+  padding: 0.5em 10px;
+}
+blockquote p {
+  display: inline-block;
+  font-size: 16px;
+}
+
+/* ====================
+   11. Cards
+   ==================== */
+.compact-card-text p.card-text {
+  margin-bottom: 0.25rem; /* or any value smaller than the default ~1rem */
+}
+.card-header-primary {
+  background-color: var(--primary-color);
+  color: white;
+}

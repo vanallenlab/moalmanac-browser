@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Cancer types | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">Cancer types</h2>
+  <br>
+
+  <table id="diseases-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+    <thead>
+      <tr>
+        <th style="width: 10%">Name</th>
+        <th style="width: 10%">Propositions</th>
+        <th style="width: 10%">Statements</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for disease in diseases %}
+        <tr>
+          <td><a href="{{ url_for('main.diseases', disease_name=disease.name) }}">{{ disease.name }}</a></td>
+          <td>{{ disease.propositions_count }}</td>
+          <td>{{ disease.statements_count }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
