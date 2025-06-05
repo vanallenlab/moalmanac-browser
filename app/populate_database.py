@@ -1,10 +1,12 @@
 import argparse
 import configparser
 import flask
+import os
+import pandas
 import requests
 import sys
 import sqlalchemy
-import pandas
+
 from requests.utils import dict_to_sequence
 
 from sqlalchemy.orm import sessionmaker
@@ -606,8 +608,14 @@ class Statements:
         else:
             return f"Something went wrong getting statements from {api} with filters: {filters}"
 
+def delete_sqlite_db(path):
+    if os.path.exists(path):
+        os.remove(path)
+        print(f"Deleted database at: {path}")
+    else:
+        print(f"No database found at: {path}")
 
-def main(config_path, api_url="https://api.moalmanac.org", drop=False):
+def main(config_path, api_url="https://api.moalmanac.org"):
     app = create_app(config_path=config_path)
     with app.app_context():
         config = database.read_config_ini(path=config_path)
@@ -659,7 +667,6 @@ def main(config_path, api_url="https://api.moalmanac.org", drop=False):
             session.close()
             return 'Success!'
 
-
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(
         prog='Populate web browser sqlite cache(s) from moalmanac api',
@@ -682,8 +689,10 @@ if __name__ == "__main__":
         action='store_true'
     )
     args = arg_parser.parse_args()
+    if args.drop_tables:
+        cache_path = database.read_config_ini(path=args.config)['app']['cache']
+        delete_sqlite_db(path=cache_path)
     main(
         config_path=args.config,
-        api_url=args.api,
-        drop=args.drop_tables
+        api_url=args.api
     )
