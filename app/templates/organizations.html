@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Organizations | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">Organizations</h2>
+  <a href="{{ url_for('main.indications') }}">Regulatory approvals</a> from {{ organizations | list | length }} organizations.
+  <br><br>
+
+  <table class="table table-striped table-hover table-sm small w-100 dataTable">
+    <thead>
+      <tr>
+        <th style="width: 25%">Name</th>
+        <th style="width: 45%">Description</th>
+        <th style="width: 10%">Documents</th>
+        <th style="width: 10%">Indications</th>
+        <th style="width: 10%">Statements</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for organization in organizations %}
+        <tr>
+          <td>
+            <a href="{{ url_for('main.organizations', organization_id=organization.id) }}">{{ organization.name }}</a>
+          </td>
+          <td>{{ organization.description }}</td>
+          <td>{{ organization.documents_count }}</td>
+          <td>{{ organization.indications_count }}</td>
+          <td>{{ organization.statements_count }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

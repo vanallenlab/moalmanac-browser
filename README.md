@@ -26,15 +26,53 @@ source activate venv/bin/activate
 pip install -r requirements.txt
 ```
 
-To launch the application for development:
+## Usage
+The Molecular Oncology Almanac web browser supports multiple configurable instances, each defined by a folder under [`deploy/](deploy). Each instance has its own configuration file, https set up, and dedicated SQLite cache. [Our API](https://github.com/vanallenlab/moalmanac-api) provides the data source for the local SQLite3 cache, which is populated according to the settings in the selected config file.
+
+### Updating local caches
+To update a local cache, run:
 ```bash
-python run.py --mode development
+python -m app.populate_database --api https://api.moalmanac.org --config config/default.ini --drop-tables
 ```
 
-To launch the application for production:
+To update multiple local caches, append `--config` multiple times. For example:
 ```bash
-python run.py --mode production
+python -m app.populate_database \ 
+  --api https://api.moalmanac.org \
+  --config deploy/default/config.ini \
+  --config deploy/ie/config.ini \
+  --drop-tables
 ```
+
+### Instances
+Each instance is defined under the [`deploy/`](deploy) directory. To activate a specific instance, run:
+```bash
+bash switch_instance.sh default
+```
+
+This command updates internal symlinks so that the app and deployment scripts point to the correct files for that instance.
+
+### Environment configuration
+Flask configuration variables are managed using environment files:
+
+- [.env](.env) - used for local development
+- [.env.production](.env.production) - used for production, loaded with systemd 
+
+To launch the application for development, using variables from [.env](.env):
+```bash
+python run.py
+```
+
+### Production deployment
+This repository uses [Gunicorn](https://gunicorn.org) to serve the Flask application for production. The service is configured using a [systemd unit file, service/moalmanac-browser.service](service/moalmanac-browser.service), which sets environment variables from [.env.production](.env.production) via the `EnvironmentFile` variable:
+```ini
+EnvironmentFile=/home/breardon/moalmanac-browser/.env.production
+```
+Gunicorn is launched using the provided `ExecStart` command:
+```ini
+/home/breardon/mambaforge-pypy3/envs/moalmanac-browser/bin/gunicorn --workers 5 --bind unix:moalmanac-browser.sock -m 007 run:app
+```
+Systemd and Gunicorn manage launching the application for production using the [service/moalmanac-browser.service](service/moalmanac-browser.service) file, so there is no need to run `python run.py` for production use.
 
 ## Citation
 If you find this tool or any code herein useful, please cite:  

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ therapy.name }} | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">{{ therapy.name }}</h2>
+  <p><!-- Placeholder for description on the therapy record --></p>
+
+  <div class="row align-items-stretch">
+    <div class="col-sm-6 d-flex">
+      <div class="card flex-fill mb-3">
+        <h5 class="card-header">About</h5>
+        <div class="card-body compact-card-text">
+          <p class="card-text"><strong>Therapy type</strong>: {{ therapy.therapy_type }}</p>
+          <p class="card-text"><strong>Therapy strategy</strong>: {{ therapy.therapy_strategy }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 d-flex">
+      <div class="card flex-fill mb-3">
+        <h5 class="card-header">Mappings</h5>
+        <div class="card-body compact-card-text">
+          <p class="card-text"><strong>NCI Thesaurus</strong>: <a href="{{ therapy.primaryCoding.iris[0] }}" target="_blank">{{ therapy.primaryCoding.name }} ({{ therapy.primaryCoding.id }})</a></p>
+          <p class="card-text"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="subtitle">Therapeutic response</h4>
+  Precision oncology relationships for therapeutic response involving this therapy.
+  <br><br>
+
+  {% include "statements_table.html" %}
+  <br>
+{% endblock %}

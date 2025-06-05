@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ organization.id }} | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">{{ organization.name }}</h2>
+  <p>{{ organization.description }}</p>
+
+  <h4 class="subtitle">Documents</h4>
+  Documents published by the {{ organization.name }}, containing at least one indication involving a biomarker.
+  <br><br>
+
+  <table id="documents-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+    <thead>
+      <tr>
+        <th style="width: 70%">Name</th>
+        <th style="width: 15%">Indications</th>
+        <th style="width: 15%">Statements</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for document in documents %}
+        <tr>
+          <td><a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.name }}</a></td>
+          <td>{{ document.indications_count }}</td>
+          <td>{{ document.statements_count }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br>
+
+  <h4 class="subtitle">Regulatory approvals</h4>
+  Approved indications from the {{ organization.name }} for cancer drugs containing at least one biomarker.
+  <br><br>
+
+  <table id="indications-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+    <thead>
+      <tr>
+        <th style="width: 25%">Document</th>
+        <th style="width: 65%">Indication</th>
+        <th style="width: 10%">Statements</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for indication in indications %}
+        <tr data-organization="{{ indication.document.organization.name }}">
+          <td><a href="{{ url_for('main.documents', document_id=indication.document.id) }}">{{ indication.document.name }}</a></td>
+          <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.indication }}</a></td>
+          <td>{{ indication.statements_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+  </table>
+  <br>
+
+  <h4 class="subtitle">Therapeutic response</h4>
+  Precision oncology relationships for therapeutic response derived from {{ organization.name }}'s regulatory approvals.
+  <br><br>
+
+  {% include "statements_table.html" %}
+  <br>
+
+{% endblock %}
