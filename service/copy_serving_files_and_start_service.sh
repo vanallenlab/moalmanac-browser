@@ -15,7 +15,7 @@ sudo systemctl start moalmanac-browser
 sudo systemctl enable moalmanac-browser
 
 sudo cp moalmanac-browser /etc/nginx/sites-available/moalmanac-browser
-sudo ln -s /etc/nginx/sites-available/moalmanac-browser /etc/nginx/sites-enabled
+sudo ln -sf /etc/nginx/sites-available/moalmanac-browser /etc/nginx/sites-enabled
 sudo systemctl restart nginx
 
 sudo chmod 755 /home/breardon

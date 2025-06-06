@@ -621,7 +621,7 @@ def delete_sqlite_db(path):
         print(f"No database found at: {path}")
 
 def main(config_path, api_url="https://api.moalmanac.org"):
-    app = create_app(config_path=config_path)
+    app = create_app(config_path=config_path, populating=True)
     with app.app_context():
         config = database.read_config_ini(path=config_path)
         about = Service.get(api=api_url)

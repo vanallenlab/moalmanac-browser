@@ -37,11 +37,7 @@ python -m app.populate_database --api https://api.moalmanac.org --config config/
 
 To update multiple local caches, append `--config` multiple times. For example:
 ```bash
-python -m app.populate_database \ 
-  --api https://api.moalmanac.org \
-  --config deploy/default/config.ini \
-  --config deploy/ie/config.ini \
-  --drop-tables
+python -m app.populate_database --api https://api.moalmanac.org --config deploy/default/config.ini --config deploy/ie/config.ini --drop-tables
 ```
 
 ### Instances

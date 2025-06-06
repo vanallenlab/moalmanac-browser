@@ -6,7 +6,7 @@ from . import database
 from . import models
 from .blueprints import main
 
-def create_app(config_path='config.ini', api='https://api.moalmanac.org'):
+def create_app(config_path='config.ini', api='https://api.moalmanac.org', populating: bool = False):
     app = flask.Flask(__name__)
     app.json.sort_keys = False
 
@@ -14,7 +14,8 @@ def create_app(config_path='config.ini', api='https://api.moalmanac.org'):
     app.config['INI_CONFIG'] = config
     app.config['API_URL'] = api
 
-    engine, session_factory = database.init_db(config=config)
+    db_filename = config['app'].get('cache') if populating else 'cache.sqlite3'
+    engine, session_factory = database.init_db(file=db_filename)
     models.Base.metadata.create_all(bind=engine)
 
     app.config['SESSION_FACTORY'] = session_factory
