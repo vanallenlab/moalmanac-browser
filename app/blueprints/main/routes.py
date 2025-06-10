@@ -170,7 +170,7 @@ def indications(indication_id: str = None):
             statements=processed_statements
         )
     else:
-        records = requests.API.get_indications()
+        records = requests.API.get_indications(config_organization_filter=True)
         cached_indications = requests.Local.get_indications()
         processed_indications = services.append_field_from_matching_records(
             target_list=records,
@@ -179,6 +179,9 @@ def indications(indication_id: str = None):
             new_field_name='statements_count',
             match_key='id'
         )
+        for indication in processed_indications:
+            if not indication.get('statements_count', None):
+                indication['statements_count'] = 0
         all_organizations = sorted(set(record['document']['organization']['name'] for record in records))
         return flask.render_template(
             template_name_or_list='indications.html',
