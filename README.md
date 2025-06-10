@@ -1,5 +1,5 @@
 # Molecular Oncology Almanac - Web Browser
-Web browser (2.0) for moalmanac db
+In development web browser for the [Molecular Oncology Almanac](https://moalmanac.org) [database](https://github.com/vanallenlab/moalmanac-db), viewable at: [dev.moalmanac.org](https://dev.moalmanac.org).
 
 ## Installation 
 ### Download
@@ -32,7 +32,7 @@ The Molecular Oncology Almanac web browser supports multiple configurable instan
 ### Updating local caches
 To update a local cache, run:
 ```bash
-python -m app.populate_database --api https://api.moalmanac.org --config config/default.ini --drop-tables
+python -m app.populate_database --api https://api.moalmanac.org --config deploy/default/config.ini --drop-tables
 ```
 
 To update multiple local caches, append `--config` multiple times. For example:
