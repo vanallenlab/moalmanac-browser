@@ -59,7 +59,7 @@ class Indications(Base):
     __tablename__ = "indications"
 
     id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
-    name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    indication = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     document_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     document_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     organization_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)

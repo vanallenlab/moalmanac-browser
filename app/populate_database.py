@@ -204,6 +204,7 @@ class Process:
             'id': record.get('id'),
             'indication': record.get('indication'),
             'document_id': record.get('document').get('id'),
+            'document_name': record.get('document').get('name'),
             'organization_id': record.get('document').get('organization').get('id'),
             'organization_name': record.get('document').get('organization').get('name'),
             'organization_description': record.get('document').get('organization').get('description'),
@@ -528,8 +529,9 @@ class SQL:
         for record in records:
             indication = models.Indications(
                 id=record.get('id'),
-                name=record.get('name'),
+                indication=record.get('indication'),
                 document_id=record.get('document_id'),
+                document_name=record.get('document_name'),
                 organization_id=record.get('organization_id'),
                 organization_name=record.get('organization_name'),
                 statements_count=record.get('statements_count')
