@@ -19,6 +19,12 @@
   <h4 class="subtitle">Citation</h4>
   <p><a href="{{ indication.document.url }}" target="_blank">{{ indication.document.citation }}</a></p>
 
+  <div class="d-flex justify-content-end mb-3">
+    <a href="{{ api_url }}/indications/{{ indication.id | urlencode }}" target="_blank" class="btn btn-outline-primary">
+      View API
+    </a>
+  </div>
+
   <h4 class="subtitle">Therapeutic response</h4>
   <p>Precision oncology relationships for therapeutic response derived from this regulatory approval.</p>
 
