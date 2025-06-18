@@ -26,8 +26,12 @@ Propositions | Molecular Oncology Almanac
               <tr>
                 <td>{{ proposition.id }}</td>
                 <td>{{ proposition.predicate }}</td>
-                <td>{{ proposition['biomarkers'] | map(attribute='name') | join(', ') }}</td>
-                <td>{{ proposition['cancer_type']['name'] }}</td>
+                <td>
+                  {% for biomarker in proposition.biomarkers %}
+                    <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+                <td><a href="{{ url_for('main.diseases', disease_name=proposition.cancer_type.name | urlencode) }}">{{ proposition.cancer_type.name }}</a></td>
                 <td>
                   {% for therapy in proposition['therapies'] %}
                     <a href="{{ url_for('main.therapies', therapy_name=therapy.name) }}">{{ therapy.name }}</a>{% if not loop.last %},{% endif %}
