@@ -47,7 +47,7 @@
     <tbody>
       {% for biomarker in biomarkers %}
         <tr data-biomarkerType="{{ biomarker.type }}">
-          <td>{{ biomarker.name }}</td>
+          <td><a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a></td>
           <td>{{ biomarker.extensions[0].value }}</td>
           <td>{{ biomarker.propositions_count }}</td>
           <td>{{ biomarker.statements_count }}</td>
