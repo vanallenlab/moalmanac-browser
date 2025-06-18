@@ -21,9 +21,10 @@ Statement {{ statement.id }} | Molecular Oncology Almanac
   {% endif %}
 
   <h4 class="subtitle">Citation</h4>
-  {% for document in statement.documents %}
-    <a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.citation }}</a>
-  {% endfor %}
-  <br><br>
+  <p>
+    {% for document in statement.documents %}
+      <a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.citation }}</a>
+    {% endfor %}
+  </p>
 
 {% endblock %}
