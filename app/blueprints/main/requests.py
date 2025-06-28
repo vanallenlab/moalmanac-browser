@@ -36,7 +36,7 @@ class API:
     @classmethod
     def get_biomarker(cls, biomarker_name: str = None):
         if biomarker_name:
-            response = cls.get(request=f"biomarkers/{biomarker_name}")
+            response = cls.get(request=f"biomarkers?biomarker_name={biomarker_name}")
             if response.status_code == 200:
                 data = response.json()['data']
                 return data[0]
@@ -75,7 +75,7 @@ class API:
     @classmethod
     def get_disease(cls, name: str = None):
         if name:
-            response = cls.get(request=f"diseases/{name}")
+            response = cls.get(request=f"diseases?disease_name={name}")
             if response.status_code == 200:
                 data = response.json()['data']
                 return data[0]
@@ -88,7 +88,7 @@ class API:
     @classmethod
     def get_document(cls, document_id: str):
         if document_id:
-            response = cls.get(request=f"documents/{document_id}")
+            response = cls.get(request=f"documents?document_id={document_id}")
             if response.status_code == 200:
                 data = response.json()['data']
                 return data[0]
@@ -119,7 +119,7 @@ class API:
     @classmethod
     def get_gene(cls, name: str = None):
         if name:
-            response = cls.get(request=f"genes/{name}")
+            response = cls.get(request=f"genes?gene_name={name}")
             if response.status_code == 200:
                 data = response.json()['data']
                 return data[0]
@@ -131,7 +131,7 @@ class API:
 
     @classmethod
     def get_indication(cls, indication_id: str):
-        response = cls.get(request=f"indications/{indication_id}")
+        response = cls.get(request=f"indications?indication_id={indication_id}")
         if response.status_code == 200:
             data = response.json()['data']
             return data[0]
@@ -158,7 +158,7 @@ class API:
 
     @classmethod
     def get_organization(cls, organization_id: str):
-        response = cls.get(request=f"organizations/{organization_id}")
+        response = cls.get(request=f"organizations?organization_id={organization_id}")
         if response.status_code == 200:
             data = response.json()['data']
             return data[0]
@@ -176,7 +176,7 @@ class API:
 
     @classmethod
     def get_statement(cls, statement_id):
-        response = cls.get(request=f"statements/{statement_id}")
+        response = cls.get(request=f"statements?statement_id={statement_id}")
         if response.status_code == 200:
             data = response.json()['data']
             return data[0]
@@ -204,7 +204,7 @@ class API:
     @classmethod
     def get_therapy(cls, name: str = None):
         if name:
-            response = cls.get(request=f"therapies/{name}")
+            response = cls.get(request=f"therapies?therapy_name={name}")
             if response.status_code == 200:
                 data = response.json()['data']
                 return data[0]
