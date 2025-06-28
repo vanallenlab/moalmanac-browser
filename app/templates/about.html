@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}
+About | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <div class="row align-items-stretch">
+    <div class="col-sm-12 d-flex">
+      <div class="card flex-fill mb-12">
+        <h5 class="card-header">About</h5>
+        <div class="card-body">
+          <p class="card-text">
+            The Molecular Oncology Almanac (MOAlmanac) is a clinical and biological interpretation algorithm and paired
+            knowledge base for the precision oncology. <strong>This webpage and version of the database is currently in development</strong>.
+            You can view our stable, production version of the algorithm and database at:
+            <a href="https://moalmanac.org" target="_blank">https://moalmanac.org</a>. This major release aims to align with
+            representation standards developed by the <a href="https://www.ga4gh.org" target="_blank">Global Alliance for Genomics & Health</a>
+            <a href="https://www.ga4gh.org/work_stream/genomic-knowledge-standards/" target="_blank">Genomic Knowledge Standards Work Stream</a>.
+            You can read about our progress, <a href="https://github.com/vanallenlab/moalmanac-db/blob/main/docs/referenced-schema-draft-about.md" target="_blank">here</a>.
+          </p>
+          <p class="card-text">
+            This website is specifically for browsing and accessing the underlying knowledge base, and there are several other
+            resources within the <a href="https://github.com/topics/molecular-oncology-almanac" target="_blank">Molecular Oncology Almanac ecosystem</a>.
+            <ul>
+              <li>
+                <a href="https://api.moalmanac.org" target="_blank">Molecular Oncology Almanac API</a>, a service to
+                programmatically interface with our knowledge base [<a href="https://github.com/vanallenlab/moalmanac-api" target="_blank">GitHub</a>].
+              </li>
+              <li>
+                <a href="https://dev.moalmanac.org" target="_blank">Molecular Oncology Almanac Browser</a>, a website to browse
+                our underlying knowledge base [<a href="https://github.com/vanallenlab/moalmanac-browser" target="_blank">GitHub</a>].
+              </li>
+              <li>
+                Molecular Oncology Almanac Database, the content and release notes of our underlying knowledge base
+                [<a href="https://github.com/vanallenlab/moalmanac-db" target="_blank">GitHub</a>].
+              </li>
+            </ul>
+            The original version of this website can be found at: <a href="https://moalmanac.org">https://moalmanac.org</a>.
+          </p>
+          <p class="card-text">
+            Additionally, we support region-specific instances of knowledge base. They currently include:
+            <ul>
+              <li>The <a href="https://ie.moalmanac.org" target="_blank">Republic of Ireland. https://ie.moalmanac.org</a>.</li>
+            </ul>
+          </p>
+          {% if about_template %}
+            {% include about_template %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+
+  <div class="row align-items-stretch">
+    <div class="col-sm-12 d-flex">
+      <div class="card flex-fill mb-3">
+        <h5 class="card-header">Citations</h5>
+        <div class="card-body">
+          <p class="card-text">
+            If you use the Molecular Oncology Almanac, please cite our publication:<br>
+            <a href="https://doi.org/10.1038/s43018-021-00243-3" target="_blank">Reardon, B., Moore, N.D., Moore, N.S. <i>et al</i>. Integrating molecular profiles into clinical frameworks through the Molecular Oncology Almanac to prospectively guide precision oncology. <i>Nat Cancer</i> (2021). https://doi.org/10.1038/s43018-021-00243-3</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row align-items-stretch">
+    <div class="col-sm-12 d-flex">
+      <div class="card flex-fill mb-3">
+        <h5 class="card-header">Data access</h5>
+        <div class="card-body">
+          <p class="card-text">
+            The contents of this knowledge base can be downloaded through
+            <a href="https://github.com/vanallenlab/moalmanac-db/releases" target="_blank">the Database's GitHub</a> or the
+            <a href="https://api.moalmanac.org" target="_blank">API</a>, particularly the
+            <a href="https://api.moalmanac.org/#/Entities/get_statements_statements_get" target="_blank">Statements endpoint</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

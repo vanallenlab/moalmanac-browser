@@ -21,6 +21,13 @@ def index():
         terms=terms
     )
 
+
+@main_bp.route('/about', methods=['GET', 'POST'])
+def about():
+    return flask.render_template(
+        template_name_or_list='about.html',
+    )
+
 @main_bp.route('/biomarkers', defaults={'biomarker_name': None}, methods=['GET', 'POST'])
 @main_bp.route('/biomarkers/<biomarker_name>', endpoint='biomarkers')
 def biomarkers(biomarker_name: str = None):
