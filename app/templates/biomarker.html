@@ -38,7 +38,7 @@
     </div>
 
     <div class="d-flex justify-content-end mb-3">
-      <a href="{{ api_url }}/biomarkers/{{ biomarker.name | urlencode }}" target="_blank" class="btn btn-outline-primary">
+      <a href="{{ api_url }}/biomarkers?biomarker_name={{ biomarker.name | urlencode }}" target="_blank" class="btn btn-outline-primary">
         View API
       </a>
     </div>

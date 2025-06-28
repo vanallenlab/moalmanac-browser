@@ -20,7 +20,7 @@
   <p><a href="{{ indication.document.url }}" target="_blank">{{ indication.document.citation }}</a></p>
 
   <div class="d-flex justify-content-end mb-3">
-    <a href="{{ api_url }}/indications/{{ indication.id | urlencode }}" target="_blank" class="btn btn-outline-primary">
+    <a href="{{ api_url }}/indications?indication_id={{ indication.id | urlencode }}" target="_blank" class="btn btn-outline-primary">
       View API
     </a>
   </div>
