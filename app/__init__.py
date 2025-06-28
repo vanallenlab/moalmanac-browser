@@ -33,13 +33,15 @@ def create_app(config_path='config.ini', api='https://api.moalmanac.org', popula
         caption = config['homepage'].get('caption', 'An open-source knowledgebase for precision cancer medicine.')
         api_url = app.config['API_URL']
         url = app.config['INI_CONFIG']['app'].get('url', 'dev.moalmanac.org')
+        about_template = app.config['INI_CONFIG']['about'].get('template', None)
         return dict(
             css_path=css_path,
             footer_logos_path=footer_logos_path,
             subtitle=subtitle,
             caption=caption,
             api_url=api_url,
-            url=url
+            url=url,
+            about_template=about_template
         )
 
     return app
