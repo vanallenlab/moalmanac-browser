@@ -99,12 +99,7 @@ body {
    4. Footer
    ==================== */
 footer {
-    position: relative;
-    bottom: 0;
-    width: 100%;
-    padding: 2em;
     background-color: #EEEEEE;
-    margin-top: 50px;
 }
 
 /* ====================
