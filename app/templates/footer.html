@@ -1,12 +1,13 @@
-<footer class="footer text-center">
+<footer class="footer mt-auto py-3 text-center">
   <div class="container text-muted">
       <p class="center-text">
           Please review our <a href="https://moalmanac.org/privacy_policy">privacy policy</a> and <a href="https://moalmanac.org/terms">terms</a> before use.
           <br>
-          <a href="https://github.com/vanallenlab/moalmanac-api" target="_blank" rel="noopener noreferrer">API</a> |
+          <a href="{{ api_url }}" target="_blank" rel="noopener noreferrer">API</a> |
           <a href="https://bsky.app/profile/moalmanac.org" target="_blank" rel="noopener noreferrer">Bluesky</a> |
-          <a href = "mailto: moalmanac@ds.dfci.harvard.edu" target="_blank" rel="noopener noreferrer">Contact</a> |
-          <a href="https://github.com/topics/molecular-oncology-almanac" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://news.moalmanac.org/category/release" rel="noopener noreferrer">Changelog</a> |
+          <a href="{{ url_for('main.about') }}#contact">Contact</a> |
+          <a href="https://news.moalmanac.org" rel="noopener noreferrer">News</a>
       </p>
       {% include footer_logos_path %}
   </div>

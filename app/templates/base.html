@@ -22,7 +22,7 @@
     </title>
   </head>
 
-  <body>
+  <body class="d-flex flex-column min-vh-100">
     <div id="content">
       {% include "navbar.html" %}
       <section class="container-fluid">
@@ -33,11 +33,9 @@
       </section>
     </div>
 
-    <div id="footer">
-      {% block footer %}
-        {% include "footer.html" %}
-      {% endblock %}
-    </div>
+    {% block footer %}
+      {% include "footer.html" %}
+    {% endblock %}
 
     {% block scripts %}
       <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
