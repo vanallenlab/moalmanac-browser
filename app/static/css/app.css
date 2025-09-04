@@ -200,7 +200,7 @@ a {
 
 a:hover {
     color: var(--primary-color);
-    text-decoration: none;
+    text-decoration: underline;
 }
 
 /* ====================
