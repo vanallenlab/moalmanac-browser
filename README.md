@@ -27,7 +27,7 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-The Molecular Oncology Almanac web browser supports multiple configurable instances, each defined by a folder under [`deploy/](deploy). Each instance has its own configuration file, https set up, and dedicated SQLite cache. [Our API](https://github.com/vanallenlab/moalmanac-api) provides the data source for the local SQLite3 cache, which is populated according to the settings in the selected config file.
+The Molecular Oncology Almanac web browser supports multiple configurable instances, each defined by a folder under [deploy/](deploy). Each instance has its own configuration file, https set up, and dedicated SQLite cache. [Our API](https://github.com/vanallenlab/moalmanac-api) provides the data source for the local SQLite3 cache, which is populated according to the settings in the selected config file.
 
 ### Updating local caches
 To update a local cache, run:
