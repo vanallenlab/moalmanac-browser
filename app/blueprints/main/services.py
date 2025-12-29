@@ -3,14 +3,16 @@ services.py
 
 Service-layer functions for intermediate processing of data retrieved from handlers or API requests.
 """
+
 import collections
 
+
 def append_field_from_matching_records(
-        target_list: list[dict],
-        source_list: list[dict],
-        source_field: str,
-        new_field_name: str,
-        match_key: str = 'id'
+    target_list: list[dict],
+    source_list: list[dict],
+    source_field: str,
+    new_field_name: str,
+    match_key: str = "id",
 ):
     """
     Appends a field from one list of records, source_list, to another, target_list, based on matching keys.
@@ -25,7 +27,11 @@ def append_field_from_matching_records(
     Returns:
         list[dict]: The updated list of target records with the appended field.
     """
-    source_lookup = {item[match_key]: item[source_field] for item in source_list if match_key in item and source_field in item}
+    source_lookup = {
+        item[match_key]: item[source_field]
+        for item in source_list
+        if match_key in item and source_field in item
+    }
 
     for record in target_list:
         record_id = record.get(match_key)
@@ -47,9 +53,10 @@ def categorize_propositions(records: list[dict]):
     """
     categorized = collections.defaultdict(list)
     for record in records:
-        key = record.get('type')
+        key = record.get("type")
         categorized[key].append(record)
     return dict(categorized)
+
 
 def extract_biomarkers(biomarkers: list[dict]):
     """
@@ -61,7 +68,8 @@ def extract_biomarkers(biomarkers: list[dict]):
     Returns:
         list[dict]: A list of dictionaries only containing `id` and `name` keys for each biomarker in biomarkers.
     """
-    return [{'id': b['id'], 'name': b['name']} for b in biomarkers]
+    return [{"id": b["id"], "name": b["name"]} for b in biomarkers]
+
 
 def extract_diseases(disease: dict):
     """
@@ -74,7 +82,8 @@ def extract_diseases(disease: dict):
     Returns:
         dict: A dictionary only containing `id` and `name` keys.
     """
-    return {'id': disease['id'], 'name': disease['name']}
+    return {"id": disease["id"], "name": disease["name"]}
+
 
 def extract_therapies(object_therapeutic: dict):
     """
@@ -87,10 +96,13 @@ def extract_therapies(object_therapeutic: dict):
     Returns:
          list[dict]: A list of dictionaries only containing `id` and `name` keys for each therapy in objectTherapeutic.
     """
-    if 'therapies' in object_therapeutic:
-        return [{'id': t['id'], 'name': t['name']} for t in object_therapeutic['therapies']]
+    if "therapies" in object_therapeutic:
+        return [
+            {"id": t["id"], "name": t["name"]} for t in object_therapeutic["therapies"]
+        ]
     else:
-        return [{'id': object_therapeutic['id'], 'name': object_therapeutic['name']}]
+        return [{"id": object_therapeutic["id"], "name": object_therapeutic["name"]}]
+
 
 def get_extension(list_of_extensions: list, name: str):
     """
@@ -103,7 +115,10 @@ def get_extension(list_of_extensions: list, name: str):
     Returns:
         - list: A list of extensions whose name value matches `name`.
     """
-    return [extension for extension in list_of_extensions if extension.get('name') == name]
+    return [
+        extension for extension in list_of_extensions if extension.get("name") == name
+    ]
+
 
 def map_predict(string: str):
     """
@@ -115,12 +130,13 @@ def map_predict(string: str):
     Returns:
         str: The mapped string to display within the view.
     """
-    if string == 'predictSensitivityTo':
-        return 'Sensitivity'
-    elif string == 'predictResistanceTo':
-        return 'Resistance'
+    if string == "predictSensitivityTo":
+        return "Sensitivity"
+    elif string == "predictResistanceTo":
+        return "Resistance"
     else:
-        return 'ERROR'
+        return "ERROR"
+
 
 def process_gene(record: list[dict]):
     """
@@ -133,9 +149,12 @@ def process_gene(record: list[dict]):
     Returns:
         record (dict): A dictionary of the original record with extensions moved to the root.
     """
-    location = get_extension(list_of_extensions=record.get('extensions'), name='location')
-    record['location'] = location[0]['value']
+    location = get_extension(
+        list_of_extensions=record.get("extensions"), name="location"
+    )
+    record["location"] = location[0]["value"]
     return record
+
 
 def process_propositions(records: list[dict]):
     """
@@ -150,6 +169,7 @@ def process_propositions(records: list[dict]):
     simplified = simplify_proposition_records(records=records)
     return categorize_propositions(records=simplified)
 
+
 def process_statement(record: dict):
     """
     Processes a single statement record from the API response into a simplified format for the statements view.
@@ -161,13 +181,18 @@ def process_statement(record: dict):
         dict: A dictionary of statements and their corresponding simplified records.
     """
     return {
-        'id': record['id'],
-        'proposition': simplify_proposition_record(record=record['proposition']),
-        'description': record['description'],
-        'direction': '+' if record['direction'] == 'supports' else '-',
-        'documents': [{'id': doc['id'], 'name': doc['name'], 'citation': doc['citation']} for doc in record['reportedIn']],
-        'raw': record
+        "id": record["id"],
+        "proposition": simplify_proposition_record(record=record["proposition"]),
+        "description": record["description"],
+        "direction": "+" if record["direction"] == "supports" else "-",
+        "documents": [
+            {"id": doc["id"], "name": doc["name"], "citation": doc["citation"]}
+            for doc in record["reportedIn"]
+        ],
+        "organization": record["indication"]["document"]["organization"]["id"].upper(),
+        "raw": record,
     }
+
 
 def process_statements(records: list[dict]):
     """
@@ -185,6 +210,7 @@ def process_statements(records: list[dict]):
         new_records.append(new_record)
     return new_records
 
+
 def process_therapy(record: dict):
     """
     Process a therapy record from the API for use within the therapies view. Currently, this simply extracts the
@@ -196,11 +222,16 @@ def process_therapy(record: dict):
     Returns:
         record (dict): A dictionary of the original record with extensions moved to the root.
     """
-    therapy_strategy = get_extension(list_of_extensions=record.get('extensions'), name='therapy_strategy')
-    record['therapy_strategy'] = ', '.join(therapy_strategy[0]['value'])
-    therapy_type = get_extension(list_of_extensions=record.get('extensions'), name='therapy_type')
-    record['therapy_type'] = therapy_type[0]['value']
+    therapy_strategy = get_extension(
+        list_of_extensions=record.get("extensions"), name="therapy_strategy"
+    )
+    record["therapy_strategy"] = ", ".join(therapy_strategy[0]["value"])
+    therapy_type = get_extension(
+        list_of_extensions=record.get("extensions"), name="therapy_type"
+    )
+    record["therapy_type"] = therapy_type[0]["value"]
     return record
+
 
 def simplify_proposition_record(record: dict):
     """
@@ -214,21 +245,24 @@ def simplify_proposition_record(record: dict):
         new_record (dict): A simplified proposition record.
     """
     new_record = {
-        'id': record['id'],
-        'type': record['type'],
-        'predicate': map_predict(string=record['predicate'])
+        "id": record["id"],
+        "type": record["type"],
+        "predicate": map_predict(string=record["predicate"]),
     }
-    if record['type'] == 'VariantTherapeuticResponseProposition':
-        biomarkers = extract_biomarkers(biomarkers=record['biomarkers'])
-        new_record['biomarkers'] = sort_dicts_by_key(data=biomarkers, key='name')
-        new_record['cancer_type'] = extract_diseases(disease=record['conditionQualifier'])
-        therapies = extract_therapies(object_therapeutic=record['objectTherapeutic'])
-        new_record['therapies'] = sort_dicts_by_key(data=therapies, key='name')
-        new_record['proposition_type'] = "Therapeutic response"
+    if record["type"] == "VariantTherapeuticResponseProposition":
+        biomarkers = extract_biomarkers(biomarkers=record["biomarkers"])
+        new_record["biomarkers"] = sort_dicts_by_key(data=biomarkers, key="name")
+        new_record["cancer_type"] = extract_diseases(
+            disease=record["conditionQualifier"]
+        )
+        therapies = extract_therapies(object_therapeutic=record["objectTherapeutic"])
+        new_record["therapies"] = sort_dicts_by_key(data=therapies, key="name")
+        new_record["proposition_type"] = "Therapeutic response"
     else:
         # We'll add if else statements as we support additional proposition types
-        print('This should not happen!')
+        print("This should not happen!")
     return new_record
+
 
 def simplify_proposition_records(records: list[dict]):
     """
@@ -246,6 +280,7 @@ def simplify_proposition_records(records: list[dict]):
         new_record = simplify_proposition_record(record=record)
         new_records.append(new_record)
     return new_records
+
 
 def sort_dicts_by_key(data: list[dict], key, reverse=False):
     """

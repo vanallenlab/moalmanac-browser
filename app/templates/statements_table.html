@@ -6,7 +6,7 @@
       <th style="width: 25%">Biomarker(s)</th>
       <th style="width: 25%">Cancer type</th>
       <th style="width: 25%">Therapy(ies)</th>
-      <th style="width: 5%"></th>
+      <th style="width: 10%"></th>
     </tr>
   </thead>
   <tbody>
@@ -25,6 +25,7 @@
           {% endfor %}
         </td>
         <td>
+          {{ statement['organization'] }}
           <a href="{{ url_for('main.statements', statement_id=statement.id) }}" class="btn btn-sm" title="More information" data-bs-toggle="tooltip">
             <i class="bi bi-info-circle" aria-hidden="true"></i>
           </a>
