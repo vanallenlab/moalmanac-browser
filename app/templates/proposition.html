@@ -45,19 +45,14 @@ Proposition {{ proposition.id }} | Molecular Oncology Almanac
       <tr>
         <th style="width: 10%">Evidence</th>
         <th style="width: 10%">Source</th>
-        <!--<th style="width: 10%">Organization</th>-->
-        <!--<th style="width: 10%">Document type</th>-->
-        <!--<th style="width: 25%">Document</th>-->
-        <th style="width: 90%">Description</th>
+        <th style="width: 80%">Description</th>
       </tr>
     </thead>
     <tbody>
       {% for statement in statements %}
         <tr>
-          <td>Tier 1<br>Level A</td>
+          <td>Tier 1<br>Level A<br><br>{{ statement.direction }}</td>
           <td><a href="{{ url_for('main.documents', document_id=statement.documents[0].id) }}">{{ statement.documents[0].name }}</a></td>
-          <!--<td>{{ statement.documents[0].subtype }}</td>-->
-          <!--<td>{{ statement.documents[0].name }}</td>-->
           <td>
             <a href="{{ url_for('main.statements', statement_id=statement.id) }}">{{ statement.description }}</a>
           </td>

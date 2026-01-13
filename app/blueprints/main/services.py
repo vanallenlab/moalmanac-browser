@@ -197,17 +197,21 @@ def process_statement(record: dict):
         "id": record["id"],
         "proposition": simplify_proposition_record(record=record["proposition"]),
         "description": record["description"],
-        "direction": "+" if record["direction"] == "supports" else "-",
+        "direction": "Supports" if record["direction"] == "supports" else "Disputes",
         "documents": [
             {
                 "id": doc["id"],
                 "subtype": doc["subtype"],
                 "name": doc["name"],
-                "citation": doc["citation"]
+                "citation": doc["citation"],
             }
             for doc in record["reportedIn"]
         ],
-        "organization": record["indication"]["document"]["organization"]["id"].upper() if record.get('indication', None) else None,
+        "organization": (
+            record["indication"]["document"]["organization"]["id"].upper()
+            if record.get("indication", None)
+            else None
+        ),
         "raw": record,
     }
 
@@ -266,6 +270,7 @@ def simplify_proposition_record(record: dict):
         "id": record["id"],
         "type": record["type"],
         "predicate": map_predict(string=record["predicate"]),
+        "aggregates": record.get("aggregates", {}),
     }
     if record["type"] == "VariantTherapeuticResponseProposition":
         biomarkers = extract_biomarkers(biomarkers=record["biomarkers"])

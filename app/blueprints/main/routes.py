@@ -300,7 +300,8 @@ def search():
     records = requests.API.get_search_results()
     processed = services.process_propositions(records=records)
     return flask.render_template(
-        template_name_or_list="search.html", propositions_by_category=processed
+        template_name_or_list="search.html", 
+        propositions_by_category=processed
     )
 
 
