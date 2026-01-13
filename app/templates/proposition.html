@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Proposition {{ proposition.id }} | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">{{ proposition.proposition_type.title() }}</h2>
+  <p>
+    {% set biomarkers = proposition.biomarkers %}
+    {% set n_b = biomarkers|length %}
+    {% for biomarker in biomarkers -%}
+    <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{% if not loop.last %}{% if n_b == 2 %} and {% else %}{% if loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}{% endif -%}
+    {%- endfor %}
+
+    status confers <strong>therapeutic {{ proposition.predicate.lower() }}</strong> to
+
+    {% set therapies = proposition.therapies %}
+    {% set n = therapies|length %}
+
+    {% if n == 1 %}
+      <a href="{{ url_for('main.therapies', therapy_name=therapies[0].name | urlencode) }}">{{ therapies[0].name }}</a>
+    {% else %}
+      <a href="{{ url_for('main.therapies', therapy_name=therapies[0].name | urlencode) }}">{{ therapies[0].name }}</a>
+      in combination with
+      {% for therapy in therapies[1:] %}
+        <a href="{{ url_for('main.therapies', therapy_name=therapy.name | urlencode) }}">{{ therapy.name }}</a>{% if not loop.last %}{% if n == 3 %} and {% else %}{% if loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}{% endif %}
+      {% endfor %}
+    {% endif %}
+    in patients with
+    <a href="{{ url_for('main.diseases', disease_name=proposition.cancer_type.name | urlencode) }}">{{ proposition.cancer_type.name }}</a>.
+  </p>
+  <div class="d-flex justify-content-end mb-3">
+    <a href="{{ api_url }}/propositions?proposition_id={{ proposition.id | urlencode }}" target="_blank" class="btn btn-outline-primary">
+      View API
+    </a>
+  </div>
+
+  <h4 class="subtitle">Statements</h4>
+  <p></p>
+
+  <table id="statements-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+    <thead>
+      <tr>
+        <th style="width: 10%">Evidence</th>
+        <th style="width: 10%">Source</th>
+        <!--<th style="width: 10%">Organization</th>-->
+        <!--<th style="width: 10%">Document type</th>-->
+        <!--<th style="width: 25%">Document</th>-->
+        <th style="width: 90%">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for statement in statements %}
+        <tr>
+          <td>Tier 1<br>Level A</td>
+          <td><a href="{{ url_for('main.documents', document_id=statement.documents[0].id) }}">{{ statement.documents[0].name }}</a></td>
+          <!--<td>{{ statement.documents[0].subtype }}</td>-->
+          <!--<td>{{ statement.documents[0].name }}</td>-->
+          <td>
+            <a href="{{ url_for('main.statements', statement_id=statement.id) }}">{{ statement.description }}</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br>
+  <div class="d-flex justify-content-end mb-3">
+    <a href="{{ api_url }}/statements?proposition_id={{ proposition.id | urlencode }}&{{ organization_filters }}" target="_blank" class="btn btn-outline-primary">
+      View API
+    </a>
+  </div>
+
+{% endblock %}

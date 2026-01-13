@@ -156,6 +156,19 @@ def process_gene(record: list[dict]):
     return record
 
 
+def process_proposition(record: dict):
+    """
+    Processes a single proposition record from the API response into a simplified format for the propositions view.
+
+    Args:
+        record (dict): A proposition record from the API.
+
+    Returns:
+        record (dict): A simplified proposition record.
+    """
+    return simplify_proposition_record(record=record)
+
+
 def process_propositions(records: list[dict]):
     """
     Processes proposition records from the API response into a simplified format for the propositions view.
@@ -186,10 +199,15 @@ def process_statement(record: dict):
         "description": record["description"],
         "direction": "+" if record["direction"] == "supports" else "-",
         "documents": [
-            {"id": doc["id"], "name": doc["name"], "citation": doc["citation"]}
+            {
+                "id": doc["id"],
+                "subtype": doc["subtype"],
+                "name": doc["name"],
+                "citation": doc["citation"]
+            }
             for doc in record["reportedIn"]
         ],
-        "organization": record["indication"]["document"]["organization"]["id"].upper(),
+        "organization": record["indication"]["document"]["organization"]["id"].upper() if record.get('indication', None) else None,
         "raw": record,
     }
 
