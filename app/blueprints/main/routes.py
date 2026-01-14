@@ -185,17 +185,18 @@ def indications(indication_id: str = None):
     if indication_id:
         record = requests.API.get_indication(indication_id=indication_id)
 
-        indication_statements = requests.API.get_statements(
+        indication_propositions = requests.API.get_search_results(
+            config_organization_filter=True,
             filters=f"indication={indication_id}"
         )
-        processed_statements = services.process_statements(
-            records=indication_statements
+        processed_propositions = services.process_propositions(
+            records=indication_propositions
         )
 
         return flask.render_template(
             template_name_or_list="indication.html",
             indication=record,
-            statements=processed_statements,
+            propositions_by_category=processed_propositions,
         )
     else:
         records = requests.API.get_indications(config_organization_filter=True)
