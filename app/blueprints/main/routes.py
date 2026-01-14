@@ -286,7 +286,7 @@ def propositions(proposition_id: str | None = None):
             template_name_or_list="proposition.html",
             proposition=processed,
             statements=processed_statements,
-            organization_filters=requests.API.get_config_organization_filters()
+            organization_filters=requests.API.get_config_organization_filters(),
         )
     records = requests.API.get_propositions()
     processed = services.process_propositions(records=records)
@@ -299,9 +299,11 @@ def propositions(proposition_id: str | None = None):
 def search():
     records = requests.API.get_search_results()
     processed = services.process_propositions(records=records)
+    response_organizations = services.extract_organizations(propositions=processed)
     return flask.render_template(
-        template_name_or_list="search.html", 
-        propositions_by_category=processed
+        template_name_or_list="search.html",
+        propositions_by_category=processed,
+        organizations=response_organizations,
     )
 
 

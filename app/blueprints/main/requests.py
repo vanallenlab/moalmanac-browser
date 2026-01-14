@@ -199,7 +199,7 @@ class API:
 
     @classmethod
     def get_search_results(
-        cls, config_organization_filter: bool = False, filters: str | None = None
+        cls, config_organization_filter: bool = True, filters: str | None = None
     ):
         request = "search"
         filters_to_apply = []

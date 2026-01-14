@@ -85,6 +85,26 @@ def extract_diseases(disease: dict):
     return {"id": disease["id"], "name": disease["name"]}
 
 
+def extract_organizations(propositions: dict):
+    """
+    Returns organizations associated with Variant Therapeutic Response Propositions to filter by regulatory agency.
+
+    Args:
+        propositions (dict): A dictionary processed propositions by type from /search route.
+
+    Returns:
+        list(dict): list of dictionaries of organization ids, with uppercase formatting applied.
+    """
+    organizations = set()
+    for proposition in propositions["VariantTherapeuticResponseProposition"]:
+        for organization in proposition.get("aggregates", {}).get(
+            "by_organization", []
+        ):
+            if "id" in organization:
+                organizations.add(organization["id"])
+    return [{"id": organization_id} for organization_id in sorted(organizations)]
+
+
 def extract_therapies(object_therapeutic: dict):
     """
     Extracts `id` and `name` from a dictionary representing therapy(ies), from the `objectTherapeutic` field. Single
