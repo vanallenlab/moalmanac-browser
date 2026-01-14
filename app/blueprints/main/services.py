@@ -140,6 +140,30 @@ def get_extension(list_of_extensions: list, name: str):
     ]
 
 
+def filter_search_results_required_organization(
+    records: list[dict], organization_id: str
+) -> list[dict]:
+    """
+    Filters processed proposition records from process_propositions function
+    to require the specified organization.
+
+    Args:
+        records (list[dict]): List of proposition records from process_propositions function.
+
+    Returns:
+        list[dict]: records, requires organization to be listed within aggregates['by_organization']
+    """
+    filtered = []
+    for record in records:
+        by_organization = record.get("aggregates", {}).get("by_organization", [])
+        if any(
+            organization.get("id") == organization_id
+            for organization in by_organization
+        ):
+            filtered.append(record)
+    return filtered
+
+
 def map_predict(string: str):
     """
     Maps the predicate string from the values required by VA-Spec to the chosen string to display within the view.

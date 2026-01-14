@@ -255,11 +255,20 @@ def organizations(organization_id):
             match_key="id",
         )
 
-        organization_statements = requests.API.get_statements(
-            filters=f"organization={organization_id}"
+        organization_propositions = requests.API.get_search_results(
+            config_organization_filter=True,
+            filters=f"",
+            # Filter for query will be contained already within organization filters
+            # of the browser's instance
         )
-        processed_statements = services.process_statements(
-            records=organization_statements
+        filtered_propositions = services.filter_search_results_required_organization(
+            records=organization_propositions, organization_id=organization_id
+        )
+        processed_propositions = services.process_propositions(
+            records=filtered_propositions
+        )
+        response_organizations = services.extract_organizations(
+            propositions=processed_propositions
         )
 
         return flask.render_template(
@@ -267,7 +276,8 @@ def organizations(organization_id):
             organization=record,
             documents=organization_documents,
             indications=organization_indications,
-            statements=processed_statements,
+            propositions_by_category=processed_propositions,
+            organizations=response_organizations,
         )
     else:
         records = requests.Local.get_organizations()
