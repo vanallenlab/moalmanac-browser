@@ -33,22 +33,24 @@ def about():
     "/biomarkers", defaults={"biomarker_name": None}, methods=["GET", "POST"]
 )
 @main_bp.route("/biomarkers/<biomarker_name>", endpoint="biomarkers")
-def biomarkers(biomarker_name: str = None):
+def biomarkers(biomarker_name: str | None = None):
     if biomarker_name:
         record = requests.API.get_biomarker(biomarker_name=biomarker_name)
         # processed_record = services.process_biomarker(record=record)
         processed_record = record
 
-        records = requests.API.get_search_results(
+        biomarker_propositions = requests.API.get_search_results(
             config_organization_filter=True,
             filters=f"biomarker={biomarker_name.replace(' ', '%20')}",
         )
-        processed = services.process_propositions(records=records)
+        processed_propositions = services.process_propositions(
+            records=biomarker_propositions
+        )
 
         return flask.render_template(
             template_name_or_list="biomarker.html",
             biomarker=processed_record,
-            propositions_by_category=processed,
+            propositions_by_category=processed_propositions,
         )
     else:
         records = requests.Local.get_biomarkers()
@@ -68,15 +70,18 @@ def diseases(disease_name: str = None):
         processed_record = record
         # processed_record = services.process_disease(record=record)
 
-        disease_statements = requests.API.get_statements(
-            config_organization_filter=True, filters=f"disease={disease_name}"
+        disease_propositions = requests.API.get_search_results(
+            config_organization_filter=True,
+            filters=f"disease={disease_name}",
         )
-        processed_statements = services.process_statements(records=disease_statements)
+        processed_propositions = services.process_propositions(
+            records=disease_propositions
+        )
 
         return flask.render_template(
             template_name_or_list="disease.html",
             disease=processed_record,
-            statements=processed_statements,
+            propositions_by_category=processed_propositions,
         )
     else:
         records = requests.Local.get_diseases()
@@ -152,16 +157,16 @@ def genes(gene_symbol: str | None = None):
             match_key="id",
         )
 
-        gene_statements = requests.API.get_statements(
+        gene_propositions = requests.API.get_search_results(
             config_organization_filter=True, filters=f"gene={gene_symbol}"
         )
-        processed_statements = services.process_statements(records=gene_statements)
+        processed_propositions = services.process_propositions(records=gene_propositions)
 
         return flask.render_template(
             template_name_or_list="gene.html",
             gene=processed_record,
             biomarkers=gene_biomarkers,
-            statements=processed_statements,
+            propositions_by_category=processed_propositions,
         )
     else:
         records = requests.Local.get_genes()
