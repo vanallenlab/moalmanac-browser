@@ -108,16 +108,18 @@ def documents(document_id: str = None):
             match_key="id",
         )
 
-        document_statements = requests.API.get_statements(
-            filters=f"document={document_id}"
+        document_propositions = requests.API.get_search_results(
+            config_organization_filter=True, filters=f"document={document_id}"
         )
-        processed_statements = services.process_statements(records=document_statements)
+        processed_propositions = services.process_propositions(
+            records=document_propositions
+        )
 
         return flask.render_template(
             template_name_or_list="document.html",
             document=record,
             indications=document_indications,
-            statements=processed_statements,
+            propositions_by_category=processed_propositions,
         )
     else:
         records = requests.Local.get_documents()
