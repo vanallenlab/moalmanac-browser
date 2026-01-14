@@ -85,6 +85,26 @@ def extract_diseases(disease: dict):
     return {"id": disease["id"], "name": disease["name"]}
 
 
+def extract_organizations(propositions: dict):
+    """
+    Returns organizations associated with Variant Therapeutic Response Propositions to filter by regulatory agency.
+
+    Args:
+        propositions (dict): A dictionary processed propositions by type from /search route.
+
+    Returns:
+        list(dict): list of dictionaries of organization ids, with uppercase formatting applied.
+    """
+    organizations = set()
+    for proposition in propositions["VariantTherapeuticResponseProposition"]:
+        for organization in proposition.get("aggregates", {}).get(
+            "by_organization", []
+        ):
+            if "id" in organization:
+                organizations.add(organization["id"])
+    return [{"id": organization_id} for organization_id in sorted(organizations)]
+
+
 def extract_therapies(object_therapeutic: dict):
     """
     Extracts `id` and `name` from a dictionary representing therapy(ies), from the `objectTherapeutic` field. Single
@@ -118,6 +138,30 @@ def get_extension(list_of_extensions: list, name: str):
     return [
         extension for extension in list_of_extensions if extension.get("name") == name
     ]
+
+
+def filter_search_results_required_organization(
+    records: list[dict], organization_id: str
+) -> list[dict]:
+    """
+    Filters processed proposition records from process_propositions function
+    to require the specified organization.
+
+    Args:
+        records (list[dict]): List of proposition records from process_propositions function.
+
+    Returns:
+        list[dict]: records, requires organization to be listed within aggregates['by_organization']
+    """
+    filtered = []
+    for record in records:
+        by_organization = record.get("aggregates", {}).get("by_organization", [])
+        if any(
+            organization.get("id") == organization_id
+            for organization in by_organization
+        ):
+            filtered.append(record)
+    return filtered
 
 
 def map_predict(string: str):
@@ -156,6 +200,19 @@ def process_gene(record: list[dict]):
     return record
 
 
+def process_proposition(record: dict):
+    """
+    Processes a single proposition record from the API response into a simplified format for the propositions view.
+
+    Args:
+        record (dict): A proposition record from the API.
+
+    Returns:
+        record (dict): A simplified proposition record.
+    """
+    return simplify_proposition_record(record=record)
+
+
 def process_propositions(records: list[dict]):
     """
     Processes proposition records from the API response into a simplified format for the propositions view.
@@ -184,12 +241,21 @@ def process_statement(record: dict):
         "id": record["id"],
         "proposition": simplify_proposition_record(record=record["proposition"]),
         "description": record["description"],
-        "direction": "+" if record["direction"] == "supports" else "-",
+        "direction": "Supports" if record["direction"] == "supports" else "Disputes",
         "documents": [
-            {"id": doc["id"], "name": doc["name"], "citation": doc["citation"]}
+            {
+                "id": doc["id"],
+                "subtype": doc["subtype"],
+                "name": doc["name"],
+                "citation": doc["citation"],
+            }
             for doc in record["reportedIn"]
         ],
-        "organization": record["indication"]["document"]["organization"]["id"].upper(),
+        "organization": (
+            record["indication"]["document"]["organization"]["id"].upper()
+            if record.get("indication", None)
+            else None
+        ),
         "raw": record,
     }
 
@@ -248,6 +314,7 @@ def simplify_proposition_record(record: dict):
         "id": record["id"],
         "type": record["type"],
         "predicate": map_predict(string=record["predicate"]),
+        "aggregates": record.get("aggregates", {}),
     }
     if record["type"] == "VariantTherapeuticResponseProposition":
         biomarkers = extract_biomarkers(biomarkers=record["biomarkers"])

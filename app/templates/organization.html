@@ -58,7 +58,23 @@
   <h4 class="subtitle">Therapeutic response</h4>
   <p>Precision oncology relationships for therapeutic response derived from {{ organization.name }}'s regulatory approvals.</p>
 
-  {% include "statements_table.html" %}
-  <br>
+  <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
+    <span class="text-muted small me-2">Filter by organization:</span>
 
+    {% for org in organizations %}
+      <div class="form-check form-check-inline">
+        <input class="form-check-input org-toggle" type="checkbox" value="{{ org.id }}" id="org-{{ org.id }}">
+        <label class="form-check-label" for="org-{{ org.id }}">
+          <a href="{{ url_for('main.organizations', organization_id=org.id | urlencode) }}">{{ org.id|upper }}</a>
+        </label>
+      </div>
+    {% endfor %}
+
+    <div class="ms-auto">
+      <button class="btn btn-sm btn-outline-secondary" id="org-clear" type="button">Clear</button>
+    </div>
+  </div>
+
+  {% include "search_table_therapeutic_response.html" %}
+  <br>
 {% endblock %}
