@@ -160,7 +160,9 @@ def genes(gene_symbol: str | None = None):
         gene_propositions = requests.API.get_search_results(
             config_organization_filter=True, filters=f"gene={gene_symbol}"
         )
-        processed_propositions = services.process_propositions(records=gene_propositions)
+        processed_propositions = services.process_propositions(
+            records=gene_propositions
+        )
 
         return flask.render_template(
             template_name_or_list="gene.html",
@@ -332,20 +334,22 @@ def statements(statement_id: str | None = None):
 
 @main_bp.route("/therapies", defaults={"therapy_name": None}, methods=["GET", "POST"])
 @main_bp.route("/therapies/<therapy_name>", endpoint="therapies")
-def therapies(therapy_name: str = None):
+def therapies(therapy_name: str | None = None):
     if therapy_name:
         record = requests.API.get_therapy(name=therapy_name)
         processed_record = services.process_therapy(record=record)
 
-        therapy_statements = requests.API.get_statements(
+        therapy_propositions = requests.API.get_search_results(
             config_organization_filter=True, filters=f"therapy={therapy_name}"
         )
-        processed_statements = services.process_statements(records=therapy_statements)
+        processed_propositions = services.process_propositions(
+            records=therapy_propositions
+        )
 
         return flask.render_template(
             template_name_or_list="therapy.html",
             therapy=processed_record,
-            statements=processed_statements,
+            propositions_by_category=processed_propositions,
         )
     else:
         records = requests.Local.get_therapies()
