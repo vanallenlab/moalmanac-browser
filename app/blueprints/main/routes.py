@@ -39,15 +39,16 @@ def biomarkers(biomarker_name: str = None):
         # processed_record = services.process_biomarker(record=record)
         processed_record = record
 
-        biomarker_statements = requests.API.get_statements(
-            config_organization_filter=True, filters=f"biomarker={biomarker_name}"
+        records = requests.API.get_search_results(
+            config_organization_filter=True,
+            filters=f"biomarker={biomarker_name.replace(' ', '%20')}",
         )
-        processed_statements = services.process_statements(records=biomarker_statements)
+        processed = services.process_propositions(records=records)
 
         return flask.render_template(
             template_name_or_list="biomarker.html",
             biomarker=processed_record,
-            statements=processed_statements,
+            propositions_by_category=processed,
         )
     else:
         records = requests.Local.get_biomarkers()
@@ -297,7 +298,7 @@ def propositions(proposition_id: str | None = None):
 
 @main_bp.route("/search", methods=["GET"])
 def search():
-    records = requests.API.get_search_results()
+    records = requests.API.get_search_results(config_organization_filter=True)
     processed = services.process_propositions(records=records)
     response_organizations = services.extract_organizations(propositions=processed)
     return flask.render_template(
