@@ -181,13 +181,13 @@ def genes(gene_symbol: str | None = None):
     "/indications", defaults={"indication_id": None}, methods=["GET", "POST"]
 )
 @main_bp.route("/indications/<indication_id>", endpoint="indications")
-def indications(indication_id: str = None):
+def indications(indication_id: str | None = None):
     if indication_id:
         record = requests.API.get_indication(indication_id=indication_id)
 
         indication_propositions = requests.API.get_search_results(
-            config_organization_filter=True,
-            filters=f"indication={indication_id}"
+            config_organization_filter=False,
+            filters=f"indication={indication_id}",
         )
         processed_propositions = services.process_propositions(
             records=indication_propositions
