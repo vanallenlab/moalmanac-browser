@@ -97,9 +97,8 @@ def extract_organizations(propositions: dict):
     """
     agents = set()
     for proposition in propositions["VariantTherapeuticResponseProposition"]:
-        for agent in proposition.get("aggregates", {}).get(
-            "by_agents", []
-        ):
+        print(proposition['aggregates'].keys())
+        for agent in proposition.get("aggregates", {}).get("by_agent", []):
             if "id" in agent:
                 agents.add(agent["id"])
     return [{"id": agent_id} for agent_id in sorted(agents)]
