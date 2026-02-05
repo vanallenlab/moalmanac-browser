@@ -245,8 +245,8 @@ def process_statement(record: dict):
             }
             for doc in record["reportedIn"]
         ],
-        "organization": (
-            record["indication"]["document"]["organization"]["id"].upper()
+        "agent": (
+            record["indication"]["document"]["agent"]["id"].upper()
             if record.get("indication", None)
             else None
         ),
