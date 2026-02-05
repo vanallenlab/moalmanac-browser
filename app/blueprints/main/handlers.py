@@ -146,6 +146,10 @@ class About(BaseHandler):
     Handler class to manage queries against the About table.
     """
 
+class Agents(BaseHandler):
+    """
+    Handler class to manage queries against the Agents table.
+    """
 
 class Biomarkers(BaseHandler):
     """
@@ -173,11 +177,6 @@ class Genes(BaseHandler):
 class Indications(BaseHandler):
     """
     Handler class to manage queries against the Indications table.
-    """
-
-class Organizations(BaseHandler):
-    """
-    Handler class to manage queries against the Organizations table.
     """
 
 class Terms(BaseHandler):

@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
     addToggleFilter({
       toggleSelector: '.org-toggle',
       attributeName: 'data-orgs',
-      tableSelector: '#propositions-therapeutic-response-table-result', // scope it!
+      tableSelector: '#propositions-therapeutic-response-table-result', 
       mode: 'any'
     });
   }

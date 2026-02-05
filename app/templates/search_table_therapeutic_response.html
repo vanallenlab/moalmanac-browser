@@ -1,49 +1,52 @@
-<table id="propositions-therapeutic-response-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
-      <thead>
-          <tr>
-            <!--<th style="width: 8%">Evidence</th>-->
-            <th style="width: 12%">Organization(s)</th>
-            <th style="width: 20%">Biomarker(s)</th>
-            <th style="width: 20%">Cancer type</th>
-            <th style="width: 20%">Therapy(ies)</th>
-            <th style="width: 5%"></th>
-          </tr>
-      </thead>
-      <tbody>
-          {% for proposition in propositions_by_category['VariantTherapeuticResponseProposition'] %}
-              <tr data-orgs="{% for o in proposition.aggregates.by_organization %}{{ o.id }}{% if not loop.last %},{% endif %}{% endfor %}">
-                <!--<td>Tier 1<br>Level A</td>-->
-                <td>
-                  {% if proposition.aggregates.by_organization|length == 0 %}
-                    <span class="text-muted">None</span>
-                  {% else %}
-                    {% for o in proposition.aggregates.by_organization %}
-                      <span class="badge text-bg-secondary me-1">
-                        {{ o.id|upper }} ({{ o.count }})
-                      </span>
-                    {% endfor %}
-                  {% endif %}
-                </td>
-                <td>
-                  {% for biomarker in proposition.biomarkers %}
-                    <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{% if not loop.last %}, {% endif %}
-                  {% endfor %}
-                </td>
-                <td><a href="{{ url_for('main.diseases', disease_name=proposition.cancer_type.name | urlencode) }}">{{ proposition.cancer_type.name }}</a></td>
-                <td>
-                  {% for therapy in proposition.therapies %}
-                    <a href="{{ url_for('main.therapies', therapy_name=therapy.name) }}">{{ therapy.name }}</a>{% if not loop.last %},{% endif %}
-                  {% endfor %}
-                </td>
-                <td>
-                  <a href="{{ url_for('main.propositions', proposition_id=proposition.id) }}" 
-                    class="btn btn-sm" 
-                    title="More information" 
-                    data-bs-toggle="tooltip">
-                    <i class="bi bi-info-circle" aria-hidden="true"></i>
-                  </a>
-                </td>
-              </tr>
-          {% endfor %}
-      </tbody>
-  </table>
+<table id="propositions-therapeutic-response-table-result"
+  class="table table-striped table-hover table-sm small w-100 dataTable">
+  <thead>
+    <tr>
+      <!--<th style="width: 8%">Evidence</th>-->
+      <th style="width: 12%">Organization(s)</th>
+      <th style="width: 20%">Biomarker(s)</th>
+      <th style="width: 20%">Cancer type</th>
+      <th style="width: 20%">Therapy(ies)</th>
+      <th style="width: 5%"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for proposition in propositions_by_category['VariantTherapeuticResponseProposition'] %}
+    <tr
+      data-orgs="{% for o in proposition.aggregates.by_agent %}{{ o.id }}{% if not loop.last %},{% endif %}{% endfor %}">
+      <!--<td>Tier 1<br>Level A</td>-->
+      <td>
+        {% if proposition.aggregates.by_agent|length == 0 %}
+        <span class="text-muted">None</span>
+        {% else %}
+        {% for o in proposition.aggregates.by_agent %}
+        <span class="badge text-bg-secondary me-1">
+          {{ o.id|upper }} ({{ o.count }})
+        </span>
+        {% endfor %}
+        {% endif %}
+      </td>
+      <td>
+        {% for biomarker in proposition.biomarkers %}
+        <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{%
+        if not loop.last %}, {% endif %}
+        {% endfor %}
+      </td>
+      <td><a href="{{ url_for('main.diseases', disease_name=proposition.cancer_type.name | urlencode) }}">{{
+          proposition.cancer_type.name }}</a></td>
+      <td>
+        {% for therapy in proposition.therapies %}
+        <a href="{{ url_for('main.therapies', therapy_name=therapy.name) }}">{{ therapy.name }}</a>{% if not loop.last
+        %},{% endif %}
+        {% endfor %}
+      </td>
+      <td>
+        <a href="{{ url_for('main.propositions', proposition_id=proposition.id) }}" class="btn btn-sm"
+          title="More information" data-bs-toggle="tooltip">
+          <i class="bi bi-info-circle" aria-hidden="true"></i>
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

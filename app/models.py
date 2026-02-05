@@ -17,6 +17,17 @@ class About(Base):
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
+class Agents(Base):
+    __tablename__ = "agents"
+
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
+    name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    last_updated = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    documents_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    indications_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+
 class Biomarkers(Base):
     __tablename__ = "biomarkers"
 
@@ -41,8 +52,8 @@ class Documents(Base):
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     citation = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     url = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    organization_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    organization_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    agent_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    agent_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     indications_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
@@ -62,19 +73,8 @@ class Indications(Base):
     indication = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     document_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     document_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    organization_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    organization_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
-
-class Organizations(Base):
-    __tablename__ = "organizations"
-
-    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
-    name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    last_updated = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    documents_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
-    indications_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    agent_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    agent_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
 class Therapies(Base):

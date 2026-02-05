@@ -226,10 +226,10 @@ def indications(indication_id: str | None = None):
 def organizations(organization_id):
     if organization_id:
         record = requests.API.get_organization(organization_id=organization_id)
-
         cached_documents = requests.Local.get_documents()
         organization_documents = requests.API.get_documents(
-            config_organization_filter=False, filters=f"organization={organization_id}"
+            config_organization_filter=False,
+            filters=f"agent_id={organization_id}",
         )
         organization_documents = services.append_field_from_matching_records(
             target_list=organization_documents,
@@ -248,7 +248,8 @@ def organizations(organization_id):
 
         cached_indications = requests.Local.get_indications()
         organization_indications = requests.API.get_indications(
-            filters=f"organization={organization_id}", config_organization_filter=False
+            filters=f"agent_id={organization_id}",
+            config_organization_filter=False,
         )
         organization_indications = services.append_field_from_matching_records(
             target_list=organization_indications,
@@ -265,7 +266,8 @@ def organizations(organization_id):
             # of the browser's instance
         )
         filtered_propositions = services.filter_search_results_required_organization(
-            records=organization_propositions, organization_id=organization_id
+            records=organization_propositions,
+            organization_id=organization_id,
         )
         processed_propositions = services.process_propositions(
             records=filtered_propositions
@@ -285,7 +287,8 @@ def organizations(organization_id):
     else:
         records = requests.Local.get_organizations()
         return flask.render_template(
-            template_name_or_list="organizations.html", organizations=records
+            template_name_or_list="organizations.html", 
+            organizations=records,
         )
 
 
