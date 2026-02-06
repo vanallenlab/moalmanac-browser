@@ -210,7 +210,6 @@ class API:
             filters_to_apply.append(filters)
         if filters_to_apply:
             request = f"{request}?{'&'.join(filters_to_apply)}"
-        print(request)
         response = cls.get(request=request)
         if response.status_code == 200:
             data = response.json()["data"]
