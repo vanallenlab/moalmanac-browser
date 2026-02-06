@@ -124,7 +124,7 @@ def documents(document_id: str = None):
     else:
         records = requests.Local.get_documents()
         all_organizations = sorted(
-            set(record["organization_name"] for record in records)
+            set(record["agent_name"] for record in records)
         )
         return flask.render_template(
             template_name_or_list="documents.html",
