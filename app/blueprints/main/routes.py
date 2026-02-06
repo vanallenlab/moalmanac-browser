@@ -212,7 +212,7 @@ def indications(indication_id: str | None = None):
             if not indication.get("statements_count", None):
                 indication["statements_count"] = 0
         all_organizations = sorted(
-            set(record["document"]["organization"]["name"] for record in records)
+            set(record["document"]["agent"]["name"] for record in records)
         )
         return flask.render_template(
             template_name_or_list="indications.html",

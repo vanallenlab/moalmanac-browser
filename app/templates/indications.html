@@ -5,37 +5,41 @@ Approvals | Molecular Oncology Almanac
 {% endblock %}
 
 {% block content %}
-  <br>
-  <h2 class="title">Regulatory approvals</h2>
-  <br>
+<br>
+<h2 class="title">Regulatory approvals</h2>
+<br>
 
-  <div class="row mb-4">
-    <div class="col-md-4">
-      <select id="organizationFilter" class="form-select form-select-sm">
-        <option value="">{{ all_organizations|length }} organizations</option>
-        {% for s in all_organizations %}
-          <option value="{{ s }}">{{ s }}</option>
-        {% endfor %}
-      </select>
-    </div>
+<div class="row mb-4">
+  <div class="col-md-4">
+    <select id="organizationFilter" class="form-select form-select-sm">
+      <option value="">{{ all_organizations|length }} organizations</option>
+      {% for s in all_organizations %}
+      <option value="{{ s }}">{{ s }}</option>
+      {% endfor %}
+    </select>
   </div>
+</div>
 
-  <table id="indications-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
-      <thead>
-          <tr>
-            <th style="width: 25%">Document</th>
-            <th style="width: 65%">Indication</th>
-            <th style="width: 10%">Statements</th>
-          </tr>
-      </thead>
-      <tbody>
-          {% for indication in indications %}
-              <tr data-organization="{{ indication.document.organization.name }}">
-                <td><a href="{{ url_for('main.documents', document_id=indication.document.id) }}">{{ indication.document.name }}</a></td>
-                <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.indication }}</a></td>
-                <td>{{ indication.statements_count }}</td>
-              </tr>
-          {% endfor %}
-      </tbody>
-  </table>
+<table id="indications-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+  <thead>
+    <tr>
+      <th style="width: 25%">Document</th>
+      <th style="width: 65%">Indication</th>
+      <th style="width: 10%">Statements</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for indication in indications %}
+    <tr data-organization="{{ indication.document.agent.name }}">
+      <td>
+        <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">
+          {{ indication.document.name}}
+        </a>
+      </td>
+      <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.indication }}</a></td>
+      <td>{{ indication.statements_count }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
