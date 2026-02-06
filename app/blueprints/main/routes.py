@@ -92,7 +92,7 @@ def diseases(disease_name: str = None):
 
 @main_bp.route("/documents", defaults={"document_id": None}, methods=["GET", "POST"])
 @main_bp.route("/documents/<document_id>", endpoint="documents")
-def documents(document_id: str = None):
+def documents(document_id: str | None = None):
     if document_id:
         record = requests.API.get_document(document_id=document_id)
 
@@ -338,7 +338,8 @@ def statements(statement_id: str | None = None):
         record = requests.API.get_statement(statement_id=statement_id)
         processed = services.process_statement(record=record)
         return flask.render_template(
-            template_name_or_list="statement.html", statement=processed
+            template_name_or_list="statement.html", 
+            statement=processed,
         )
     else:
         records = requests.API.get_statements(config_organization_filter=True)

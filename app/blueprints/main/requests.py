@@ -129,7 +129,7 @@ class API:
             return response.json()
 
     @classmethod
-    def get_gene(cls, name: str = None):
+    def get_gene(cls, name: str | None = None):
         if name:
             response = cls.get(request=f"genes?gene_name={name}")
             if response.status_code == 200:
@@ -210,6 +210,7 @@ class API:
             filters_to_apply.append(filters)
         if filters_to_apply:
             request = f"{request}?{'&'.join(filters_to_apply)}"
+        print(request)
         response = cls.get(request=request)
         if response.status_code == 200:
             data = response.json()["data"]
