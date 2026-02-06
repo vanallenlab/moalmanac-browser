@@ -77,13 +77,13 @@ class API:
             if enabled.lower() == "true"
         ]
         agency_statements = [
-            f"organization={agency.lower()}" for agency in enabled_agencies
+            f"agent_id={agency.lower()}" for agency in enabled_agencies
         ]
         string = "&".join(agency_statements)
         return string.replace(" ", "%20")
 
     @classmethod
-    def get_disease(cls, name: str = None):
+    def get_disease(cls, name: str | None = None):
         if name:
             response = cls.get(request=f"diseases?disease_name={name}")
             if response.status_code == 200:
@@ -110,7 +110,7 @@ class API:
 
     @classmethod
     def get_documents(
-        cls, config_organization_filter: bool = False, filters: str = None
+        cls, config_organization_filter: bool = False, filters: str | None = None
     ):
         request = "documents"
         filters_to_apply = []
@@ -129,7 +129,7 @@ class API:
             return response.json()
 
     @classmethod
-    def get_gene(cls, name: str = None):
+    def get_gene(cls, name: str | None = None):
         if name:
             response = cls.get(request=f"genes?gene_name={name}")
             if response.status_code == 200:
@@ -172,7 +172,7 @@ class API:
 
     @classmethod
     def get_organization(cls, organization_id: str):
-        response = cls.get(request=f"organizations?organization_id={organization_id}")
+        response = cls.get(request=f"agents?agent_id={organization_id}")
         if response.status_code == 200:
             data = response.json()["data"]
             return data[0]
@@ -317,8 +317,8 @@ class Local:
 
     @classmethod
     def get_organizations(cls):
-        handler = handlers.Organizations()
-        statement = handler.construct_base_query(model=models.Organizations)
+        handler = handlers.Agents()
+        statement = handler.construct_base_query(model=models.Agents)
         results = cls.get(handler=handler, statement=statement)
         return cls.sort(data=results, sort_key="name")
 

@@ -93,16 +93,14 @@ def extract_organizations(propositions: dict):
         propositions (dict): A dictionary processed propositions by type from /search route.
 
     Returns:
-        list(dict): list of dictionaries of organization ids, with uppercase formatting applied.
+        list(dict): list of dictionaries of agent ids, with uppercase formatting applied.
     """
-    organizations = set()
+    agents = set()
     for proposition in propositions["VariantTherapeuticResponseProposition"]:
-        for organization in proposition.get("aggregates", {}).get(
-            "by_organization", []
-        ):
-            if "id" in organization:
-                organizations.add(organization["id"])
-    return [{"id": organization_id} for organization_id in sorted(organizations)]
+        for agent in proposition.get("aggregates", {}).get("by_agent", []):
+            if "id" in agent:
+                agents.add(agent["id"])
+    return [{"id": agent_id} for agent_id in sorted(agents)]
 
 
 def extract_therapies(object_therapeutic: dict):
@@ -140,9 +138,7 @@ def get_extension(list_of_extensions: list, name: str):
     ]
 
 
-def filter_search_results_required_organization(
-    records: list[dict], organization_id: str
-) -> list[dict]:
+def filter_search_results_required_organization(records: list[dict], organization_id: str) -> list[dict]:
     """
     Filters processed proposition records from process_propositions function
     to require the specified organization.
@@ -151,15 +147,12 @@ def filter_search_results_required_organization(
         records (list[dict]): List of proposition records from process_propositions function.
 
     Returns:
-        list[dict]: records, requires organization to be listed within aggregates['by_organization']
+        list[dict]: records, requires organization to be listed within aggregates['by_agent']
     """
     filtered = []
     for record in records:
-        by_organization = record.get("aggregates", {}).get("by_organization", [])
-        if any(
-            organization.get("id") == organization_id
-            for organization in by_organization
-        ):
+        by_agent = record.get("aggregates", {}).get("by_agent", [])
+        if any(agent.get("id") == organization_id for agent in by_agent):
             filtered.append(record)
     return filtered
 
@@ -251,8 +244,8 @@ def process_statement(record: dict):
             }
             for doc in record["reportedIn"]
         ],
-        "organization": (
-            record["indication"]["document"]["organization"]["id"].upper()
+        "agent": (
+            record["indication"]["document"]["agent"]["id"].upper()
             if record.get("indication", None)
             else None
         ),

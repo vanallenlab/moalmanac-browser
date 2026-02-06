@@ -1,6 +1,7 @@
 *.DS_Store
 *.idea*
 *__pycache__*
+*.ipynb_checkpoints*
 
 # symlinks for instances
 /config.ini
@@ -10,7 +11,9 @@
 
 # Old web browser files
 venv_old*
+venv_backup*
 update_db.sh*
 upload_db.sh*
 feature_definitions.tsv*
 secret_key.py
+db_versions/*

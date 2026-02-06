@@ -32,12 +32,20 @@ The Molecular Oncology Almanac web browser supports multiple configurable instan
 ### Updating local caches
 To update a local cache, run:
 ```bash
-python -m app.populate_database --api https://api.moalmanac.org --config deploy/default/config.ini --drop-tables
+python -m app.populate_database \
+  --api http://localhost:8000 \
+  --config deploy/default/config.ini \
+  --drop-tables
 ```
 
 To update multiple local caches, append `--config` multiple times. For example:
 ```bash
-python -m app.populate_database --api https://api.moalmanac.org --config deploy/default/config.ini --config deploy/ie/config.ini --drop-tables
+python -m app.populate_database \
+  --api http://localhost:8000 \
+  --config deploy/default/config.ini \
+  --config deploy/ie/config.ini \
+  --config deploy/ca/config.ini \
+  --drop-tables
 ```
 
 ### Instances

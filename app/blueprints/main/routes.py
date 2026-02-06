@@ -92,7 +92,7 @@ def diseases(disease_name: str = None):
 
 @main_bp.route("/documents", defaults={"document_id": None}, methods=["GET", "POST"])
 @main_bp.route("/documents/<document_id>", endpoint="documents")
-def documents(document_id: str = None):
+def documents(document_id: str | None = None):
     if document_id:
         record = requests.API.get_document(document_id=document_id)
 
@@ -124,7 +124,7 @@ def documents(document_id: str = None):
     else:
         records = requests.Local.get_documents()
         all_organizations = sorted(
-            set(record["organization_name"] for record in records)
+            set(record["agent_name"] for record in records)
         )
         return flask.render_template(
             template_name_or_list="documents.html",
@@ -181,13 +181,13 @@ def genes(gene_symbol: str | None = None):
     "/indications", defaults={"indication_id": None}, methods=["GET", "POST"]
 )
 @main_bp.route("/indications/<indication_id>", endpoint="indications")
-def indications(indication_id: str = None):
+def indications(indication_id: str | None = None):
     if indication_id:
         record = requests.API.get_indication(indication_id=indication_id)
 
         indication_propositions = requests.API.get_search_results(
-            config_organization_filter=True,
-            filters=f"indication={indication_id}"
+            config_organization_filter=False,
+            filters=f"indication={indication_id}",
         )
         processed_propositions = services.process_propositions(
             records=indication_propositions
@@ -212,7 +212,7 @@ def indications(indication_id: str = None):
             if not indication.get("statements_count", None):
                 indication["statements_count"] = 0
         all_organizations = sorted(
-            set(record["document"]["organization"]["name"] for record in records)
+            set(record["document"]["agent"]["name"] for record in records)
         )
         return flask.render_template(
             template_name_or_list="indications.html",
@@ -226,10 +226,10 @@ def indications(indication_id: str = None):
 def organizations(organization_id):
     if organization_id:
         record = requests.API.get_organization(organization_id=organization_id)
-
         cached_documents = requests.Local.get_documents()
         organization_documents = requests.API.get_documents(
-            config_organization_filter=False, filters=f"organization={organization_id}"
+            config_organization_filter=False,
+            filters=f"agent_id={organization_id}",
         )
         organization_documents = services.append_field_from_matching_records(
             target_list=organization_documents,
@@ -248,7 +248,8 @@ def organizations(organization_id):
 
         cached_indications = requests.Local.get_indications()
         organization_indications = requests.API.get_indications(
-            filters=f"organization={organization_id}", config_organization_filter=False
+            filters=f"agent_id={organization_id}",
+            config_organization_filter=False,
         )
         organization_indications = services.append_field_from_matching_records(
             target_list=organization_indications,
@@ -265,7 +266,8 @@ def organizations(organization_id):
             # of the browser's instance
         )
         filtered_propositions = services.filter_search_results_required_organization(
-            records=organization_propositions, organization_id=organization_id
+            records=organization_propositions,
+            organization_id=organization_id,
         )
         processed_propositions = services.process_propositions(
             records=filtered_propositions
@@ -285,7 +287,8 @@ def organizations(organization_id):
     else:
         records = requests.Local.get_organizations()
         return flask.render_template(
-            template_name_or_list="organizations.html", organizations=records
+            template_name_or_list="organizations.html", 
+            organizations=records,
         )
 
 
@@ -335,7 +338,8 @@ def statements(statement_id: str | None = None):
         record = requests.API.get_statement(statement_id=statement_id)
         processed = services.process_statement(record=record)
         return flask.render_template(
-            template_name_or_list="statement.html", statement=processed
+            template_name_or_list="statement.html", 
+            statement=processed,
         )
     else:
         records = requests.API.get_statements(config_organization_filter=True)

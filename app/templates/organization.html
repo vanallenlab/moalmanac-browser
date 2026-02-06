@@ -5,76 +5,85 @@
 {% endblock %}
 
 {% block content %}
-  <br>
-  <h2 class="title">{{ organization.name }}</h2>
-  <p>{{ organization.description }}</p>
+<br>
+<h2 class="title">{{ organization.name }}</h2>
+<p>{{ organization.description }}</p>
 
-  <h4 class="subtitle">Documents</h4>
-  <p>Documents published by the {{ organization.name }}, containing at least one indication involving a biomarker.</p>
+<h4 class="subtitle">Documents</h4>
+<p>Documents published by the {{ organization.name }}, containing at least one indication involving a biomarker.</p>
 
-  <table id="documents-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
-    <thead>
-      <tr>
-        <th style="width: 70%">Name</th>
-        <th style="width: 15%">Indications</th>
-        <th style="width: 15%">Statements</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for document in documents %}
-        <tr>
-          <td><a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.name }}</a></td>
-          <td>{{ document.indications_count }}</td>
-          <td>{{ document.statements_count }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <br>
-
-  <h4 class="subtitle">Regulatory approvals</h4>
-  <p>Approved indications from the {{ organization.name }} for cancer drugs containing at least one biomarker.</p>
-
-  <table id="indications-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
-    <thead>
-      <tr>
-        <th style="width: 25%">Document</th>
-        <th style="width: 65%">Indication</th>
-        <th style="width: 10%">Statements</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for indication in indications %}
-        <tr data-organization="{{ indication.document.organization.name }}">
-          <td><a href="{{ url_for('main.documents', document_id=indication.document.id) }}">{{ indication.document.name }}</a></td>
-          <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.indication }}</a></td>
-          <td>{{ indication.statements_count }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-  </table>
-  <br>
-
-  <h4 class="subtitle">Therapeutic response</h4>
-  <p>Precision oncology relationships for therapeutic response derived from {{ organization.name }}'s regulatory approvals.</p>
-
-  <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
-    <span class="text-muted small me-2">Filter by organization:</span>
-
-    {% for org in organizations %}
-      <div class="form-check form-check-inline">
-        <input class="form-check-input org-toggle" type="checkbox" value="{{ org.id }}" id="org-{{ org.id }}">
-        <label class="form-check-label" for="org-{{ org.id }}">
-          <a href="{{ url_for('main.organizations', organization_id=org.id | urlencode) }}">{{ org.id|upper }}</a>
-        </label>
-      </div>
+<table id="documents-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+  <thead>
+    <tr>
+      <th style="width: 70%">Name</th>
+      <th style="width: 15%">Indications</th>
+      <th style="width: 15%">Statements</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for document in documents %}
+    <tr>
+      <td><a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.name }}</a></td>
+      <td>{{ document.indications_count }}</td>
+      <td>{{ document.statements_count }}</td>
+    </tr>
     {% endfor %}
+  </tbody>
+</table>
+<br>
 
-    <div class="ms-auto">
-      <button class="btn btn-sm btn-outline-secondary" id="org-clear" type="button">Clear</button>
-    </div>
+<h4 class="subtitle">Regulatory approvals</h4>
+<p>Approved indications from the {{ organization.name }} for cancer drugs containing at least one biomarker.</p>
+
+<table id="indications-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+  <thead>
+    <tr>
+      <th style="width: 25%">Document</th>
+      <th style="width: 65%">Indication</th>
+      <th style="width: 10%">Statements</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for indication in indications %}
+    <tr data-organization="{{ indication.document.agent.name }}">
+      <td>
+        <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">
+          {{ indication.document.name}}
+        </a>
+      </td>
+      <td>
+        <a href="{{ url_for('main.indications', indication_id=indication.id) }}">
+          {{ indication.indication }}
+        </a>
+      </td>
+      <td>{{ indication.statements_count }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<br>
+
+<h4 class="subtitle">Therapeutic response</h4>
+<p>Precision oncology relationships for therapeutic response derived from {{ organization.name }}'s regulatory
+  approvals.</p>
+
+<div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
+  <span class="text-muted small me-2">Filter by organization:</span>
+
+  {% for org in organizations %}
+  <div class="form-check form-check-inline">
+    <input class="form-check-input org-toggle" type="checkbox" value="{{ org.id }}" id="org-{{ org.id }}">
+    <label class="form-check-label" for="org-{{ org.id }}">
+      <a href="{{ url_for('main.organizations', organization_id=org.id | urlencode) }}">{{ org.id|upper }}</a>
+    </label>
   </div>
+  {% endfor %}
 
-  {% include "search_table_therapeutic_response.html" %}
-  <br>
+  <div class="ms-auto">
+    <button class="btn btn-sm btn-outline-secondary" id="org-clear" type="button">Clear</button>
+  </div>
+</div>
+
+{% include "search_table_therapeutic_response.html" %}
+<br>
 {% endblock %}
