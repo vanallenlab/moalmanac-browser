@@ -123,9 +123,7 @@ def documents(document_id: str | None = None):
         )
     else:
         records = requests.Local.get_documents()
-        all_organizations = sorted(
-            set(record["agent_name"] for record in records)
-        )
+        all_organizations = sorted(set(record["agent_name"] for record in records))
         return flask.render_template(
             template_name_or_list="documents.html",
             documents=records,
@@ -177,9 +175,7 @@ def genes(gene_symbol: str | None = None):
         return flask.render_template(template_name_or_list="genes.html", genes=records)
 
 
-@main_bp.route(
-    "/indications", defaults={"indication_id": None}, methods=["GET", "POST"]
-)
+@main_bp.route("/indications", defaults={"indication_id": None}, methods=["GET", "POST"])
 @main_bp.route("/indications/<indication_id>", endpoint="indications")
 def indications(indication_id: str | None = None):
     if indication_id:
