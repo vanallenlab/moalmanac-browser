@@ -5,13 +5,22 @@
 {% endblock %}
 
 {% block content %}
+{% set extensions = document.extensions %}
+{% set agent = (
+document.extensions
+| selectattr("name", "equalto", "agent")
+| map(attribute="value")
+| first
+)
+%}
+
 <br>
 <h2 class="title">{{ document.name }}</h2>
-<p><a href="{{ url_for('main.indications') }}">{{ document.subtype }}</a> published by the <a
-    href="{{ url_for('main.organizations', organization_id=document.agent.id) }}">{{ document.agent.name }}</a>.</p>
+<p><a href="{{ url_for('main.indications') }}">{{ document.documentType }}</a> published by the <a
+    href="{{ url_for('main.organizations', organization_id=agent.id) }}">{{ agent.name }}</a>.</p>
 
 <h4 class="subtitle">Citation</h4>
-<p><a href="{{ document.url }}" target="_blank">{{ document.citation }}</a></p>
+<p><a href="{{ document.urls[0] }}" target="_blank">{{ document.description }}</a></p>
 
 <div class="d-flex justify-content-end mb-3">
   <a href="{{ api_url }}/documents?document_id={{ document.id | urlencode }}" target="_blank"
@@ -32,7 +41,15 @@
   </thead>
   <tbody>
     {% for indication in indications %}
-    <tr data-organization="{{ indication.document.agent.name }}">
+    {% set ind_doc_extensions = indication.document.extensions %}
+    {% set ind_agent = (
+    document.extensions
+    | selectattr("name", "equalto", "agent")
+    | map(attribute="value")
+    | first
+    )
+    %}
+    <tr data-organization="{{ ind_agent.name }}">
       <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.indication }}</a></td>
       <td>{{ indication.statements_count }}</td>
     </tr>
