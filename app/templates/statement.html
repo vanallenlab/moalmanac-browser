@@ -21,11 +21,18 @@ Statement {{ statement.id }} | Molecular Oncology Almanac
 <p>{{ statement.description }}</p>
 
 {% if statement.raw.indication %}
+{% set extensions = statement.raw.indication.document.extensions %}
+{% set agent = (
+extensions
+| selectattr("name", "equalto", "agent")
+| map(attribute="value")
+| first
+)
+%}
 <p>
   This statement is based on a <a href="{{ url_for('main.indications', indication_id=statement.raw.indication.id) }}">{{
-    statement.raw.indication.document.subtype.lower() }}</a> from the <a
-    href="{{ url_for('main.organizations', organization_id=statement.raw.indication.document.agent.id) }}">{{
-    statement.raw.indication.document.agent.name }}</a>:
+    statement.raw.indication.document.documentType.lower() }}</a> from the <a
+    href="{{ url_for('main.organizations', organization_id=agent.id) }}">{{agent.name }}</a>:
 </p>
 <blockquote class="blockquote">
   <p>{{ statement.raw.indication.indication }}</p>
@@ -35,7 +42,7 @@ Statement {{ statement.id }} | Molecular Oncology Almanac
 <h4 class="subtitle">Citation</h4>
 <p>
   {% for document in statement.documents %}
-  <a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.citation }}</a>
+  <a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.description }}</a>
   {% endfor %}
 </p>
 
