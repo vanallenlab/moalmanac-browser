@@ -30,7 +30,15 @@ Approvals | Molecular Oncology Almanac
   </thead>
   <tbody>
     {% for indication in indications %}
-    <tr data-organization="{{ indication.document.agent.name }}">
+    {% set extensions = indication.document.extensions %}
+    {% set agent = (
+    indication.document.extensions
+    | selectattr("name", "equalto", "agent")
+    | map(attribute="value")
+    | first
+    )
+    %}
+    <tr data-organization="{{ agent.name }}">
       <td>
         <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">
           {{ indication.document.name}}

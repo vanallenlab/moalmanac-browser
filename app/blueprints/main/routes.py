@@ -208,9 +208,13 @@ def indications(indication_id: str | None = None):
         for indication in processed_indications:
             if not indication.get("statements_count", None):
                 indication["statements_count"] = 0
-        all_organizations = sorted(
-            set(record["document"]["agent"]["name"] for record in records)
-        )
+        
+        all_organizations = set()
+        for record in records:
+            extensions = record.get("document").get("extensions")
+            agent = [ext for ext in extensions if ext['name'] == "agent"][0]['value']
+            all_organizations.add(agent.get('name'))
+
         return flask.render_template(
             template_name_or_list="indications.html",
             indications=processed_indications,
