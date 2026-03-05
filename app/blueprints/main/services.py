@@ -230,6 +230,13 @@ def process_statement(record: dict):
     Returns:
         dict: A dictionary of statements and their corresponding simplified records.
     """
+    document_extensions = (
+        record
+        .get("indication")
+        .get("document")
+        .get("extensions")
+    )
+    agent = [ext for ext in document_extensions if ext['name'] == "agent"][0]['value']
     return {
         "id": record["id"],
         "proposition": simplify_proposition_record(record=record["proposition"]),
@@ -238,14 +245,14 @@ def process_statement(record: dict):
         "documents": [
             {
                 "id": doc["id"],
-                "subtype": doc["subtype"],
+                "documentType": doc["documentType"],
                 "name": doc["name"],
-                "citation": doc["citation"],
+                "description": doc["description"],
             }
             for doc in record["reportedIn"]
         ],
         "agent": (
-            record["indication"]["document"]["agent"]["id"].upper()
+            agent["id"].upper()
             if record.get("indication", None)
             else None
         ),

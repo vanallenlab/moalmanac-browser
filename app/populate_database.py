@@ -217,15 +217,17 @@ class Process:
 
     @classmethod
     def get_document(cls, record, statement_id):
+        extensions = record.get("extensions")
+        agent = [ext for ext in extensions if ext['name'] == "agent"][0]['value']
         return {
             "id": record.get("id"),
             "name": record.get("name"),
-            "citation": record.get("citation"),
-            "url": record.get("url"),
-            "agent_id": record.get("agent").get("id"),
-            "agent_name": record.get("agent").get("name"),
-            "agent_description": record.get("agent").get("description"),
-            "agent_last_updated": record.get("agent").get("last_updated"),
+            "description": record.get("description"),
+            "url": record.get("urls")[0],
+            "agent_id": agent.get("id"),
+            "agent_name": agent.get("name"),
+            "agent_description": agent.get("description"),
+            "agent_last_updated": agent.get("last_updated"),
             "statement_id": statement_id,
         }
 
@@ -261,15 +263,18 @@ class Process:
 
     @classmethod
     def get_indication(cls, record, statement_id):
+        document = record.get("document")
+        doc_extensions = document.get("extensions")
+        agent = [ext for ext in doc_extensions if ext['name'] == "agent"][0]['value']
         return {
             "id": record.get("id"),
             "indication": record.get("indication"),
             "document_id": record.get("document").get("id"),
             "document_name": record.get("document").get("name"),
-            "agent_id": record.get("document").get("agent").get("id"),
-            "agent_name": record.get("document").get("agent").get("name"),
-            "agent_description": record.get("document").get("agent").get("description"),
-            "agent_last_updated": record.get("document").get("agent").get("last_updated"),
+            "agent_id": agent.get("id"),
+            "agent_name": agent.get("name"),
+            "agent_description": agent.get("description"),
+            "agent_last_updated": agent.get("last_updated"),
             "statement_id": statement_id,
         }
 
@@ -557,7 +562,7 @@ class SQL:
             document = models.Documents(
                 id=record.get("id"),
                 name=record.get("name"),
-                citation=record.get("citation"),
+                description=record.get("description"),
                 url=record.get("url"),
                 agent_id=record.get("agent_id"),
                 agent_name=record.get("agent_name"),

@@ -98,7 +98,7 @@ def documents(document_id: str | None = None):
 
         cached_indications = requests.Local.get_indications()
         document_indications = requests.API.get_indications(
-            filters=f"document={document_id}"
+            filters=f"document={document_id}",
         )
         document_indications = services.append_field_from_matching_records(
             target_list=document_indications,
@@ -109,10 +109,11 @@ def documents(document_id: str | None = None):
         )
 
         document_propositions = requests.API.get_search_results(
-            config_organization_filter=True, filters=f"document={document_id}"
+            config_organization_filter=True, 
+            filters=f"document={document_id}",
         )
         processed_propositions = services.process_propositions(
-            records=document_propositions
+            records=document_propositions,
         )
 
         return flask.render_template(
@@ -207,9 +208,13 @@ def indications(indication_id: str | None = None):
         for indication in processed_indications:
             if not indication.get("statements_count", None):
                 indication["statements_count"] = 0
-        all_organizations = sorted(
-            set(record["document"]["agent"]["name"] for record in records)
-        )
+        
+        all_organizations = set()
+        for record in records:
+            extensions = record.get("document").get("extensions")
+            agent = [ext for ext in extensions if ext['name'] == "agent"][0]['value']
+            all_organizations.add(agent.get('name'))
+
         return flask.render_template(
             template_name_or_list="indications.html",
             indications=processed_indications,

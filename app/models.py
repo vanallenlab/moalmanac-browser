@@ -50,7 +50,7 @@ class Documents(Base):
 
     id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    citation = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    description = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     url = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     agent_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     agent_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
