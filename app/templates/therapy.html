@@ -1,43 +1,64 @@
 {% extends 'base.html' %}
 
-{% block title %}
-{{ therapy.name }} | Molecular Oncology Almanac
-{% endblock %}
+{% block title %}{{ therapy.name }} | Molecular Oncology Almanac{% endblock %}
 
 {% block content %}
-  <br>
-  <h2 class="title">{{ therapy.name }}</h2>
-  <p><!-- Placeholder for description on the therapy record --></p>
+<br>
+<h2 class="title">{{ therapy.name }}</h2>
+<p><!-- Placeholder for description on the therapy record --></p>
 
-  <div class="row align-items-stretch">
-    <div class="col-sm-6 d-flex">
-      <div class="card flex-fill mb-3">
-        <h5 class="card-header">About</h5>
-        <div class="card-body compact-card-text">
-          <p class="card-text"><strong>Therapy type</strong>: {{ therapy.therapy_type }}</p>
-          <p class="card-text"><strong>Therapy strategy</strong>: {{ therapy.therapy_strategy }}</p>
-        </div>
+<div class="row align-items-stretch">
+  <div class="col-sm-6 d-flex">
+    <div class="card flex-fill mb-3">
+      <h5 class="card-header">About</h5>
+      <div class="card-body compact-card-text">
+        <p class="card-text"><strong>Therapy type</strong>: {{ therapy.therapy_type }}</p>
+        <p class="card-text"><strong>Therapy strategy</strong>: {{ therapy.therapy_strategy }}</p>
       </div>
-    </div>
-    <div class="col-sm-6 d-flex">
-      <div class="card flex-fill mb-3">
-        <h5 class="card-header">Mappings</h5>
-        <div class="card-body compact-card-text">
-          <p class="card-text"><strong>NCI Thesaurus</strong>: <a href="{{ therapy.primaryCoding.iris[0] }}" target="_blank">{{ therapy.primaryCoding.name }} ({{ therapy.primaryCoding.id }})</a></p>
-          <p class="card-text"></p>
-        </div>
-      </div>
-    </div>
-    <div class="d-flex justify-content-end mb-3">
-      <a href="{{ api_url }}/therapies?therapy_name={{ therapy.name | urlencode }}" target="_blank" class="btn btn-outline-primary">
-        View API
-      </a>
     </div>
   </div>
+  <div class="col-sm-6 d-flex">
+    <div class="card flex-fill mb-3">
+      <h5 class="card-header">Mappings</h5>
+      <div class="card-body compact-card-text">
+        <p class="card-text"><strong>NCI Thesaurus</strong>: {{ therapy.primaryCoding.name }}
+          (<a href="{{ therapy.primaryCoding.iris[0] }}" target="_blank">{{ therapy.primaryCoding.id }}</a>)
+        </p>
+        {% for i in range(therapy.mappings | length) %}
+        {%- set mapping = therapy.mappings[i] -%}
+        {%- set next_mapping = therapy.mappings[i + 1] if i + 1 < therapy.mappings | length else None -%} 
+        {%- if mapping.coding.system=="SNOMED" %}
+        <p class="card-text"><strong>SNOMED</strong>: {{ mapping.coding.name }} (
+          {%- if next_mapping and next_mapping.coding.system == "OMOP" -%}
+            <a href="{{ mapping.coding.iris[0] }}" target="_blank">{{ mapping.coding.id }}</a>, 
+            <a href="{{ next_mapping.coding.iris[0] }}" target="_blank">{{next_mapping.coding.id }}</a>
+          {%- else -%}
+          <a href="{{ mapping.coding.iris[0] }}" target="_blank">{{mapping.coding.id }}</a>
+          {%- endif -%})
+        </p>
+        {%- elif mapping.coding.system == "RxNorm" -%}
+        <p class="card-text"><strong>RxNorm</strong>: {{ mapping.coding.name }} (
+          {%- if next_mapping and next_mapping.coding.system == "OMOP" -%}
+            <a href="{{ mapping.coding.iris[0] }}" target="_blank">{{mapping.coding.id }}</a>, 
+            <a href="{{ next_mapping.coding.iris[0] }}" target="_blank">{{next_mapping.coding.id }}</a>
+          {%- else -%}
+            <a href="{{ mapping.coding.iris[0] }}" target="_blank">{{mapping.coding.id }}</a>
+          {%- endif -%})
+        </p>
+        {%- endif %}
+        {%- endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="d-flex justify-content-end mb-3">
+    <a href="{{ api_url }}/therapies?therapy_name={{ therapy.name | urlencode }}" target="_blank"
+      class="btn btn-outline-primary">View API</a>
+  </div>
+</div>
 
-  <h4 class="subtitle">Therapeutic response</h4>
-  <p>Precision oncology relationships for therapeutic response involving this therapy.</p>
+<h4 class="subtitle">Therapeutic response</h4>
+<p>Precision oncology relationships for therapeutic response involving this therapy.</p>
 
-  {% include "search_table_therapeutic_response.html" %}
-  <br>
+{% include "search_table_therapeutic_response.html" %}
+<br>
 {% endblock %}
