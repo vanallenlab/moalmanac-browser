@@ -26,8 +26,25 @@
       <div class="card flex-fill mb-3">
         <h5 class="card-header">Mappings</h5>
         <div class="card-body compact-card-text">
-          <p class="card-text"><strong>OncoTree</strong>: <a href="{{ disease.primaryCoding.iris[0] }}" target="_blank">{{ disease.primaryCoding.name }} ({{ disease.primaryCoding.id }})</a></p>
-          <p class="card-text"></p>
+          {% if disease.primaryCoding.system == "https://evsexplore.semantics.cancer.gov" %}
+            <p class="card-text"><strong>NCI Thesaurus</strong>: {{ disease.primaryCoding.name }} (<a href="{{ disease.primaryCoding.iris[0] }}" target="_blank">{{ disease.primaryCoding.id }}</a>)</p>
+          {% else %}
+            {% for mapping in disease.mappings %}
+              {% if mapping.coding.system == "https://evsexplore.semantics.cancer.gov" %}
+                <p class="card-text"><strong>NCI Thesaurus</strong>: {{ mapping.coding.name }} (<a href="{{ mapping.coding.iris[0] }}" target="_blank">{{ mapping.coding.id }}</a>)</p>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+          
+          {% if disease.primaryCoding.system == "https://oncotree.mskcc.org" %}
+            <p class="card-text"><strong>OncoTree</strong>: {{ disease.primaryCoding.name }} (<a href="{{ disease.primaryCoding.iris[0] }}" target="_blank">{{ disease.primaryCoding.id }}</a>)</p>
+          {% else %}
+            {% for mapping in disease.mappings %}
+              {% if mapping.coding.system == "https://oncotree.mskcc.org" %}
+                <p class="card-text"><strong>OncoTree</strong>: {{ mapping.coding.name }} (<a href="{{ mapping.coding.iris[0] }}" target="_blank">{{ mapping.coding.id }}</a>)</p>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
     </div>
