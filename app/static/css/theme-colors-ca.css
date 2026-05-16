@@ -1,5 +1,8 @@
 :root {
-  --primary-color: #D80621;   /* Maple Leaf Red */
-  --secondary-color: #212121; /* Charcoal Black — for titles */
-  --tertiary-color: #2C2C2C;  /* Onyx — for headings */
+  --primary-color: #006070;
+  /* Dark Teal — navbar, titles, links */
+  --secondary-color: #F09500;
+  /* Amber — hover, subtitles */
+  --tertiary-color: #006070;
+  /* Same as primary — unused currently */
 }
