@@ -111,6 +111,81 @@ def extract_biomarker_genes(biomarker: dict):
     return sort_dicts_by_key(data=list(genes.values()), key="name")
 
 
+def extract_biomarker_about(biomarker: dict):
+    """
+    Builds the rows displayed in the About card of the biomarker view. Which rows are shown depends on the
+    biomarker's `biomarker_type` extension. A row is a dictionary with a `label` and either a `value` or, for
+    gene context, a list of `genes`. Rows without a value are omitted.
+
+    Args:
+        biomarker (dict): A biomarker record from the API, with `genes` already extracted.
+
+    Returns:
+        list[dict]: The rows to display, in order.
+    """
+    extensions = biomarker.get("extensions") or []
+    constraints = biomarker.get("constraints") or []
+    biomarker_type = get_extension_value(list_of_extensions=extensions, name="biomarker_type")
+
+    def constraint_of_type(constraint_type: str):
+        return next((c for c in constraints if c.get("type") == constraint_type), None)
+
+    def copy_change_row():
+        constraint = constraint_of_type("CopyChangeConstraint") or {}
+        return {"label": "Copy change", "value": constraint.get("copyChange")}
+
+    def extension_row(name: str):
+        return {
+            "label": format_label(name),
+            "value": get_extension_value(list_of_extensions=extensions, name=name),
+        }
+
+    gene_context_row = {"label": "Gene context", "genes": biomarker.get("genes") or []}
+
+    rows = [{"label": "Biomarker type", "value": biomarker_type}]
+    if biomarker_type == "Copy number":
+        rows += [gene_context_row, copy_change_row()]
+    elif biomarker_type == "Copy number (arm level)":
+        location = (constraint_of_type("DefiningLocationConstraint") or {}).get("location") or {}
+        reference = (location.get("sequenceReference") or {}).get("description") or ""
+        location_value = None
+        if reference:
+            location_value = f"{reference.rstrip('.')} {location.get('start')} - {location.get('end')}"
+        rows += [{"label": "Location", "value": location_value}, copy_change_row()]
+    elif biomarker_type == "Germline variant":
+        rows.append(gene_context_row)
+        rows += [
+            extension_row(extension["name"])
+            for extension in extensions
+            if extension.get("name") != "biomarker_type"
+        ]
+    elif biomarker_type in ("Homologous recombination", "Microsatellite stability", "Mismatch repair"):
+        rows.append(extension_row("status"))
+    elif biomarker_type == "Protein expression":
+        rows += [extension_row(name) for name in ("marker", "unit", "equality", "value")]
+    elif biomarker_type == "Somatic variant":
+        rows.append(gene_context_row)
+        allele = (constraint_of_type("DefiningAlleleConstraint") or {}).get("allele") or {}
+        rows += [
+            {"label": format_expression_syntax(expression.get("syntax")), "value": expression.get("value")}
+            for expression in allele.get("expressions") or []
+        ]
+    elif biomarker_type == "Tumor mutational burden":
+        rows += [extension_row("classification"), extension_row("minimum_mutations_per_megabase")]
+    elif biomarker_type in ("Gene fusion", "Rearrangement", "Translocation", "Wild type"):
+        rows.append(gene_context_row)
+    else:
+        # Types without a dedicated layout show gene context and all remaining extensions.
+        rows.append(gene_context_row)
+        rows += [
+            extension_row(extension["name"])
+            for extension in extensions
+            if extension.get("name") != "biomarker_type"
+        ]
+
+    return [row for row in rows if row.get("genes") or row.get("value") not in (None, "")]
+
+
 def extract_diseases(disease: dict):
     """
     Extracts `id` and `name` from a dictionary representing cancer types / diseases,
@@ -191,6 +266,36 @@ def encode_query_value(value: str | None):
     if value is None:
         return ""
     return urllib.parse.quote(str(value), safe=":")
+
+
+def format_expression_syntax(syntax: str | None):
+    """
+    Formats a variation expression syntax for display as a label, capitalizing the "hgvs" prefix while
+    leaving the sequence type lowercase, e.g. "hgvs.p" becomes "HGVS.p". Other syntaxes are returned as-is.
+
+    Args:
+        syntax (str | None): The expression syntax, e.g. "hgvs.p".
+
+    Returns:
+        str | None: The formatted syntax.
+    """
+    if syntax and syntax.startswith("hgvs"):
+        return "HGVS" + syntax[len("hgvs"):]
+    return syntax
+
+
+def format_label(name: str):
+    """
+    Formats an extension name for display as a label, e.g. "minimum_mutations_per_megabase" becomes
+    "Minimum mutations per megabase".
+
+    Args:
+        name (str): The extension name.
+
+    Returns:
+        str: The name with underscores replaced by spaces, the first letter capitalized, and the rest lowercase.
+    """
+    return name.replace("_", " ").capitalize()
 
 
 def get_extension(list_of_extensions: list, name: str):
@@ -296,13 +401,15 @@ def organization_id_from_short_name(short_name: str):
 def process_biomarker(record: dict):
     """
     Process a biomarker record from the API for use within the biomarker view. Adds a `genes` field derived
-    from the record's constraints, and drops extensions with a null value.
+    from the record's constraints, drops extensions with a null value, and adds the `about` rows displayed
+    for the record's biomarker type.
 
     Args:
         record (dict): A biomarker record from the API.
 
     Returns:
-        record (dict): A dictionary of the original record with `genes` added and null extensions removed.
+        record (dict): A dictionary of the original record with `genes` and `about` added and null
+            extensions removed.
     """
     record = dict(record)
     record["genes"] = extract_biomarker_genes(biomarker=record)
@@ -311,6 +418,7 @@ def process_biomarker(record: dict):
         for extension in record.get("extensions") or []
         if extension.get("value") is not None
     ]
+    record["about"] = extract_biomarker_about(biomarker=record)
     return record
 
 

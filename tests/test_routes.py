@@ -64,7 +64,7 @@ def test_uncached_biomarker_detail_route_returns_200(client):
     # bmkr:124 is not associated with any statement from the ie instance's organizations
     response = client.get("/biomarkers/bmkr:124")
     assert response.status_code == 200
-    assert b"biomarker_id=bmkr%3A124" in response.data
+    assert b"biomarker_id=bmkr:124" in response.data
 
 
 def test_gene_detail_route_by_legacy_symbol_redirects_to_id(client):
