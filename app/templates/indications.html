@@ -30,13 +30,13 @@ Approvals | Molecular Oncology Almanac
   </thead>
   <tbody>
     {% for indication in indications %}
-    <tr data-organization="{{ indication.agent.name }}">
+    <tr data-organization="{{ indication.agent_name }}">
       <td>
-        <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">
-          {{ indication.document.name}}
+        <a href="{{ url_for('main.documents', document_id=indication.document_id) }}">
+          {{ indication.document_name }}
         </a>
       </td>
-      <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.description }}</a></td>
+      <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.indication }}</a></td>
       <td>{{ indication.statements_count }}</td>
     </tr>
     {% endfor %}

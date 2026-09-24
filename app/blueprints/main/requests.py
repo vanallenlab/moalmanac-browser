@@ -36,9 +36,22 @@ class API:
 
     TIMEOUT_SECONDS = 10
 
-    @staticmethod
-    def get_api_url():
-        return flask.current_app.config["API_URL"]
+    @classmethod
+    def find_disease_by_name(cls, name: str):
+        return cls.find_one(path="diseases", params=[("disease_name", name)])
+
+    @classmethod
+    def find_gene_by_name(cls, name: str):
+        return cls.find_one(path="genes", params=[("gene_name", name)])
+
+    @classmethod
+    def find_one(cls, path: str, params: list[tuple]):
+        data = cls.get(path=path, params=params)
+        return data[0] if data else None
+
+    @classmethod
+    def find_therapy_by_name(cls, name: str):
+        return cls.find_one(path="therapies", params=[("therapy_name", name)])
 
     @classmethod
     def get(cls, path: str, params: list[tuple] | None = None):
@@ -71,6 +84,26 @@ class API:
             )
         return response.json()["data"]
 
+    @staticmethod
+    def get_api_url():
+        return flask.current_app.config["API_URL"]
+
+    @classmethod
+    def get_biomarker(cls, biomarker_id: str | None = None):
+        if not biomarker_id:
+            flask.abort(404)
+        return cls.get_one(path="biomarkers", params=[("biomarker_id", biomarker_id)])
+
+    @classmethod
+    def get_biomarkers(
+        cls, config_organization_filter: bool = False, filters: list[tuple] | None = None
+    ):
+        return cls.get_list(
+            path="biomarkers",
+            config_organization_filter=config_organization_filter,
+            filters=filters,
+        )
+
     @classmethod
     def get_config_organization_filters(cls):
         """
@@ -90,7 +123,54 @@ class API:
         ]
 
     @classmethod
-    def _get_list(
+    def get_disease(cls, disease_id: str | None = None):
+        if not disease_id:
+            flask.abort(404)
+        return cls.find_one(path="diseases", params=[("disease_id", disease_id)])
+
+    @classmethod
+    def get_document(cls, document_id: str | None = None):
+        if not document_id:
+            flask.abort(404)
+        return cls.get_one(path="documents", params=[("document_id", document_id)])
+
+    @classmethod
+    def get_documents(
+        cls, config_organization_filter: bool = False, filters: list[tuple] | None = None
+    ):
+        return cls.get_list(
+            path="documents",
+            config_organization_filter=config_organization_filter,
+            filters=filters,
+        )
+
+    @classmethod
+    def get_gene(cls, gene_id: str | None = None):
+        if not gene_id:
+            flask.abort(404)
+        return cls.find_one(path="genes", params=[("gene_id", gene_id)])
+
+    @classmethod
+    def get_indication(cls, indication_id: str | None = None):
+        if not indication_id:
+            flask.abort(404)
+        return cls.get_one(
+            path="indications",
+            params=[("indication_id", indication_id), ("include_deprecated", "true")],
+        )
+
+    @classmethod
+    def get_indications(
+        cls, config_organization_filter: bool = False, filters: list[tuple] | None = None
+    ):
+        return cls.get_list(
+            path="indications",
+            config_organization_filter=config_organization_filter,
+            filters=filters,
+        )
+
+    @classmethod
+    def get_list(
         cls,
         path: str,
         config_organization_filter: bool = False,
@@ -104,87 +184,23 @@ class API:
         return cls.get(path=path, params=params or None)
 
     @classmethod
-    def _get_one(cls, path: str, params: list[tuple]):
-        data = cls.get(path=path, params=params)
-        if not data:
+    def get_one(cls, path: str, params: list[tuple]):
+        record = cls.find_one(path=path, params=params)
+        if not record:
             flask.abort(404)
-        return data[0]
-
-    @classmethod
-    def get_biomarker(cls, biomarker_name: str | None = None):
-        if not biomarker_name:
-            flask.abort(404)
-        return cls._get_one(
-            path="biomarkers", params=[("biomarker_name", biomarker_name)]
-        )
-
-    @classmethod
-    def get_biomarkers(
-        cls, config_organization_filter: bool = False, filters: list[tuple] | None = None
-    ):
-        return cls._get_list(
-            path="biomarkers",
-            config_organization_filter=config_organization_filter,
-            filters=filters,
-        )
-
-    @classmethod
-    def get_disease(cls, name: str | None = None):
-        if not name:
-            flask.abort(404)
-        return cls._get_one(path="diseases", params=[("disease_name", name)])
-
-    @classmethod
-    def get_document(cls, document_id: str | None = None):
-        if not document_id:
-            flask.abort(404)
-        return cls._get_one(path="documents", params=[("document_id", document_id)])
-
-    @classmethod
-    def get_documents(
-        cls, config_organization_filter: bool = False, filters: list[tuple] | None = None
-    ):
-        return cls._get_list(
-            path="documents",
-            config_organization_filter=config_organization_filter,
-            filters=filters,
-        )
-
-    @classmethod
-    def get_gene(cls, name: str | None = None):
-        if not name:
-            flask.abort(404)
-        return cls._get_one(path="genes", params=[("gene_name", name)])
-
-    @classmethod
-    def get_indication(cls, indication_id: str | None = None):
-        if not indication_id:
-            flask.abort(404)
-        return cls._get_one(
-            path="indications", params=[("indication_id", indication_id)]
-        )
-
-    @classmethod
-    def get_indications(
-        cls, config_organization_filter: bool = False, filters: list[tuple] | None = None
-    ):
-        return cls._get_list(
-            path="indications",
-            config_organization_filter=config_organization_filter,
-            filters=filters,
-        )
+        return record
 
     @classmethod
     def get_organization(cls, organization_id: str | None = None):
         if not organization_id:
             flask.abort(404)
-        return cls._get_one(path="agents", params=[("agent_id", organization_id)])
+        return cls.find_one(path="agents", params=[("agent_id", organization_id)])
 
     @classmethod
     def get_proposition(cls, proposition_id: str | None = None):
         if not proposition_id:
             flask.abort(404)
-        return cls._get_one(
+        return cls.get_one(
             path="propositions", params=[("proposition_id", proposition_id)]
         )
 
@@ -196,7 +212,7 @@ class API:
     def get_search_results(
         cls, config_organization_filter: bool = False, filters: list[tuple] | None = None
     ):
-        return cls._get_list(
+        return cls.get_list(
             path="search",
             config_organization_filter=config_organization_filter,
             filters=filters,
@@ -206,7 +222,7 @@ class API:
     def get_statement(cls, statement_id: str | None = None):
         if not statement_id:
             flask.abort(404)
-        return cls._get_one(
+        return cls.get_one(
             path="statements", params=[("statement_id", statement_id)]
         )
 
@@ -214,17 +230,17 @@ class API:
     def get_statements(
         cls, config_organization_filter: bool = False, filters: list[tuple] | None = None
     ):
-        return cls._get_list(
+        return cls.get_list(
             path="statements",
             config_organization_filter=config_organization_filter,
             filters=filters,
         )
 
     @classmethod
-    def get_therapy(cls, name: str | None = None):
-        if not name:
+    def get_therapy(cls, therapy_id: str | None = None):
+        if not therapy_id:
             flask.abort(404)
-        return cls._get_one(path="therapies", params=[("therapy_name", name)])
+        return cls.find_one(path="therapies", params=[("therapy_id", therapy_id)])
 
 
 class Local:
@@ -249,13 +265,6 @@ class Local:
         if not results:
             flask.abort(404)
         return results[0]
-
-    @classmethod
-    def get_biomarker(cls, biomarker_id: str):
-        for record in cls.get_biomarkers():
-            if record.get("id") == biomarker_id:
-                return record
-        return None
 
     @classmethod
     def get_biomarkers(cls):

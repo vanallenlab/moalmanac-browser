@@ -75,6 +75,7 @@ class Indications(Base):
     document_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     agent_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     agent_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    status = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
 class Therapies(Base):

@@ -69,6 +69,23 @@ def test_short_agent_id():
     assert services.short_agent_id(None) == ""
 
 
+def test_organization_id_from_short_name():
+    assert services.organization_id_from_short_name("FDA") == "agent:org:fda"
+
+
+def test_sort_biomarker_criteria_lists_present_first():
+    biomarkers = [
+        {"id": "bmkr:12", "name": "BCR::ABL1", "present": False},
+        {"id": "bmkr:14", "name": "CD19 +", "present": True},
+        {"id": "bmkr:1", "name": "ER positive", "present": True},
+    ]
+    assert [b["name"] for b in services.sort_biomarker_criteria(biomarkers)] == [
+        "CD19 +",
+        "ER positive",
+        "BCR::ABL1",
+    ]
+
+
 def test_map_predict():
     assert services.map_predict("predictsSensitivityTo") == "Sensitivity"
     assert services.map_predict("predictsResistanceTo") == "Resistance"
@@ -79,3 +96,14 @@ def test_build_query_string_preserves_repeated_keys():
     params = [("agent_id", "agent:org:fda"), ("agent_id", "agent:org:ema")]
     query = services.build_query_string(params)
     assert query.count("agent_id=") == 2
+
+
+def test_build_query_string_preserves_colons():
+    params = [("agent_id", "agent:org:fda"), ("agent_id", "agent:org:ema")]
+    assert services.build_query_string(params) == "agent_id=agent:org:fda&agent_id=agent:org:ema"
+
+
+def test_encode_query_value_preserves_colons():
+    assert services.encode_query_value("doc:ema:adcetris") == "doc:ema:adcetris"
+    assert services.encode_query_value("a b&c") == "a%20b%26c"
+    assert services.encode_query_value(None) == ""

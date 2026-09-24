@@ -6,6 +6,12 @@
 
 {% block content %}
 <br>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('main.organizations') }}">Organizations</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ organization.id }}</li>
+  </ol>
+</nav>
 <h2 class="title">{{ organization.name }}</h2>
 <p>{{ organization.description }}</p>
 
@@ -74,7 +80,7 @@
   <div class="form-check form-check-inline">
     <input class="form-check-input org-toggle" type="checkbox" value="{{ org.id }}" id="org-{{ org.id }}">
     <label class="form-check-label" for="org-{{ org.id }}">
-      <a href="{{ url_for('main.organizations', organization_id=org.id | urlencode) }}">{{ org.id|short_agent_id }}</a>
+      <a href="{{ url_for('main.organizations', organization_id=org.id) }}">{{ org.id|short_agent_id }}</a>
     </label>
   </div>
   {% endfor %}

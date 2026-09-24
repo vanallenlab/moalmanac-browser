@@ -7,6 +7,9 @@ Service-layer functions for intermediate processing of data retrieved from handl
 import collections
 import urllib.parse
 
+# Indication statuses shown on list pages; Superseded and Withdrawn indications are only reachable by URL.
+ACTIVE_INDICATION_STATUSES = ("Approved", "Accelerated")
+
 
 def append_field_from_matching_records(
     target_list: list[dict],
@@ -168,9 +171,26 @@ def build_query_string(params: list[tuple]):
             `requests.API.get_config_organization_filters`.
 
     Returns:
-        str: A URL-encoded query string, e.g. "agent_id=agent%3Aorg%3Afda&agent_id=agent%3Aorg%3Aema".
+        str: A URL-encoded query string, e.g. "agent_id=agent:org:fda&agent_id=agent:org:ema". Colons are
+            left unencoded so that ids appear in the URL as they do in the API.
     """
-    return urllib.parse.urlencode(params or [])
+    return urllib.parse.urlencode(params or [], safe=":")
+
+
+def encode_query_value(value: str | None):
+    """
+    Percent-encodes a value for use in a URL query string, leaving `:` unencoded so prefixed ids
+    (e.g. "bmkr:0", "doc:ema:adcetris") are preserved as-is.
+
+    Args:
+        value (str | None): The value to encode.
+
+    Returns:
+        str: The encoded value. Returns an empty string if `value` is None.
+    """
+    if value is None:
+        return ""
+    return urllib.parse.quote(str(value), safe=":")
 
 
 def get_extension(list_of_extensions: list, name: str):
@@ -258,6 +278,19 @@ def map_predict(string: str):
         return "Resistance"
     else:
         return "ERROR"
+
+
+def organization_id_from_short_name(short_name: str):
+    """
+    Expands an organization's short name (e.g. "fda") to its agent id (e.g. "agent:org:fda").
+
+    Args:
+        short_name (str): An organization's short name, as used in legacy browser URLs.
+
+    Returns:
+        str: The organization's agent id.
+    """
+    return f"agent:org:{short_name.lower()}"
 
 
 def process_biomarker(record: dict):
@@ -481,10 +514,7 @@ def simplify_proposition_record(record: dict):
             default=[],
         )
         biomarkers = extract_biomarkers(biomarkers=biomarker_criteria)
-        new_record["biomarkers"] = sort_dicts_by_key(
-            data=biomarkers, 
-            key="name",
-        )
+        new_record["biomarkers"] = sort_biomarker_criteria(biomarkers=biomarkers)
         new_record["cancer_type"] = extract_diseases(
             disease=record["conditionQualifier"],
         )
@@ -513,6 +543,22 @@ def simplify_proposition_records(records: list[dict]):
         new_record = simplify_proposition_record(record=record)
         new_records.append(new_record)
     return new_records
+
+
+def sort_biomarker_criteria(biomarkers: list[dict]):
+    """
+    Sorts biomarker criteria so that present biomarkers come before absent ones, each group sorted by name.
+
+    Args:
+        biomarkers (list[dict]): Biomarker criteria from `extract_biomarkers`, each with `name` and `present`.
+
+    Returns:
+        list[dict]: The sorted biomarker criteria.
+    """
+    return sorted(
+        biomarkers,
+        key=lambda biomarker: (not biomarker["present"], biomarker["name"]),
+    )
 
 
 def sort_dicts_by_key(data: list[dict], key, reverse=False):

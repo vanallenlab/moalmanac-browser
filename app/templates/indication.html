@@ -6,6 +6,12 @@
 
 {% block content %}
 <br>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('main.indications') }}">Regulatory approvals</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ indication.id }}</li>
+  </ol>
+</nav>
 <h2 class="title">Regulatory approval</h2>
 <p>Published by the <a href="{{ url_for('main.organizations', organization_id=indication.agent.id) }}">{{ indication.agent.name }}</a>.
   {% if indication.status %}<span class="badge text-bg-secondary">{{ indication.status }}</span>{% endif %}
@@ -26,7 +32,7 @@
 <p><a href="{{ indication.document.urls[0] }}" target="_blank">{{ indication.document.description }}</a></p>
 
 <div class="d-flex justify-content-end mb-3">
-  <a href="{{ api_url }}/indications?indication_id={{ indication.id | urlencode }}" target="_blank"
+  <a href="{{ api_url }}/indications?indication_id={{ indication.id | api_id }}{% if indication.status not in ('Approved', 'Accelerated') %}&include_deprecated=true{% endif %}" target="_blank"
     class="btn btn-outline-primary">
     View API
   </a>

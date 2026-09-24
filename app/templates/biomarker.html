@@ -6,6 +6,12 @@
 
 {% block content %}
   <br>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.biomarkers') }}">Biomarkers</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ biomarker.id }}</li>
+    </ol>
+  </nav>
   <h2 class="title">{{ biomarker.name }}</h2>
   <p><!-- Placeholder for description on the gene record --></p>
 
@@ -16,7 +22,7 @@
         <div class="card-body compact-card-text">
           {% if biomarker.genes %}
             <p class="card-text">
-              <strong>Gene context</strong>: {% for gene in biomarker.genes %}<a href="{{ url_for('main.genes', gene_symbol=gene.name | urlencode) }}"><em>{{ gene.name }}</em></a>{% if not loop.last %}, {% endif %}{% endfor %}
+              <strong>Gene context</strong>: {% for gene in biomarker.genes %}<a href="{{ url_for('main.genes', gene_id=gene.id) }}"><em>{{ gene.name }}</em></a>{% if not loop.last %}, {% endif %}{% endfor %}
             </p>
           {% endif %}
           {% for extension in biomarker.extensions %}
@@ -38,7 +44,7 @@
     </div>
 
     <div class="d-flex justify-content-end mb-3">
-      <a href="{{ api_url }}/biomarkers?biomarker_name={{ biomarker.name | urlencode }}" target="_blank" class="btn btn-outline-primary">
+      <a href="{{ api_url }}/biomarkers?biomarker_id={{ biomarker.id | api_id }}" target="_blank" class="btn btn-outline-primary">
         View API
       </a>
     </div>

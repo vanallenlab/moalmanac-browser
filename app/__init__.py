@@ -27,6 +27,7 @@ def create_app(config_path='config.ini', api='https://api.moalmanac.org', popula
 
     app.add_url_rule(rule="/", endpoint="index")
 
+    app.jinja_env.filters['api_id'] = services.encode_query_value
     app.jinja_env.filters['short_agent_id'] = services.short_agent_id
 
     @app.errorhandler(404)
