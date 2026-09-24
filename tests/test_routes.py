@@ -105,6 +105,30 @@ def test_withdrawn_indication_detail_route_returns_200(client):
     assert b"Withdrawn" in response.data
 
 
+def test_deprecated_document_detail_route_returns_200(client):
+    response = client.get("/documents/doc:ema:gavreto")
+    assert response.status_code == 200
+    assert b'<span class="badge text-bg-secondary">Deprecated</span>' in response.data
+
+
+def test_deprecated_statement_detail_route_returns_200(client):
+    response = client.get("/statements/stmt:ema:gavreto:0:0")
+    assert response.status_code == 200
+    assert b">Deprecated</span>" in response.data
+
+
+def test_superseded_statement_detail_route_returns_200(client):
+    response = client.get("/statements/stmt:ema:jemperli:0:0")
+    assert response.status_code == 200
+    assert b">Superseded</span>" in response.data
+
+
+def test_active_document_detail_route_has_no_status_badge(client):
+    response = client.get("/documents/doc:fda:verzenio")
+    assert response.status_code == 200
+    assert b">Active</span>" not in response.data
+
+
 def test_indications_list_route_excludes_inactive(client):
     response = client.get("/indications")
     assert response.status_code == 200

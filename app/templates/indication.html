@@ -32,7 +32,7 @@
 <p><a href="{{ indication.document.urls[0] }}" target="_blank">{{ indication.document.description }}</a></p>
 
 <div class="d-flex justify-content-end mb-3">
-  <a href="{{ api_url }}/indications?indication_id={{ indication.id | api_id }}{% if indication.status not in ('Approved', 'Accelerated') %}&include_deprecated=true{% endif %}" target="_blank"
+  <a href="{{ api_url }}/indications?indication_id={{ indication.id | api_id }}" target="_blank"
     class="btn btn-outline-primary">
     View API
   </a>

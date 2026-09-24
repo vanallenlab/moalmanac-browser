@@ -14,7 +14,9 @@ Statement {{ statement.id }} | Molecular Oncology Almanac
   </ol>
 </nav>
 <h2 class="title">{{ statement.proposition.proposition_type.title() }} Statement ({{
-  statement.proposition.predicate.title() }})</h2>
+  statement.proposition.predicate.title() }})
+  {% if statement.status and statement.status != 'Active' %}<span class="badge text-bg-secondary fs-6 align-middle">{{ statement.status }}</span>{% endif %}
+</h2>
 <p>This {{ statement.proposition.proposition_type.lower() }} statement <strong>{{ statement.direction }}</strong> the relationship that {{ biomarker_prose(statement.proposition.biomarkers) }} status confers therapeutic {{ statement.proposition.predicate.lower() }} to {% for therapy in statement.proposition['therapies'] %}<a href="{{ url_for('main.therapies', therapy_id=therapy.id) }}">{{ therapy.name }}</a>{% if not loop.last %}, {% endif %}{% endfor %} in patients with <a href="{{ url_for('main.diseases', disease_id=statement.proposition.cancer_type.id) }}">{{statement.proposition.cancer_type.name }}</a>.</p>
 
 <p>{{ statement.description }}</p>

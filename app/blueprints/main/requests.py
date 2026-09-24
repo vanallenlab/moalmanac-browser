@@ -154,10 +154,7 @@ class API:
     def get_indication(cls, indication_id: str | None = None):
         if not indication_id:
             flask.abort(404)
-        return cls.get_one(
-            path="indications",
-            params=[("indication_id", indication_id), ("include_deprecated", "true")],
-        )
+        return cls.get_one(path="indications", params=[("indication_id", indication_id)])
 
     @classmethod
     def get_indications(
@@ -222,9 +219,7 @@ class API:
     def get_statement(cls, statement_id: str | None = None):
         if not statement_id:
             flask.abort(404)
-        return cls.get_one(
-            path="statements", params=[("statement_id", statement_id)]
-        )
+        return cls.get_one(path="statements", params=[("statement_id", statement_id)])
 
     @classmethod
     def get_statements(
