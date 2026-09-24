@@ -31,7 +31,7 @@ class Agents(Base):
 class Biomarkers(Base):
     __tablename__ = "biomarkers"
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     type = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
@@ -40,7 +40,7 @@ class Biomarkers(Base):
 class Diseases(Base):
     __tablename__ = "diseases"
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
@@ -60,7 +60,7 @@ class Documents(Base):
 class Genes(Base):
     __tablename__ = "genes"
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     biomarkers_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
@@ -80,7 +80,7 @@ class Indications(Base):
 class Therapies(Base):
     __tablename__ = "therapies"
 
-    id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     # therapy_strategy
     therapy_type = sqlalchemy.Column(sqlalchemy.String, nullable=False)
@@ -92,5 +92,5 @@ class Terms(Base):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
     table = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    record_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    record_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     record_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)

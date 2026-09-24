@@ -16,8 +16,8 @@ def main():
     )
     arg_parser.add_argument(
         '-a', '--api',
-        choices=['http://localhost:8000', 'https://api.moalmanac.org'],
-        default=os.environ.get('API_URL', 'http://localhost:8000'),
+        choices=['http://localhost:8080', 'https://api.moalmanac.org'],
+        default=os.environ.get('API_URL', 'http://localhost:8080'),
         help='URL for the MOAlmanac API'
     )
     arg_parser.add_argument(

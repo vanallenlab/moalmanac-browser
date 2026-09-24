@@ -3,10 +3,10 @@
   <thead>
     <tr>
       <!--<th style="width: 8%">Evidence</th>-->
-      <th style="width: 12%">Organization(s)</th>
-      <th style="width: 20%">Biomarker(s)</th>
+      <th style="width: 12%">Organizations</th>
+      <th style="width: 20%">Biomarkers</th>
       <th style="width: 20%">Cancer type</th>
-      <th style="width: 20%">Therapy(ies)</th>
+      <th style="width: 20%">Therapies</th>
       <th style="width: 5%"></th>
     </tr>
   </thead>
@@ -21,14 +21,14 @@
         {% else %}
         {% for o in proposition.aggregates.by_agent %}
         <span class="badge text-bg-secondary me-1">
-          {{ o.id|upper }} ({{ o.count }})
+          {{ o.id|short_agent_id }} ({{ o.count }})
         </span>
         {% endfor %}
         {% endif %}
       </td>
       <td>
         {% for biomarker in proposition.biomarkers %}
-        <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{%
+        <a href="{{ url_for('main.biomarkers', biomarker_id=biomarker.id) }}">{{ biomarker.name }}</a>{%
         if not loop.last %}, {% endif %}
         {% endfor %}
       </td>

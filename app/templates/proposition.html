@@ -11,7 +11,7 @@ Proposition {{ proposition.id }} | Molecular Oncology Almanac
     {% set biomarkers = proposition.biomarkers %}
     {% set n_b = biomarkers|length %}
     {% for biomarker in biomarkers -%}
-    <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{% if not loop.last %}{% if n_b == 2 %} and {% else %}{% if loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}{% endif -%}
+    <a href="{{ url_for('main.biomarkers', biomarker_id=biomarker.id) }}">{{ biomarker.name }}</a>{% if not loop.last %}{% if n_b == 2 %} and {% else %}{% if loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}{% endif -%}
     {%- endfor %}
 
     status confers <strong>therapeutic {{ proposition.predicate.lower() }}</strong> to

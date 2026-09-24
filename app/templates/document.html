@@ -41,16 +41,8 @@ document.extensions
   </thead>
   <tbody>
     {% for indication in indications %}
-    {% set ind_doc_extensions = indication.document.extensions %}
-    {% set ind_agent = (
-    document.extensions
-    | selectattr("name", "equalto", "agent")
-    | map(attribute="value")
-    | first
-    )
-    %}
-    <tr data-organization="{{ ind_agent.name }}">
-      <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.indication }}</a></td>
+    <tr data-organization="{{ indication.agent.name }}">
+      <td><a href="{{ url_for('main.indications', indication_id=indication.id) }}">{{ indication.description }}</a></td>
       <td>{{ indication.statements_count }}</td>
     </tr>
     {% endfor %}

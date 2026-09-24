@@ -15,7 +15,7 @@
         <td>{{ statement.proposition.predicate }} ({{ statement.direction }})</td>
         <td>
           {% for biomarker in statement.proposition.biomarkers %}
-            <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{% if not loop.last %}, {% endif %}
+            <a href="{{ url_for('main.biomarkers', biomarker_id=biomarker.id) }}">{{ biomarker.name }}</a>{% if not loop.last %}, {% endif %}
           {% endfor %}
         </td>
         <td><a href="{{ url_for('main.diseases', disease_name=statement.proposition.cancer_type.name | urlencode) }}">{{ statement.proposition.cancer_type.name }}</a></td>

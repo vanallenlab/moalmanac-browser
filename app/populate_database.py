@@ -14,6 +14,7 @@ from sqlalchemy.orm import sessionmaker
 from . import create_app
 from . import database
 from . import models
+from .blueprints.main import services
 
 
 class Process:
@@ -185,7 +186,9 @@ class Process:
     @classmethod
     def get_biomarker(cls, record, proposition_id, statement_id):
         extensions = record.get("extensions")
-        biomarker_type = cls.get_value_by_name(data=extensions, name="biomarker_type")
+        biomarker_type = services.get_extension_value(
+            list_of_extensions=extensions, name="biomarker_type"
+        )
         return {
             "id": record.get("id"),
             "name": record.get("name"),
@@ -263,14 +266,16 @@ class Process:
 
     @classmethod
     def get_indication(cls, record, statement_id):
-        document = record.get("document")
-        doc_extensions = document.get("extensions")
-        agent = [ext for ext in doc_extensions if ext['name'] == "agent"][0]['value']
+        reported_in = record.get("reportedIn") or []
+        document = reported_in[0] if reported_in else {}
+        agent = services.get_extension_value(
+            list_of_extensions=document.get("extensions"), name="agent", default={}
+        )
         return {
             "id": record.get("id"),
-            "indication": record.get("indication"),
-            "document_id": record.get("document").get("id"),
-            "document_name": record.get("document").get("name"),
+            "indication": record.get("description"),
+            "document_id": document.get("id"),
+            "document_name": document.get("name"),
             "agent_id": agent.get("id"),
             "agent_name": agent.get("name"),
             "agent_description": agent.get("description"),
@@ -357,29 +362,38 @@ class Process:
                 )
                 document_records.append(record_document)
 
-            record_indication = cls.get_indication(
-                record=record.get("indication"),
-                statement_id=statement_id,
+            indication = services.get_extension_value(
+                list_of_extensions=record.get("extensions"), name="indication"
             )
-            indication_records.append(record_indication)
+            if indication:
+                record_indication = cls.get_indication(
+                    record=indication,
+                    statement_id=statement_id,
+                )
+                indication_records.append(record_indication)
 
             proposition = record.get("proposition")
-            for biomarker in proposition.get("biomarkers"):
+            biomarker_criteria = services.get_extension_value(
+                list_of_extensions=proposition.get("extensions"),
+                name="biomarkers",
+                default=[],
+            )
+            for criterion in biomarker_criteria:
+                biomarker = criterion.get("subject")
                 record_biomarker = cls.get_biomarker(
                     record=biomarker,
                     proposition_id=proposition.get("id"),
                     statement_id=statement_id,
                 )
                 biomarker_records.append(record_biomarker)
-                if "genes" in biomarker:
-                    for gene in biomarker.get("genes"):
-                        record_gene = cls.get_gene(
-                            record=gene,
-                            biomarker_id=biomarker.get("id"),
-                            proposition_id=proposition.get("id"),
-                            statement_id=statement_id,
-                        )
-                        gene_records.append(record_gene)
+                for gene in services.extract_biomarker_genes(biomarker=biomarker):
+                    record_gene = cls.get_gene(
+                        record=gene,
+                        biomarker_id=biomarker.get("id"),
+                        proposition_id=proposition.get("id"),
+                        statement_id=statement_id,
+                    )
+                    gene_records.append(record_gene)
 
             record_disease = cls.get_disease(
                 record=proposition.get("conditionQualifier"),
@@ -447,11 +461,11 @@ class Process:
             id_column="id",
             count_column="statement_id",
         )
-        therapy_records["propositions_count"] = (
-            therapy_records.get("id").astype(int).replace(therapy_to_proposition_count)
+        therapy_records["propositions_count"] = therapy_records.get("id").replace(
+            therapy_to_proposition_count
         )
-        therapy_records["statements_count"] = (
-            therapy_records.get("id").astype(int).replace(therapy_to_statement_count)
+        therapy_records["statements_count"] = therapy_records.get("id").replace(
+            therapy_to_statement_count
         )
         return therapy_records.drop(
             ["proposition_id", "statement_id"], axis="columns"
@@ -513,6 +527,7 @@ class SQL:
             release=record.get("release"),
             documents_count=record.get("documents_count"),
             indications_count=record.get("indications_count"),
+            organizations_count=record.get("organizations_count"),
             propositions_count=record.get("propositions_count"),
             statements_count=record.get("statements_count"),
         )
@@ -639,9 +654,9 @@ class Statements:
     @staticmethod
     def make_organization_filter(settings):
         return [
-            f"agent_id={agency.lower()}"
+            f"agent_id=agent:org:{agency.lower()}"
             for agency, value in settings.items()
-            if value == "true"
+            if value.lower() == "true"
         ]
 
     @classmethod
@@ -714,11 +729,11 @@ def main(config_path, api_url="https://api.moalmanac.org"):
             SQL.add_terms(results=results, session=session)
             session.commit()
         except Exception as e:
-            print(f"Error occurred: {e}")
             session.rollback()
+            sys.exit(f"Error occurred while populating database: {e}")
         finally:
             session.close()
-            return "Success!"
+        return "Success!"
 
 
 if __name__ == "__main__":
@@ -729,7 +744,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "-a",
         "--api",
-        choices=["http://localhost:8000", "https://api.moalmanac.org"],
+        choices=["http://localhost:8080", "https://api.moalmanac.org"],
         default="https://api.moalmanac.org",
         help="URL for the MOAlmanac API",
     )

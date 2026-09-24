@@ -45,15 +45,7 @@
   </thead>
   <tbody>
     {% for indication in indications %}
-    {% set extensions = indication.document.extensions %}
-    {% set agent = (
-    extensions
-    | selectattr("name", "equalto", "agent")
-    | map(attribute="value")
-    | first
-    )
-    %}
-    <tr data-organization="{{ agent.name }}">
+    <tr data-organization="{{ indication.agent.name }}">
       <td>
         <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">
           {{ indication.document.name}}
@@ -61,7 +53,7 @@
       </td>
       <td>
         <a href="{{ url_for('main.indications', indication_id=indication.id) }}">
-          {{ indication.indication }}
+          {{ indication.description }}
         </a>
       </td>
       <td>{{ indication.statements_count }}</td>
@@ -82,7 +74,7 @@
   <div class="form-check form-check-inline">
     <input class="form-check-input org-toggle" type="checkbox" value="{{ org.id }}" id="org-{{ org.id }}">
     <label class="form-check-label" for="org-{{ org.id }}">
-      <a href="{{ url_for('main.organizations', organization_id=org.id | urlencode) }}">{{ org.id|upper }}</a>
+      <a href="{{ url_for('main.organizations', organization_id=org.id | urlencode) }}">{{ org.id|short_agent_id }}</a>
     </label>
   </div>
   {% endfor %}

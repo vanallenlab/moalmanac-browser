@@ -5,6 +5,7 @@ Service-layer functions for intermediate processing of data retrieved from handl
 """
 
 import collections
+import urllib.parse
 
 
 def append_field_from_matching_records(
@@ -60,15 +61,51 @@ def categorize_propositions(records: list[dict]):
 
 def extract_biomarkers(biomarkers: list[dict]):
     """
-    Extracts `id` and `name` from a list of dictionaries representing biomarkers.
+    Extracts `id` and `name` from a list of dictionaries representing biomarker criteria, as found within a
+    proposition's `biomarkers` extension (each item is `{id, present, subject: Biomarker}`).
 
     Args:
-        biomarkers (list[dict]): A list of dictionaries containing biomarker information.
+        biomarkers (list[dict]): A list of biomarker criterion dictionaries.
 
     Returns:
-        list[dict]: A list of dictionaries only containing `id` and `name` keys for each biomarker in biomarkers.
+        list[dict]: A list of dictionaries only containing `id` and `name` keys for each biomarker's subject.
     """
-    return [{"id": b["id"], "name": b["name"]} for b in biomarkers]
+    return [
+        {
+            "id": criterion["subject"]["id"],
+            "name": criterion["subject"]["name"],
+            "present": criterion["present"]
+        }
+        for criterion in biomarkers
+    ]
+
+
+def extract_biomarker_genes(biomarker: dict):
+    """
+    Extracts the genes associated with a biomarker record from its `constraints`. Genes may appear as the
+    `featureContext` of a constraint (e.g. a variant on a single gene) or within `adjoinedElements` of an
+    `AdjacencyConstraint` (e.g. a fusion).
+
+    Args:
+        biomarker (dict): A biomarker record from the API.
+
+    Returns:
+        list[dict]: A sorted, de-duplicated list of dictionaries containing `id` and `name` for each gene.
+    """
+    genes = {}
+    for constraint in biomarker.get("constraints") or []:
+        feature_context = constraint.get("featureContext")
+        if feature_context:
+            genes[feature_context["id"]] = {
+                "id": feature_context["id"],
+                "name": feature_context["name"],
+            }
+        for element in constraint.get("adjoinedElements") or []:
+            # Fusion partners are not always known genes; an unknown partner is represented as an
+            # `UnspecifiedElement` with no `id`/`name`, which is skipped here.
+            if element.get("conceptType") == "Gene":
+                genes[element["id"]] = {"id": element["id"], "name": element["name"]}
+    return sort_dicts_by_key(data=list(genes.values()), key="name")
 
 
 def extract_diseases(disease: dict):
@@ -93,10 +130,10 @@ def extract_organizations(propositions: dict):
         propositions (dict): A dictionary processed propositions by type from /search route.
 
     Returns:
-        list(dict): list of dictionaries of agent ids, with uppercase formatting applied.
+        list(dict): list of dictionaries of agent ids.
     """
     agents = set()
-    for proposition in propositions["VariantTherapeuticResponseProposition"]:
+    for proposition in propositions.get("VariantTherapeuticResponseProposition", []):
         for agent in proposition.get("aggregates", {}).get("by_agent", []):
             if "id" in agent:
                 agents.add(agent["id"])
@@ -122,6 +159,20 @@ def extract_therapies(object_therapeutic: dict):
         return [{"id": object_therapeutic["id"], "name": object_therapeutic["name"]}]
 
 
+def build_query_string(params: list[tuple]):
+    """
+    Encodes a list of (key, value) tuples into a URL query string, preserving repeated keys.
+
+    Args:
+        params (list[tuple]): A list of (key, value) tuples, e.g. from
+            `requests.API.get_config_organization_filters`.
+
+    Returns:
+        str: A URL-encoded query string, e.g. "agent_id=agent%3Aorg%3Afda&agent_id=agent%3Aorg%3Aema".
+    """
+    return urllib.parse.urlencode(params or [])
+
+
 def get_extension(list_of_extensions: list, name: str):
     """
     Subsets `list_of_extensions` to retrieve the extension whose name matches `name`.
@@ -134,8 +185,42 @@ def get_extension(list_of_extensions: list, name: str):
         - list: A list of extensions whose name value matches `name`.
     """
     return [
-        extension for extension in list_of_extensions if extension.get("name") == name
+        extension
+        for extension in (list_of_extensions or [])
+        if extension.get("name") == name
     ]
+
+
+def get_extension_value(list_of_extensions: list, name: str, default=None):
+    """
+    Retrieves the `value` of the extension whose name matches `name`.
+
+    Args:
+        - list_of_extensions (list): A list of dictionaries representing extensions.
+        - name (str): The name of the extension to retrieve.
+        - default: The value to return if no matching extension is found.
+
+    Returns:
+        The extension's `value`, or `default` if no extension named `name` exists.
+    """
+    matches = get_extension(list_of_extensions=list_of_extensions, name=name)
+    return matches[0]["value"] if matches else default
+
+
+def short_agent_id(agent_id: str | None):
+    """
+    Shortens a prefixed agent id (e.g. "agent:org:fda") to its display form (e.g. "FDA").
+
+    Args:
+        agent_id (str | None): A prefixed agent id.
+
+    Returns:
+        str: The text after the final `:` in `agent_id`, upper-cased. Returns an empty string if `agent_id`
+            is falsy.
+    """
+    if not agent_id:
+        return ""
+    return agent_id.rsplit(":", 1)[-1].upper()
 
 
 def filter_search_results_required_organization(records: list[dict], organization_id: str) -> list[dict]:
@@ -167,18 +252,39 @@ def map_predict(string: str):
     Returns:
         str: The mapped string to display within the view.
     """
-    if string == "predictSensitivityTo":
+    if string == "predictsSensitivityTo":
         return "Sensitivity"
-    elif string == "predictResistanceTo":
+    elif string == "predictsResistanceTo":
         return "Resistance"
     else:
         return "ERROR"
 
 
-def process_gene(record: list[dict]):
+def process_biomarker(record: dict):
     """
-    Process a gene record from the API for use within the genes view.
-    Currently, this simply extracts the gene's location.
+    Process a biomarker record from the API for use within the biomarker view. Adds a `genes` field derived
+    from the record's constraints, and drops extensions with a null value.
+
+    Args:
+        record (dict): A biomarker record from the API.
+
+    Returns:
+        record (dict): A dictionary of the original record with `genes` added and null extensions removed.
+    """
+    record = dict(record)
+    record["genes"] = extract_biomarker_genes(biomarker=record)
+    record["extensions"] = [
+        extension
+        for extension in record.get("extensions") or []
+        if extension.get("value") is not None
+    ]
+    return record
+
+
+def process_gene(record: dict):
+    """
+    Process a gene record from the API for use within the genes view. Extracts the gene's location, and
+    identifies its Ensembl, NCBI and RefSeq mappings by coding system rather than assuming a fixed order.
 
     Args:
         record (dict): A gene record from the API.
@@ -186,10 +292,23 @@ def process_gene(record: list[dict]):
     Returns:
         record (dict): A dictionary of the original record with extensions moved to the root.
     """
-    location = get_extension(
-        list_of_extensions=record.get("extensions"), name="location"
+    record = dict(record)
+    record["location"] = get_extension_value(
+        list_of_extensions=record.get("extensions"), 
+        name="location",
     )
-    record["location"] = location[0]["value"]
+
+    mapping_systems = {
+        "https://www.ensembl.org": "ensembl",
+        "https://www.ncbi.nlm.nih.gov/gene": "ncbi",
+        "https://www.ncbi.nlm.nih.gov/nuccore": "refseq",
+    }
+    mappings_by_source = {}
+    for mapping in record.get("mappings") or []:
+        source = mapping_systems.get(mapping.get("coding", {}).get("system"))
+        if source:
+            mappings_by_source[source] = mapping
+    record["mappings_by_source"] = mappings_by_source
     return record
 
 
@@ -220,23 +339,59 @@ def process_propositions(records: list[dict]):
     return categorize_propositions(records=simplified)
 
 
+def process_indication(record: dict):
+    """
+    Processes an indication record from the API response into a simplified format, flattening its reporting
+    document, publishing agent and extensions for use within the indication and related views.
+
+    Args:
+        record (dict): An indication record from the API.
+
+    Returns:
+        dict: A simplified indication record.
+    """
+    reported_in = record.get("reportedIn") or []
+    document = reported_in[0] if reported_in else {}
+    agent = get_extension_value(
+        list_of_extensions=document.get("extensions"), 
+        name="agent", 
+        default={},
+    )
+    extensions = record.get("extensions") or []
+    return {
+        "id": record["id"],
+        "description": record.get("description"),
+        "document": document,
+        "agent": agent,
+        "status": get_extension_value(extensions, "status"),
+        "reimbursement_scheme": get_extension_value(extensions, "reimbursement_scheme"),
+        "reimbursement_comment": get_extension_value(extensions, "reimbursement_comment"),
+        "contributions": record.get("contributions", []),
+    }
+
+
 def process_statement(record: dict):
     """
     Processes a single statement record from the API response into a simplified format for the statements view.
 
     Args:
-        record (dict): A list of statement records from the API.
+        record (dict): A statement record from the API.
 
     Returns:
-        dict: A dictionary of statements and their corresponding simplified records.
+        dict: A simplified statement record.
     """
-    document_extensions = (
-        record
-        .get("indication")
-        .get("document")
-        .get("extensions")
+    reported_in = record.get("reportedIn") or []
+    document = reported_in[0] if reported_in else {}
+    agent = get_extension_value(
+        list_of_extensions=document.get("extensions"), 
+        name="agent", 
+        default={},
     )
-    agent = [ext for ext in document_extensions if ext['name'] == "agent"][0]['value']
+    extensions = record.get("extensions") or []
+    indication = get_extension_value(
+        list_of_extensions=extensions, 
+        name="indication",
+    )
     return {
         "id": record["id"],
         "proposition": simplify_proposition_record(record=record["proposition"]),
@@ -249,13 +404,13 @@ def process_statement(record: dict):
                 "name": doc["name"],
                 "description": doc["description"],
             }
-            for doc in record["reportedIn"]
+            for doc in reported_in
         ],
-        "agent": (
-            agent["id"].upper()
-            if record.get("indication", None)
-            else None
-        ),
+        "agent": agent.get("id", "").upper() if agent else None,
+        "organization": short_agent_id(agent.get("id")) if agent else None,
+        "status": get_extension_value(list_of_extensions=extensions, name="status"),
+        "strength": (record.get("strength") or {}).get("name"),
+        "indication": process_indication(record=indication) if indication else None,
         "raw": record,
     }
 
@@ -288,14 +443,17 @@ def process_therapy(record: dict):
     Returns:
         record (dict): A dictionary of the original record with extensions moved to the root.
     """
-    therapy_strategy = get_extension(
-        list_of_extensions=record.get("extensions"), name="therapy_strategy"
+    record = dict(record)
+    therapy_strategy = get_extension_value(
+        list_of_extensions=record.get("extensions"), 
+        name="therapy_strategy", 
+        default=[],
     )
-    record["therapy_strategy"] = ", ".join(therapy_strategy[0]["value"])
-    therapy_type = get_extension(
-        list_of_extensions=record.get("extensions"), name="therapy_type"
+    record["therapy_strategy"] = ", ".join(therapy_strategy or [])
+    record["therapy_type"] = get_extension_value(
+        list_of_extensions=record.get("extensions"), 
+        name="therapy_type",
     )
-    record["therapy_type"] = therapy_type[0]["value"]
     return record
 
 
@@ -317,10 +475,18 @@ def simplify_proposition_record(record: dict):
         "aggregates": record.get("aggregates", {}),
     }
     if record["type"] == "VariantTherapeuticResponseProposition":
-        biomarkers = extract_biomarkers(biomarkers=record["biomarkers"])
-        new_record["biomarkers"] = sort_dicts_by_key(data=biomarkers, key="name")
+        biomarker_criteria = get_extension_value(
+            list_of_extensions=record.get("extensions"), 
+            name="biomarkers", 
+            default=[],
+        )
+        biomarkers = extract_biomarkers(biomarkers=biomarker_criteria)
+        new_record["biomarkers"] = sort_dicts_by_key(
+            data=biomarkers, 
+            key="name",
+        )
         new_record["cancer_type"] = extract_diseases(
-            disease=record["conditionQualifier"]
+            disease=record["conditionQualifier"],
         )
         therapies = extract_therapies(object_therapeutic=record["objectTherapeutic"])
         new_record["therapies"] = sort_dicts_by_key(data=therapies, key="name")

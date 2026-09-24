@@ -19,7 +19,7 @@ Search results | Molecular Oncology Almanac
       <div class="form-check form-check-inline">
         <input class="form-check-input org-toggle" type="checkbox" value="{{ org.id }}" id="org-{{ org.id }}">
         <label class="form-check-label" for="org-{{ org.id }}">
-          <a href="{{ url_for('main.organizations', organization_id=org.id | urlencode) }}">{{ org.id|upper }}</a>
+          <a href="{{ url_for('main.organizations', organization_id=org.id | urlencode) }}">{{ org.id|short_agent_id }}</a>
         </label>
       </div>
     {% endfor %}
