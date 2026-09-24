@@ -14,9 +14,25 @@ from sqlalchemy.orm import sessionmaker
 from . import create_app
 from . import database
 from . import models
+from .blueprints.main import services
 
 
 class Process:
+    @staticmethod
+    def active_indications(indication_records):
+        """
+        Subsets indication records to those with an active status (Approved or Accelerated).
+
+        Args:
+            indication_records (pandas.DataFrame): Indication records, with a `status` column.
+
+        Returns:
+            pandas.DataFrame: The indication records with an active status.
+        """
+        return indication_records.loc[
+            indication_records["status"].isin(services.ACTIVE_INDICATION_STATUSES)
+        ]
+
     @classmethod
     def agents(cls, document_records, indication_records):
         counts_by_documents = document_records.groupby(["agent_name"])[
@@ -53,11 +69,14 @@ class Process:
                 .value_counts()
             )
         )
+        active_indication_records = cls.active_indications(
+            indication_records=indication_records
+        )
         counts_by_agent["indications_count"] = (
             counts_by_agent
             .loc[:, "name"]
             .map(
-                indication_records
+                active_indication_records
                 .loc[:, ["agent_name", "id"]]
                 .drop_duplicates()
                 .loc[:, "agent_name"]
@@ -185,7 +204,9 @@ class Process:
     @classmethod
     def get_biomarker(cls, record, proposition_id, statement_id):
         extensions = record.get("extensions")
-        biomarker_type = cls.get_value_by_name(data=extensions, name="biomarker_type")
+        biomarker_type = services.get_extension_value(
+            list_of_extensions=extensions, name="biomarker_type"
+        )
         return {
             "id": record.get("id"),
             "name": record.get("name"),
@@ -263,18 +284,23 @@ class Process:
 
     @classmethod
     def get_indication(cls, record, statement_id):
-        document = record.get("document")
-        doc_extensions = document.get("extensions")
-        agent = [ext for ext in doc_extensions if ext['name'] == "agent"][0]['value']
+        reported_in = record.get("reportedIn") or []
+        document = reported_in[0] if reported_in else {}
+        agent = services.get_extension_value(
+            list_of_extensions=document.get("extensions"), name="agent", default={}
+        )
         return {
             "id": record.get("id"),
-            "indication": record.get("indication"),
-            "document_id": record.get("document").get("id"),
-            "document_name": record.get("document").get("name"),
+            "indication": record.get("description"),
+            "document_id": document.get("id"),
+            "document_name": document.get("name"),
             "agent_id": agent.get("id"),
             "agent_name": agent.get("name"),
             "agent_description": agent.get("description"),
             "agent_last_updated": agent.get("last_updated"),
+            "status": services.get_extension_value(
+                list_of_extensions=record.get("extensions"), name="status"
+            ),
             "statement_id": statement_id,
         }
 
@@ -318,29 +344,47 @@ class Process:
             ]
 
     @classmethod
-    def indications(cls, indication_records):
+    def indications(cls, indication_records, all_indications):
+        """
+        Builds one record per indication for the enabled organizations, including indications without any
+        statements and indications that are Superseded or Withdrawn, with each indication's statements count.
+
+        Args:
+            indication_records (pandas.DataFrame): Indication records derived from statements, one row per
+                indication and statement.
+            all_indications (list[dict]): Every indication record from the API for the enabled organizations.
+
+        Returns:
+            pandas.DataFrame: One row per indication, with a `statements_count` column.
+        """
         indication_to_statement_count = cls.get_counts(
             ids=indication_records.get("id").unique(),
             dataframe=indication_records,
             id_column="id",
             count_column="statement_id",
         )
-        # this is required for python 3.12 and pandas 2.2 to opt into future behavior for type downcasting
-        with pandas.option_context("future.no_silent_downcasting", True):
-            indication_records["statements_count"] = (
-                indication_records.get("id")
-                .astype(str)
-                .replace(indication_to_statement_count)
-                .astype(int)
-            )
-        return indication_records.drop("statement_id", axis="columns").drop_duplicates()
+        api_records = pandas.DataFrame(
+            [
+                cls.get_indication(record=record, statement_id=None)
+                for record in all_indications
+            ]
+        )
+        records = (
+            pandas.concat([indication_records, api_records], ignore_index=True)
+            .drop("statement_id", axis="columns")
+            .drop_duplicates(subset="id")
+        )
+        records["statements_count"] = (
+            records.get("id").map(indication_to_statement_count).fillna(0).astype(int)
+        )
+        return records
 
     @classmethod
     def propositions(cls, statements):
         return {statement.get("proposition").get("id") for statement in statements}
 
     @classmethod
-    def statements(cls, records):
+    def statements(cls, records, all_indications):
         agent_records = []
         biomarker_records = []
         disease_records = []
@@ -357,29 +401,38 @@ class Process:
                 )
                 document_records.append(record_document)
 
-            record_indication = cls.get_indication(
-                record=record.get("indication"),
-                statement_id=statement_id,
+            indication = services.get_extension_value(
+                list_of_extensions=record.get("extensions"), name="indication"
             )
-            indication_records.append(record_indication)
+            if indication:
+                record_indication = cls.get_indication(
+                    record=indication,
+                    statement_id=statement_id,
+                )
+                indication_records.append(record_indication)
 
             proposition = record.get("proposition")
-            for biomarker in proposition.get("biomarkers"):
+            biomarker_criteria = services.get_extension_value(
+                list_of_extensions=proposition.get("extensions"),
+                name="biomarkers",
+                default=[],
+            )
+            for criterion in biomarker_criteria:
+                biomarker = criterion.get("subject")
                 record_biomarker = cls.get_biomarker(
                     record=biomarker,
                     proposition_id=proposition.get("id"),
                     statement_id=statement_id,
                 )
                 biomarker_records.append(record_biomarker)
-                if "genes" in biomarker:
-                    for gene in biomarker.get("genes"):
-                        record_gene = cls.get_gene(
-                            record=gene,
-                            biomarker_id=biomarker.get("id"),
-                            proposition_id=proposition.get("id"),
-                            statement_id=statement_id,
-                        )
-                        gene_records.append(record_gene)
+                for gene in services.extract_biomarker_genes(biomarker=biomarker):
+                    record_gene = cls.get_gene(
+                        record=gene,
+                        biomarker_id=biomarker.get("id"),
+                        proposition_id=proposition.get("id"),
+                        statement_id=statement_id,
+                    )
+                    gene_records.append(record_gene)
 
             record_disease = cls.get_disease(
                 record=proposition.get("conditionQualifier"),
@@ -404,12 +457,18 @@ class Process:
 
         biomarker_records = cls.biomarkers(biomarker_records=biomarker_records)
         disease_records = cls.diseases(disease_records=disease_records)
+        gene_records = cls.genes(gene_records=gene_records)
+        indication_records = cls.indications(
+            indication_records=indication_records,
+            all_indications=all_indications,
+        )
+        active_indication_records = cls.active_indications(
+            indication_records=indication_records
+        )
         document_records = cls.documents(
             document_records=document_records,
-            indication_records=indication_records,
+            indication_records=active_indication_records,
         )
-        gene_records = cls.genes(gene_records=gene_records)
-        indication_records = cls.indications(indication_records=indication_records)
         agent_records = cls.agents(
             document_records=document_records,
             indication_records=indication_records,
@@ -427,7 +486,7 @@ class Process:
             "indications": indication_records.to_dict(orient="records"),
             "therapies": therapy_records.to_dict(orient="records"),
             "documents_count": document_records.to_dict(orient="records").__len__(),
-            "indications_count": indication_records.to_dict(orient="records").__len__(),
+            "indications_count": active_indication_records.shape[0],
             "organizations_count": agent_records.to_dict(orient="records").__len__(),
             "propositions_count": propositions.__len__(),
             "statements_count": records.__len__(),
@@ -447,11 +506,11 @@ class Process:
             id_column="id",
             count_column="statement_id",
         )
-        therapy_records["propositions_count"] = (
-            therapy_records.get("id").astype(int).replace(therapy_to_proposition_count)
+        therapy_records["propositions_count"] = therapy_records.get("id").replace(
+            therapy_to_proposition_count
         )
-        therapy_records["statements_count"] = (
-            therapy_records.get("id").astype(int).replace(therapy_to_statement_count)
+        therapy_records["statements_count"] = therapy_records.get("id").replace(
+            therapy_to_statement_count
         )
         return therapy_records.drop(
             ["proposition_id", "statement_id"], axis="columns"
@@ -494,6 +553,17 @@ class Requests:
         )
 
     @classmethod
+    def get_indications(cls, root_url, filters=None):
+        request = f"{root_url}/indications?include_deprecated=true"
+        if filters:
+            request = f"{request}&{'&'.join(filters)}"
+        response = cls.get_request(request=request)
+        return cls.check_request(
+            response=response,
+            failure_message=f"Failed to get indications from moalmanac api at {root_url}",
+        )
+
+    @classmethod
     def get_statements(cls, root_url, filters=None):
         request = f"{root_url}/statements"
         if filters:
@@ -513,6 +583,7 @@ class SQL:
             release=record.get("release"),
             documents_count=record.get("documents_count"),
             indications_count=record.get("indications_count"),
+            organizations_count=record.get("organizations_count"),
             propositions_count=record.get("propositions_count"),
             statements_count=record.get("statements_count"),
         )
@@ -593,6 +664,7 @@ class SQL:
                 document_name=record.get("document_name"),
                 agent_id=record.get("agent_id"),
                 agent_name=record.get("agent_name"),
+                status=record.get("status"),
                 statements_count=record.get("statements_count"),
             )
             session.add(indication)
@@ -625,6 +697,14 @@ class SQL:
             session.add(therapy)
 
 
+class Indications:
+    @classmethod
+    def get(cls, agency_preferences, api):
+        filters = Statements.make_organization_filter(settings=agency_preferences)
+        response = Requests.get_indications(root_url=api, filters=filters)
+        return response.json()["data"]
+
+
 class Service:
     @classmethod
     def get(cls, api):
@@ -639,9 +719,9 @@ class Statements:
     @staticmethod
     def make_organization_filter(settings):
         return [
-            f"agent_id={agency.lower()}"
+            f"agent_id=agent:org:{agency.lower()}"
             for agency, value in settings.items()
-            if value == "true"
+            if value.lower() == "true"
         ]
 
     @classmethod
@@ -675,7 +755,8 @@ def main(config_path, api_url="https://api.moalmanac.org"):
         config = database.read_config_ini(path=config_path)
         about = Service.get(api=api_url)
         statements = Statements.get(agency_preferences=config["agencies"], api=api_url)
-        results = Process.statements(records=statements)
+        indications = Indications.get(agency_preferences=config["agencies"], api=api_url)
+        results = Process.statements(records=statements, all_indications=indications)
         count_columns = [
             "documents_count",
             "indications_count",
@@ -714,11 +795,11 @@ def main(config_path, api_url="https://api.moalmanac.org"):
             SQL.add_terms(results=results, session=session)
             session.commit()
         except Exception as e:
-            print(f"Error occurred: {e}")
             session.rollback()
+            sys.exit(f"Error occurred while populating database: {e}")
         finally:
             session.close()
-            return "Success!"
+        return "Success!"
 
 
 if __name__ == "__main__":
@@ -729,7 +810,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "-a",
         "--api",
-        choices=["http://localhost:8000", "https://api.moalmanac.org"],
+        choices=["http://localhost:8080", "https://api.moalmanac.org"],
         default="https://api.moalmanac.org",
         help="URL for the MOAlmanac API",
     )

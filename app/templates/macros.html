@@ -1,0 +1,18 @@
+{# Shared template macros. Biomarkers are expected to be sorted by services.sort_biomarker_criteria (present first). #}
+
+{% macro biomarker_link(biomarker) -%}
+{% if not biomarker.present %}not {% endif %}<a href="{{ url_for('main.biomarkers', biomarker_id=biomarker.id) }}">{{ biomarker.name }}</a>
+{%- endmacro %}
+
+{# Comma-separated biomarkers for tables, e.g. "CD19 +, not BCR::ABL1". #}
+{% macro biomarker_list(biomarkers) -%}
+{% for biomarker in biomarkers %}{{ biomarker_link(biomarker) }}{% if not loop.last %}, {% endif %}{% endfor %}
+{%- endmacro %}
+
+{# Biomarkers joined for sentences, e.g. "A and not B" or "A, B, and not C". #}
+{% macro biomarker_prose(biomarkers) -%}
+{% set n = biomarkers|length %}
+{%- for biomarker in biomarkers -%}
+{{ biomarker_link(biomarker) }}{% if not loop.last %}{% if n == 2 %} and {% elif loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}
+{%- endfor %}
+{%- endmacro %}

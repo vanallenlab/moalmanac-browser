@@ -6,6 +6,12 @@
 
 {% block content %}
   <br>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.genes') }}">Genes</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ gene.id }}</li>
+    </ol>
+  </nav>
   <h2 class="title"><em>{{ gene.name }}</em></h2>
   <p><!-- Placeholder for description on the gene record --></p>
 
@@ -24,15 +30,21 @@
         <h5 class="card-header">Mappings</h5>
         <div class="card-body compact-card-text">
           <p class="card-text"><strong>HGNC</strong>: <a href="{{ gene.primaryCoding.iris[0] }}" target="_blank">{{ gene.primaryCoding.code }}</a></p>
-          <p class="card-text"><strong>Ensembl</strong>: <a href="{{ gene.mappings[0].coding.iris[0] }}" target="_blank">{{ gene.mappings[0].coding.code }}</a></p>
-          <p class="card-text"><strong>NCBI</strong>: <a href="{{ gene.mappings[1].coding.iris[0] }}" target="_blank">{{ gene.mappings[1].coding.code }}</a></p>
-          <p class="card-text"><strong>Refseq</strong>: <a href="{{ gene.mappings[2].coding.iris[0] }}" target="_blank">{{ gene.mappings[2].coding.code }}</a></p>
+          {% if gene.mappings_by_source.ensembl %}
+          <p class="card-text"><strong>Ensembl</strong>: <a href="{{ gene.mappings_by_source.ensembl.coding.iris[0] }}" target="_blank">{{ gene.mappings_by_source.ensembl.coding.code }}</a></p>
+          {% endif %}
+          {% if gene.mappings_by_source.ncbi %}
+          <p class="card-text"><strong>NCBI</strong>: <a href="{{ gene.mappings_by_source.ncbi.coding.iris[0] }}" target="_blank">{{ gene.mappings_by_source.ncbi.coding.code }}</a></p>
+          {% endif %}
+          {% if gene.mappings_by_source.refseq %}
+          <p class="card-text"><strong>Refseq</strong>: <a href="{{ gene.mappings_by_source.refseq.coding.iris[0] }}" target="_blank">{{ gene.mappings_by_source.refseq.coding.code }}</a></p>
+          {% endif %}
         </div>
       </div>
     </div>
 
     <div class="d-flex justify-content-end mb-3">
-      <a href="{{ api_url }}/genes?gene={{ gene.name | urlencode }}" target="_blank" class="btn btn-outline-primary">
+      <a href="{{ api_url }}/genes?gene_id={{ gene.id | api_id }}" target="_blank" class="btn btn-outline-primary">
         View API
       </a>
     </div>
@@ -52,9 +64,9 @@
     </thead>
     <tbody>
       {% for biomarker in biomarkers %}
-        <tr data-biomarkerType="{{ biomarker.type }}">
-          <td><a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a></td>
-          <td>{{ biomarker.extensions[0].value }}</td>
+        <tr data-biomarkerType="{{ biomarker.biomarker_type }}">
+          <td><a href="{{ url_for('main.biomarkers', biomarker_id=biomarker.id) }}">{{ biomarker.name }}</a></td>
+          <td>{{ biomarker.biomarker_type }}</td>
           <td>{{ biomarker.propositions_count }}</td>
           <td>{{ biomarker.statements_count }}</td>
         </tr>

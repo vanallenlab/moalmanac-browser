@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "macros.html" import biomarker_prose %}
 
 {% block title %}
 Proposition {{ proposition.id }} | Molecular Oncology Almanac
@@ -6,13 +7,15 @@ Proposition {{ proposition.id }} | Molecular Oncology Almanac
 
 {% block content %}
   <br>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.propositions') }}">Propositions</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ proposition.id }}</li>
+    </ol>
+  </nav>
   <h2 class="title">{{ proposition.proposition_type.title() }}</h2>
   <p>
-    {% set biomarkers = proposition.biomarkers %}
-    {% set n_b = biomarkers|length %}
-    {% for biomarker in biomarkers -%}
-    <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{% if not loop.last %}{% if n_b == 2 %} and {% else %}{% if loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}{% endif -%}
-    {%- endfor %}
+    {{ biomarker_prose(proposition.biomarkers) }}
 
     status confers <strong>therapeutic {{ proposition.predicate.lower() }}</strong> to
 
@@ -20,19 +23,19 @@ Proposition {{ proposition.id }} | Molecular Oncology Almanac
     {% set n = therapies|length %}
 
     {% if n == 1 %}
-      <a href="{{ url_for('main.therapies', therapy_name=therapies[0].name | urlencode) }}">{{ therapies[0].name }}</a>
+      <a href="{{ url_for('main.therapies', therapy_id=therapies[0].id) }}">{{ therapies[0].name }}</a>
     {% else %}
-      <a href="{{ url_for('main.therapies', therapy_name=therapies[0].name | urlencode) }}">{{ therapies[0].name }}</a>
+      <a href="{{ url_for('main.therapies', therapy_id=therapies[0].id) }}">{{ therapies[0].name }}</a>
       in combination with
       {% for therapy in therapies[1:] %}
-        <a href="{{ url_for('main.therapies', therapy_name=therapy.name | urlencode) }}">{{ therapy.name }}</a>{% if not loop.last %}{% if n == 3 %} and {% else %}{% if loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}{% endif %}
+        <a href="{{ url_for('main.therapies', therapy_id=therapy.id) }}">{{ therapy.name }}</a>{% if not loop.last %}{% if n == 3 %} and {% else %}{% if loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}{% endif %}
       {% endfor %}
     {% endif %}
     in patients with
-    <a href="{{ url_for('main.diseases', disease_name=proposition.cancer_type.name | urlencode) }}">{{ proposition.cancer_type.name }}</a>.
+    <a href="{{ url_for('main.diseases', disease_id=proposition.cancer_type.id) }}">{{ proposition.cancer_type.name }}</a>.
   </p>
   <div class="d-flex justify-content-end mb-3">
-    <a href="{{ api_url }}/propositions?proposition_id={{ proposition.id | urlencode }}" target="_blank" class="btn btn-outline-primary">
+    <a href="{{ api_url }}/propositions?proposition_id={{ proposition.id | api_id }}" target="_blank" class="btn btn-outline-primary">
       View API
     </a>
   </div>
@@ -62,7 +65,7 @@ Proposition {{ proposition.id }} | Molecular Oncology Almanac
   </table>
   <br>
   <div class="d-flex justify-content-end mb-3">
-    <a href="{{ api_url }}/statements?proposition_id={{ proposition.id | urlencode }}&{{ organization_filters }}" target="_blank" class="btn btn-outline-primary">
+    <a href="{{ api_url }}/statements?proposition_id={{ proposition.id | api_id }}&{{ organization_filters }}" target="_blank" class="btn btn-outline-primary">
       View API
     </a>
   </div>

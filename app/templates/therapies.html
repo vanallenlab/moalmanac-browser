@@ -33,7 +33,7 @@ Therapies | Molecular Oncology Almanac
     <tbody>
       {% for therapy in therapies %}
         <tr data-therapyType="{{ therapy.therapy_type }}">
-          <td><a href="{{ url_for('main.therapies', therapy_name=therapy.name) }}">{{ therapy.name }}</a></td>
+          <td><a href="{{ url_for('main.therapies', therapy_id=therapy.id) }}">{{ therapy.name }}</a></td>
           <!--<td>{{ therapy.therapy_strategy }}</td>-->
           <td>{{ therapy.therapy_type }}</td>
           <td>{{ therapy.propositions_count }}</td>

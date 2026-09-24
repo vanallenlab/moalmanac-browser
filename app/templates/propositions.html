@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "macros.html" import biomarker_list %}
 
 {% block title %}
 Propositions | Molecular Oncology Almanac
@@ -17,9 +18,9 @@ Propositions | Molecular Oncology Almanac
           <tr>
             <th style="width: 5%">id</th>
             <th style="width: 10%">Type</th>
-            <th style="width: 25%">Biomarker(s)</th>
+            <th style="width: 25%">Biomarkers</th>
             <th style="width: 25%">Cancer type</th>
-            <th style="width: 25%">Therapy(ies)</th>
+            <th style="width: 25%">Therapies</th>
             <th style="width: 10%">Statements</th>
           </tr>
       </thead>
@@ -29,14 +30,12 @@ Propositions | Molecular Oncology Almanac
                 <td>{{ proposition.id }}</td>
                 <td>{{ proposition.predicate }}</td>
                 <td>
-                  {% for biomarker in proposition.biomarkers %}
-                    <a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a>{% if not loop.last %}, {% endif %}
-                  {% endfor %}
+                  {{ biomarker_list(proposition.biomarkers) }}
                 </td>
-                <td><a href="{{ url_for('main.diseases', disease_name=proposition.cancer_type.name | urlencode) }}">{{ proposition.cancer_type.name }}</a></td>
+                <td><a href="{{ url_for('main.diseases', disease_id=proposition.cancer_type.id) }}">{{ proposition.cancer_type.name }}</a></td>
                 <td>
                   {% for therapy in proposition['therapies'] %}
-                    <a href="{{ url_for('main.therapies', therapy_name=therapy.name) }}">{{ therapy.name }}</a>{% if not loop.last %},{% endif %}
+                    <a href="{{ url_for('main.therapies', therapy_id=therapy.id) }}">{{ therapy.name }}</a>{% if not loop.last %},{% endif %}
                   {% endfor %}
                 </td>
                 <td>

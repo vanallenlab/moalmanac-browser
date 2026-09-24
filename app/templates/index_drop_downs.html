@@ -7,10 +7,10 @@
       <strong>{{ terms | selectattr("table", "equalto", "biomarkers") | list | length }}</strong> biomarkers:
     </p>
     <form action="{{ url_for('main.documents') }}" method="get">
-      <select name="biomarker" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/biomarkers/' + encodeURIComponent(this.value);">
+      <select name="biomarker" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/biomarkers/' + encodeURIComponent(this.value).replace(/%3A/g, ':');">
         <option selected disabled hidden>Select biomarker</option>
         {% for term in terms | selectattr("table", "equalto", "biomarkers") | sort(attribute="record_name") %}
-          <option value="{{ term.record_name }}">{{ term.record_name }}</option>
+          <option value="{{ term.record_id }}">{{ term.record_name }}</option>
         {% endfor %}
       </select>
       <noscript>
@@ -29,10 +29,10 @@
       <strong>{{ terms | selectattr("table", "equalto", "genes") | list | length }}</strong> genes:
     </p>
     <form action="{{ url_for('main.documents') }}" method="get" onsubmit="return false;">
-      <select name="gene" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/genes/' + encodeURIComponent(this.value);">
+      <select name="gene" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/genes/' + encodeURIComponent(this.value).replace(/%3A/g, ':');">
         <option selected disabled hidden>Select gene</option>
         {% for term in terms | selectattr("table", "equalto", "genes") | sort(attribute="record_name") %}
-          <option value="{{ term.record_name }}">{{ term.record_name }}</option>
+          <option value="{{ term.record_id }}">{{ term.record_name }}</option>
         {% endfor %}
       </select>
       <noscript>
@@ -51,10 +51,10 @@
       <strong>{{ terms | selectattr("table", "equalto", "diseases") | list | length }}</strong> cancer types:
     </p>
     <form action="{{ url_for('main.documents') }}" method="get">
-      <select name="disease" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/diseases/' + encodeURIComponent(this.value);">
+      <select name="disease" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/diseases/' + encodeURIComponent(this.value).replace(/%3A/g, ':');">
         <option selected disabled hidden>Select cancer type</option>
         {% for term in terms | selectattr("table", "equalto", "diseases") | sort(attribute="record_name") %}
-          <option value="{{ term.record_name }}">{{ term.record_name }}</option>
+          <option value="{{ term.record_id }}">{{ term.record_name }}</option>
         {% endfor %}
       </select>
       <noscript>
@@ -67,16 +67,16 @@
 
   <div class="col-md-3">
     <h3 class="h5 category-title">
-        <a class="nav-link" href="{{ url_for('main.therapies') }}">Therapy</a>
+        <a class="nav-link" href="{{ url_for('main.therapies') }}">Therapies</a>
     </h3>
     <p class="text-muted">Select from
       <strong>{{ terms | selectattr("table", "equalto", "therapies") | list | length }}</strong> therapies:
     </p>
     <form action="{{ url_for('main.documents') }}" method="get">
-      <select name="therapy" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/therapies/' + encodeURIComponent(this.value);">
+      <select name="therapy" class="form-select browse-dropdown" onchange="if (this.value) window.location.href = '/therapies/' + encodeURIComponent(this.value).replace(/%3A/g, ':');">
         <option selected disabled hidden>Select therapy</option>
         {% for term in terms | selectattr("table", "equalto", "therapies") | sort(attribute="record_name") %}
-          <option value="{{ term.record_name }}">{{ term.record_name }}</option>
+          <option value="{{ term.record_id }}">{{ term.record_name }}</option>
         {% endfor %}
       </select>
       <noscript>

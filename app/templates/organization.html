@@ -6,6 +6,12 @@
 
 {% block content %}
 <br>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('main.organizations') }}">Organizations</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ organization.id }}</li>
+  </ol>
+</nav>
 <h2 class="title">{{ organization.name }}</h2>
 <p>{{ organization.description }}</p>
 
@@ -45,15 +51,7 @@
   </thead>
   <tbody>
     {% for indication in indications %}
-    {% set extensions = indication.document.extensions %}
-    {% set agent = (
-    extensions
-    | selectattr("name", "equalto", "agent")
-    | map(attribute="value")
-    | first
-    )
-    %}
-    <tr data-organization="{{ agent.name }}">
+    <tr data-organization="{{ indication.agent.name }}">
       <td>
         <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">
           {{ indication.document.name}}
@@ -61,7 +59,7 @@
       </td>
       <td>
         <a href="{{ url_for('main.indications', indication_id=indication.id) }}">
-          {{ indication.indication }}
+          {{ indication.description }}
         </a>
       </td>
       <td>{{ indication.statements_count }}</td>
@@ -82,7 +80,7 @@
   <div class="form-check form-check-inline">
     <input class="form-check-input org-toggle" type="checkbox" value="{{ org.id }}" id="org-{{ org.id }}">
     <label class="form-check-label" for="org-{{ org.id }}">
-      <a href="{{ url_for('main.organizations', organization_id=org.id | urlencode) }}">{{ org.id|upper }}</a>
+      <a href="{{ url_for('main.organizations', organization_id=org.id) }}">{{ org.id|short_agent_id }}</a>
     </label>
   </div>
   {% endfor %}

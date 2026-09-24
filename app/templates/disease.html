@@ -6,6 +6,12 @@
 
 {% block content %}
   <br>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.diseases') }}">Cancer types</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ disease.id }}</li>
+    </ol>
+  </nav>
   <h2 class="title">{{ disease.name }}</h2>
   <p><!-- Placeholder for description on the therapy record --></p>
 
@@ -50,7 +56,7 @@
     </div>
 
     <div class="d-flex justify-content-end mb-3">
-      <a href="{{ api_url }}/diseases?disease={{ disease.name | urlencode }}" target="_blank" class="btn btn-outline-primary">
+      <a href="{{ api_url }}/diseases?disease_id={{ disease.id | api_id }}" target="_blank" class="btn btn-outline-primary">
         View API
       </a>
     </div>

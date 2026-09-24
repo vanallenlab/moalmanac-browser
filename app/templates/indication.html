@@ -4,33 +4,35 @@
 {{ indication.id }} | Molecular Oncology Almanac
 {% endblock %}
 
-{% set extensions = indication.document.extensions %}
-{% set agent = (
-indication.document.extensions
-| selectattr("name", "equalto", "agent")
-| map(attribute="value")
-| first
-)
-%}
-
 {% block content %}
 <br>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('main.indications') }}">Regulatory approvals</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ indication.id }}</li>
+  </ol>
+</nav>
 <h2 class="title">Regulatory approval</h2>
-<p>Published by the <a href="{{ url_for('main.organizations', organization_id=agent.id) }}">{{agent.name }}</a>.</p>
+<p>Published by the <a href="{{ url_for('main.organizations', organization_id=indication.agent.id) }}">{{ indication.agent.name }}</a>.
+  {% if indication.status %}<span class="badge text-bg-secondary">{{ indication.status }}</span>{% endif %}
+</p>
 
 <p>{{ indication.description }}</p>
 
 <p>This is written in the <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">approval
-    document</a> as:</p>
-<blockquote class="blockquote">
-  <p>{{ indication.indication }}</p>
-</blockquote>
+    document</a>.</p>
+
+{% if indication.reimbursement_scheme or indication.reimbursement_comment %}
+<h4 class="subtitle">Reimbursement</h4>
+{% if indication.reimbursement_scheme %}<p>{{ indication.reimbursement_scheme }}</p>{% endif %}
+{% if indication.reimbursement_comment %}<p>{{ indication.reimbursement_comment }}</p>{% endif %}
+{% endif %}
 
 <h4 class="subtitle">Citation</h4>
 <p><a href="{{ indication.document.urls[0] }}" target="_blank">{{ indication.document.description }}</a></p>
 
 <div class="d-flex justify-content-end mb-3">
-  <a href="{{ api_url }}/indications?indication_id={{ indication.id | urlencode }}" target="_blank"
+  <a href="{{ api_url }}/indications?indication_id={{ indication.id | api_id }}" target="_blank"
     class="btn btn-outline-primary">
     View API
   </a>

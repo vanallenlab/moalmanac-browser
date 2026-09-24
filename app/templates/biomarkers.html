@@ -32,7 +32,7 @@ Biomarkers | Molecular Oncology Almanac
     <tbody>
       {% for biomarker in biomarkers %}
         <tr data-biomarkerType="{{ biomarker.type }}">
-          <td><a href="{{ url_for('main.biomarkers', biomarker_name=biomarker.name | urlencode) }}">{{ biomarker.name }}</a></td>
+          <td><a href="{{ url_for('main.biomarkers', biomarker_id=biomarker.id) }}">{{ biomarker.name }}</a></td>
           <td>{{ biomarker.type }}</td>
           <td>{{ biomarker.propositions_count }}</td>
           <td>{{ biomarker.statements_count }}</td>

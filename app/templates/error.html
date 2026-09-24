@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Something went wrong | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="d-grid gap-4">
+    <div class="card">
+      <div class="card-header">{{ status_code }} &mdash; Something went wrong</div>
+      <div class="card-body">
+        <p class="card-text">
+          {{ message or "Something went wrong while loading this page." }}
+        </p>
+        <p class="card-text mb-0">
+          <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary btn-sm">Home</a>
+          <a href="{{ url_for('main.search') }}" class="btn btn-outline-primary btn-sm">Search</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
