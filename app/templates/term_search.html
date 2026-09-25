@@ -1,0 +1,28 @@
+{# Term search box with suggestions. Expects `search_terms` (see services.process_search_terms); optionally
+   `query` to prefill the box and `search_column_class` to size it. #}
+<div class="row justify-content-center mb-4">
+  <div class="{{ search_column_class or 'col-12 col-md-9' }}">
+    <form action="{{ url_for('main.search') }}" method="get" role="search" class="term-search">
+      <label for="term-search" class="visually-hidden">Search</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search" aria-hidden="true"></i></span>
+        <input
+          id="term-search"
+          name="q"
+          type="search"
+          class="form-control"
+          placeholder="e.g., BRAF, CD20 +, melanoma, or osimertinib"
+          value="{{ query or '' }}"
+          autocomplete="off"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded="false"
+          aria-controls="term-search-results"
+        >
+        <button type="submit" class="btn btn-outline-secondary">Search</button>
+      </div>
+      <ul id="term-search-results" class="list-group term-search-results" role="listbox" hidden></ul>
+    </form>
+    <script type="application/json" id="term-search-data">{{ search_terms | tojson }}</script>
+  </div>
+</div>

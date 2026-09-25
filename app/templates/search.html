@@ -1,33 +1,69 @@
 {% extends 'base.html' %}
 
 {% block title %}
-Search results | Molecular Oncology Almanac
+Search | Molecular Oncology Almanac
 {% endblock %}
 
 {% block content %}
   <br>
-  <h2 class="title">Search results</h2>
+  <h2 class="title">Search</h2>
   <br>
+  {% with search_column_class="col-12" %}
+    {% include "term_search.html" %}
+  {% endwith %}
 
-  <h4 class="subtitle">Therapeutic Response</h4>
-  <p>Precision oncology relationships indicating that patients with listed biomarkers and diagnosed cancer type may be sensitive to the listed therapies.</p>
-
-  <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
-    <span class="text-muted small me-2">Filter by organization:</span>
-
-    {% for org in organizations %}
-      <div class="form-check form-check-inline">
-        <input class="form-check-input org-toggle" type="checkbox" value="{{ org.id }}" id="org-{{ org.id }}">
-        <label class="form-check-label" for="org-{{ org.id }}">
-          <a href="{{ url_for('main.organizations', organization_id=org.id) }}">{{ org.id|short_agent_id }}</a>
-        </label>
+  {% if results %}
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <select id="conceptFilter" class="form-select form-select-sm" aria-label="Filter by concept">
+          <option value="">{{ all_types | length }} concept{{ 's' if all_types | length != 1 }}</option>
+          {% for term_type, plural in all_types %}
+            <option value="{{ term_type }}">{{ plural }}</option>
+          {% endfor %}
+        </select>
       </div>
-    {% endfor %}
-
-    <div class="ms-auto">
-      <button class="btn btn-sm btn-outline-secondary" id="org-clear" type="button">Clear</button>
     </div>
-  </div>
 
-  {% include "search_table_therapeutic_response.html" %}
+    {# data-order="[]" keeps the server's ranking (exact, prefix, contains, description) instead of sorting by column. #}
+    <table id="search-table-result" class="table table-striped table-hover table-sm small w-100 dataTable term-search-table" data-order="[]" data-search-label="Search results:">
+      <thead>
+        <tr>
+          <th style="width: 15%">Concept</th>
+          <th style="width: 20%">ID</th>
+          <th style="width: 65%">Name or description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for term in results %}
+          <tr data-concept="{{ term.type }}">
+            <td>{{ term.type }}</td>
+            <td><a href="{{ term.url }}">{{ term.record_id }}</a></td>
+            <td>
+              {% if term.record_name %}
+                <a href="{{ term.url }}">{{ term.record_name }}</a>
+                {% if term.snippet %}
+                  <div class="text-muted">{{ term.snippet[0] }}<mark>{{ term.snippet[1] }}</mark>{{ term.snippet[2] }}</div>
+                {% endif %}
+              {% elif term.snippet %}
+                {# Unnamed terms (e.g. indications) show the part of their description that matched. #}
+                <a href="{{ term.url }}">{{ term.snippet[0] }}<mark>{{ term.snippet[1] }}</mark>{{ term.snippet[2] }}</a>
+              {% else %}
+                <a href="{{ term.url }}">{{ term.label }}</a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% elif query %}
+    <p class="text-muted">No results for <strong>{{ query }}</strong>.</p>
+  {% endif %}
+
+  {# Last on the page, so it reads as a fallback after the results (or in place of them). #}
+  <p class="text-muted{{ ' mt-3' if results }}">
+    Or browse all <a href="{{ url_for('main.indications') }}">approvals</a>,
+    <a href="{{ url_for('main.documents') }}">documents</a>,
+    <a href="{{ url_for('main.propositions') }}">propositions</a>, or
+    <a href="{{ url_for('main.statements') }}">statements</a>.
+  </p>
 {% endblock %}

@@ -70,13 +70,19 @@ class Indications(Base):
     __tablename__ = "indications"
 
     id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
-    indication = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    description = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     document_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     document_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     agent_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     agent_name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     status = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+
+class Statements(Base):
+    __tablename__ = "statements"
+
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
+    json_data = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
 
 class Therapies(Base):
     __tablename__ = "therapies"
@@ -95,3 +101,4 @@ class Terms(Base):
     table = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     record_id = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     record_name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    record_description = sqlalchemy.Column(sqlalchemy.String, nullable=True)

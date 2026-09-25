@@ -196,3 +196,95 @@ def test_therapy_detail_route_by_legacy_name_redirects_to_id(client):
 def test_therapy_detail_route_unknown_returns_404(client):
     response = client.get("/therapies/not-a-therapy")
     assert response.status_code == 404
+
+
+def test_statements_list_route_reads_from_cache(client, monkeypatch):
+    from app.blueprints.main import requests as browser_requests
+
+    def _raise(cls, path, params=None):
+        raise browser_requests.APIError("API unreachable")
+
+    monkeypatch.setattr(browser_requests.API, "get", classmethod(_raise))
+    response = client.get("/statements")
+    assert response.status_code == 200
+    assert b"/statements/stmt:" in response.data
+
+
+def test_index_route_has_term_search(client):
+    response = client.get("/")
+    assert b'id="term-search"' in response.data
+    assert b'id="term-search-data"' in response.data
+
+
+def test_search_route_without_query_shows_search_box(client):
+    response = client.get("/search")
+    assert response.status_code == 200
+    assert b'id="term-search"' in response.data
+    assert b'id="search-table-result"' not in response.data
+    assert b"No results" not in response.data
+
+
+def test_search_route_lists_exact_name_first(client):
+    response = client.get("/search?q=egfr")
+    assert response.status_code == 200
+    assert b"/genes/gene:hgnc:3236" in response.data
+    assert b"/biomarkers/bmkr:" in response.data
+
+
+def test_search_route_single_match_redirects_to_record(client):
+    response = client.get("/search?q=gene:hgnc:3236")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/genes/gene:hgnc:3236")
+
+
+def test_search_route_lists_multiple_matches(client):
+    response = client.get("/search?q=BRCA")
+    assert response.status_code == 200
+    assert b'id="search-table-result"' in response.data
+    assert b'<option value="Biomarker">Biomarkers</option>' in response.data
+    assert b"/biomarkers/bmkr:" in response.data
+    # The search box on the results page keeps the query and offers suggestions.
+    assert b'value="BRCA"' in response.data
+    assert b'id="term-search-data"' in response.data
+    # The browse links follow the results table.
+    assert response.data.index(b"Or browse all") > response.data.index(b'id="search-table-result"')
+
+
+def test_search_route_finds_organizations(client):
+    response = client.get("/search?q=Food and Drug Administration")
+    assert response.status_code == 200
+    assert b"/organizations/agent:org:fda" in response.data
+
+
+def test_search_route_matches_indication_descriptions(client):
+    response = client.get("/search?q=kinase inhibitor")
+    assert response.status_code == 200
+    # Indications link from both the ID and the "Name or description" columns.
+    assert response.data.count(b'href="/indications/ind:') >= 2 * response.data.count(b"<td>Indication</td>") > 0
+
+
+def test_search_route_with_no_matches(client):
+    response = client.get("/search?q=zzzzzz")
+    assert response.status_code == 200
+    assert b"No results" in response.data
+    assert b"Or browse all" in response.data
+
+
+def test_propositions_route_defaults_to_site_organizations(client):
+    response = client.get("/propositions")
+    assert response.status_code == 200
+    assert b"Show all propositions" in response.data
+    assert b'class="form-check-input org-toggle"' in response.data
+
+
+def test_propositions_route_scope_all_includes_propositions_without_statements(client):
+    site = client.get("/propositions")
+    everything = client.get("/propositions?scope=all")
+    assert everything.status_code == 200
+    assert b"Show only this site" in everything.data
+    assert everything.data.count(b"/propositions/prop:") > site.data.count(b"/propositions/prop:")
+
+
+def test_index_statements_link_points_to_statements(client):
+    response = client.get("/")
+    assert b'href="/statements">' in response.data

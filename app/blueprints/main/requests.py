@@ -12,11 +12,15 @@ Defines unified interfaces for retrieving data from two sources:
 Each class provides helper methods for retrieving and processing relevant resources such as genes, therapies, propositions, and documents.
 """
 
+import json
+
 import flask
 import requests
+import sqlalchemy
 
-from . import handlers
 from app import models
+
+from . import handlers, services
 
 
 class APIError(Exception):
@@ -304,6 +308,14 @@ class Local:
         return cls.sort(data=results, sort_key="name")
 
     @classmethod
+    def get_statements(cls):
+        handler = handlers.Statements()
+        statement = handler.construct_base_query(model=models.Statements)
+        results = cls.get(handler=handler, statement=statement)
+        records = [json.loads(result["json_data"]) for result in results]
+        return cls.sort(data=records, sort_key="id")
+
+    @classmethod
     def get_terms(cls):
         handler = handlers.Terms()
         statement = handler.construct_base_query(model=models.Terms)
@@ -315,6 +327,41 @@ class Local:
         statement = handler.construct_base_query(model=models.Therapies)
         results = cls.get(handler=handler, statement=statement)
         return cls.sort(data=results, sort_key="name")
+
+    @classmethod
+    def search_terms(cls, query: str):
+        """
+        Searches the terms table for records whose id, name, or description contains the query, case-insensitively.
+
+        Args:
+            query (str): The search query.
+
+        Returns:
+            list[dict]: Matching terms with `rank` (see `services.term_rank`), `label`, `type`, and `url` fields,
+                sorted by rank and then label.
+        """
+        query = query.strip()
+        if not query:
+            return []
+        pattern = f"%{query}%"
+        handler = handlers.Terms()
+        statement = handler.construct_base_query(model=models.Terms).where(
+            sqlalchemy.or_(
+                models.Terms.record_id.ilike(pattern),
+                models.Terms.record_name.ilike(pattern),
+                models.Terms.record_description.ilike(pattern),
+            )
+        )
+        results = []
+        for term in cls.get(handler=handler, statement=statement):
+            term["rank"] = services.term_rank(term=term, query=query)
+            if term["rank"] is None:
+                continue
+            term["label"] = services.term_label(term=term)
+            term["type"] = services.term_type(term=term)
+            term["url"] = services.term_url(term=term)
+            results.append(term)
+        return sorted(results, key=lambda term: (term["rank"], term["label"].lower()))
 
     @classmethod
     def sort(cls, data, sort_key="name", reverse=False):
