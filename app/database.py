@@ -33,7 +33,10 @@ def read_config_ini(path: str) -> configparser.ConfigParser():
     return config
 
 
-def init_db(file: str) -> tuple[Engine, sessionmaker]:
+def init_db(
+        file: str, 
+        must_exist: bool = True,
+    ) -> tuple[Engine, sessionmaker]:
     """
     Initializes the sqlite database connection and session.
 
@@ -41,20 +44,19 @@ def init_db(file: str) -> tuple[Engine, sessionmaker]:
 
     Args:
         file (str): A sqlite3 filename within the data/ folder.
+        must_exist (bool): Raise an error if the file does not exist. Set to False when populating a new cache.
 
     Returns:
         tuple[sqlalchemy.orm.engine, sqlalchemy.orm.Session]: A tuple containing the SQLAlchemy engine
             and configured session.
 
     Raises:
-        FileNotFoundError: If the specified configuration file does not exist.
-        KeyError: If the database path is not found within the configuration file.
+        FileNotFoundError: If must_exist is True and the sqlite3 file does not exist.
     """
     path = os.path.join("data", file)
     path = os.path.abspath(path)
-    if file == "cache.sqlite3":
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"SQLite database file not found: {path}")
+    if must_exist and not os.path.exists(path):
+        raise FileNotFoundError(f"SQLite database file not found: {path}")
 
     engine = sqlalchemy.create_engine(f"sqlite:///{path}")
     session_factory = sessionmaker(bind=engine)

@@ -749,8 +749,8 @@ def delete_sqlite_db(path):
         print(f"No database found at: {path}")
 
 
-def main(config_path, api_url="https://api.moalmanac.org"):
-    app = create_app(config_path=config_path, populating=True)
+def main(config_path, api_url="http://127.0.0.1:8000"):
+    app = create_app(config_path=config_path, api=api_url, populating=True)
     with app.app_context():
         config = database.read_config_ini(path=config_path)
         about = Service.get(api=api_url)
@@ -810,9 +810,13 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "-a",
         "--api",
-        choices=["http://localhost:8080", "https://api.moalmanac.org"],
-        default="https://api.moalmanac.org",
-        help="URL for the MOAlmanac API",
+        choices=[
+            "http://localhost:8080",
+            "http://127.0.0.1:8000",
+            "https://api.moalmanac.org"
+        ],
+        default="http://127.0.0.1:8000",
+        help="URL for the MOAlmanac API: http://localhost:8080 (local), http://127.0.0.1:8000 (VM), or https://api.moalmanac.org (live)",
     )
     arg_parser.add_argument(
         "-c", "--config", action="append", help="Path to config file", required=True

@@ -1,0 +1,17 @@
+# Template unit: one instance per folder under deploy/, e.g. moalmanac-browser@ie
+[Unit]
+Description=Gunicorn instance to serve moalmanac-browser (%i)
+After=network.target moalmanac-api.service
+Wants=moalmanac-api.service
+
+[Service]
+User=breardon
+Group=www-data
+WorkingDirectory=/home/breardon/moalmanac-browser
+EnvironmentFile=/home/breardon/moalmanac-browser/.env.production
+Environment="APP_CONFIG=/home/breardon/moalmanac-browser/deploy/%i/config.ini"
+Environment="PATH=/home/breardon/mambaforge-pypy3/envs/moalmanac-browser/bin"
+ExecStart=/home/breardon/mambaforge-pypy3/envs/moalmanac-browser/bin/gunicorn --worker-class gthread --workers ${GUNICORN_WORKERS} --threads ${GUNICORN_THREADS} --bind unix:moalmanac-browser-%i.sock -m 007 run:app
+
+[Install]
+WantedBy=multi-user.target
