@@ -179,9 +179,14 @@ class Indications(BaseHandler):
     Handler class to manage queries against the Indications table.
     """
 
+class Statements(BaseHandler):
+    """
+    Handler class to manage queries against the Statements table.
+    """
+
 class Terms(BaseHandler):
     """
-    Handler class to manage queries against the About table.
+    Handler class to manage queries against the Terms table.
     """
 
 class Therapies(BaseHandler):

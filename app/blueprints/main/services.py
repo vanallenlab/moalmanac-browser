@@ -5,10 +5,26 @@ Service-layer functions for intermediate processing of data retrieved from handl
 """
 
 import collections
+import flask
 import urllib.parse
 
 # Indication statuses shown on list pages; Superseded and Withdrawn indications are only reachable by URL.
 ACTIVE_INDICATION_STATUSES = ("Approved", "Accelerated")
+
+# Maps each `terms.table` value to its display type, plural display type, detail endpoint, and the endpoint's
+# id argument. Search result concept filters are listed in this order.
+TERM_TABLES = {
+    "biomarkers": ("Biomarker", "Biomarkers", "main.biomarkers", "biomarker_id"),
+    "genes": ("Gene", "Genes", "main.genes", "gene_id"),
+    "diseases": ("Cancer type", "Cancer types", "main.diseases", "disease_id"),
+    "therapies": ("Therapy", "Therapies", "main.therapies", "therapy_id"),
+    "documents": ("Document", "Documents", "main.documents", "document_id"),
+    "agents": ("Organization", "Organizations", "main.organizations", "organization_id"),
+    "indications": ("Indication", "Indications", "main.indications", "indication_id"),
+}
+
+# Maximum length of a term label derived from its description.
+TERM_LABEL_LENGTH = 120
 
 
 def append_field_from_matching_records(
@@ -511,6 +527,29 @@ def process_indication(record: dict):
     }
 
 
+def process_search_terms(terms: list[dict]):
+    """
+    Processes records from the terms table into the fields used by the term search box's suggestions.
+
+    Args:
+        terms (list[dict]): Records from the terms table.
+
+    Returns:
+        list[dict]: Terms with `id`, `name`, `description`, `label`, `type`, and `url` fields.
+    """
+    return [
+        {
+            "id": term["record_id"],
+            "name": term["record_name"],
+            "description": term["record_description"],
+            "label": term_label(term=term),
+            "type": term_type(term=term),
+            "url": term_url(term=term),
+        }
+        for term in terms
+    ]
+
+
 def process_statement(record: dict):
     """
     Processes a single statement record from the API response into a simplified format for the statements view.
@@ -571,6 +610,33 @@ def process_statements(records: list[dict]):
         new_record = process_statement(record=record)
         new_records.append(new_record)
     return new_records
+
+
+def process_statement_summary(record: dict):
+    """
+    Processes a statement record from the API into the minimal fields shown in the statements list view. These
+    summaries are what the local cache stores, since full statement records are fully dereferenced and large.
+
+    Args:
+        record (dict): A statement record from the API.
+
+    Returns:
+        dict: A statement summary with `id`, `direction`, `organization`, and a `proposition` holding `predicate`,
+            `biomarkers`, `cancer_type`, and `therapies`.
+    """
+    processed = process_statement(record=record)
+    proposition = processed["proposition"]
+    return {
+        "id": processed["id"],
+        "direction": processed["direction"],
+        "organization": processed["organization"],
+        "proposition": {
+            "predicate": proposition["predicate"],
+            "biomarkers": proposition["biomarkers"],
+            "cancer_type": proposition["cancer_type"],
+            "therapies": proposition["therapies"],
+        },
+    }
 
 
 def process_therapy(record: dict):
@@ -688,3 +754,109 @@ def sort_dicts_by_key(data: list[dict], key, reverse=False):
         return sorted(data, key=lambda d: d[key], reverse=reverse)
     except KeyError as e:
         raise KeyError(f"Missing key '{key}' in one or more dictionaries.") from e
+
+
+def term_label(term: dict, max_length: int = TERM_LABEL_LENGTH):
+    """
+    Returns the display label for a term: its name, or else its description (trimmed), or else its id.
+
+    Args:
+        term (dict): A record from the terms table.
+        max_length (int): The maximum length of a label derived from the description.
+
+    Returns:
+        str: The term's display label.
+    """
+    if term.get("record_name"):
+        return term["record_name"]
+    description = term.get("record_description")
+    if description:
+        if len(description) <= max_length:
+            return description
+        return description[:max_length].rsplit(" ", 1)[0] + "…"
+    return term["record_id"]
+
+
+def term_rank(term: dict, query: str):
+    """
+    Ranks how well a term matches a search query, where lower is better.
+
+    Args:
+        term (dict): A record from the terms table.
+        query (str): The search query.
+
+    Returns:
+        int | None: 0 for an exact id or name match, 1 if the id or name starts with the query, 2 if the id or
+            name contains the query, 3 if only the description contains the query, or None if nothing matches.
+            Terms without a name (e.g. indications) only match their id exactly or by prefix, since ids like
+            `ind:fda:braftovi:0` would otherwise surface them as name-like matches for "braf".
+    """
+    query = query.strip().lower()
+    if not query:
+        return None
+    keys = [(term.get(field) or "").lower() for field in ("record_id", "record_name")]
+    if query in keys:
+        return 0
+    if any(key.startswith(query) for key in keys):
+        return 1
+    if term.get("record_name") and any(query in key for key in keys):
+        return 2
+    if query in (term.get("record_description") or "").lower():
+        return 3
+    return None
+
+
+def term_snippet(text: str, query: str, width: int = 160):
+    """
+    Returns about `width` characters of `text` around the first case-insensitive match of `query`, split so the
+    match can be highlighted.
+
+    Args:
+        text (str): The text to excerpt, e.g. a term's description.
+        query (str): The search query.
+        width (int): The approximate length of the excerpt.
+
+    Returns:
+        tuple[str, str, str]: The text before the match, the match, and the text after the match. If `query` is not
+            found, the first `width` characters of `text` and two empty strings.
+    """
+    index = text.lower().find(query.strip().lower())
+    if index == -1:
+        return (text[:width] + ("…" if len(text) > width else ""), "", "")
+    length = len(query.strip())
+    start = max(0, index - (width - length) // 2)
+    # Start on a word boundary, as long as it doesn't skip past the match.
+    space = text.find(" ", start)
+    if start > 0 and -1 < space < index:
+        start = space + 1
+    end = min(len(text), start + width)
+    before = ("…" if start > 0 else "") + text[start:index]
+    after = text[index + length:end] + ("…" if end < len(text) else "")
+    return (before, text[index:index + length], after)
+
+
+def term_type(term: dict):
+    """
+    Returns the display type (e.g. "Cancer type") of a term.
+
+    Args:
+        term (dict): A record from the terms table.
+
+    Returns:
+        str: The term's display type.
+    """
+    return TERM_TABLES[term["table"]][0]
+
+
+def term_url(term: dict):
+    """
+    Builds the URL of a term's detail page from its table and record id.
+
+    Args:
+        term (dict): A record from the terms table.
+
+    Returns:
+        str: The URL of the term's detail page.
+    """
+    _, _, endpoint, argument = TERM_TABLES[term["table"]]
+    return flask.url_for(endpoint, **{argument: term["record_id"]})

@@ -107,3 +107,78 @@ def test_encode_query_value_preserves_colons():
     assert services.encode_query_value("doc:ema:adcetris") == "doc:ema:adcetris"
     assert services.encode_query_value("a b&c") == "a%20b%26c"
     assert services.encode_query_value(None) == ""
+
+
+def test_process_statement_summary_keeps_list_fields_only():
+    statement = load_fixture("statement.json")
+    summary = services.process_statement_summary(record=statement)
+
+    assert set(summary) == {"id", "direction", "organization", "proposition"}
+    assert set(summary["proposition"]) == {"predicate", "biomarkers", "cancer_type", "therapies"}
+    assert summary["id"] == statement["id"]
+
+
+def test_term_label_prefers_name_then_description_then_id():
+    assert services.term_label({"record_id": "gene:hgnc:3236", "record_name": "EGFR"}) == "EGFR"
+    description = "word " * 50
+    label = services.term_label(
+        {"record_id": "ind:fda:0", "record_name": None, "record_description": description}
+    )
+    assert label.endswith("…")
+    assert len(label) <= services.TERM_LABEL_LENGTH + 1
+    assert services.term_label({"record_id": "ind:fda:0", "record_name": None}) == "ind:fda:0"
+
+
+def test_term_rank_tiers():
+    term = {
+        "record_id": "gene:hgnc:3236",
+        "record_name": "EGFR",
+        "record_description": "Epidermal growth factor receptor",
+    }
+    assert services.term_rank(term=term, query="egfr") == 0
+    assert services.term_rank(term=term, query="eg") == 1
+    assert services.term_rank(term=term, query="3236") == 2
+    assert services.term_rank(term=term, query="growth factor") == 3
+    assert services.term_rank(term=term, query="kras") is None
+    assert services.term_rank(term=term, query="  ") is None
+
+
+def test_term_url_for_each_table(app):
+    expected = {
+        "biomarkers": "/biomarkers/bmkr:1",
+        "genes": "/genes/bmkr:1",
+        "diseases": "/diseases/bmkr:1",
+        "therapies": "/therapies/bmkr:1",
+        "documents": "/documents/bmkr:1",
+        "agents": "/organizations/bmkr:1",
+        "indications": "/indications/bmkr:1",
+    }
+    assert set(expected) == set(services.TERM_TABLES)
+    with app.test_request_context():
+        for table, url in expected.items():
+            assert services.term_url({"table": table, "record_id": "bmkr:1"}) == url
+
+
+def test_term_snippet_centers_on_match():
+    text = ("lorem ipsum " * 20) + "BRCA1 mutated" + (" dolor sit" * 20)
+    before, match, after = services.term_snippet(text=text, query="brca1", width=60)
+    assert match == "BRCA1"
+    assert before.startswith("…")
+    assert after.endswith("…")
+    assert len(before) + len(match) + len(after) <= 62
+
+
+def test_term_snippet_without_match():
+    assert services.term_snippet(text="short", query="zzz") == ("short", "", "")
+
+
+def test_term_rank_unnamed_terms_skip_id_substring_matches():
+    term = {
+        "record_id": "ind:fda:braftovi:0",
+        "record_name": None,
+        "record_description": "BRAFTOVI is a kinase inhibitor indicated for BRAF V600E melanoma.",
+    }
+    assert services.term_rank(term=term, query="braf") == 3
+    assert services.term_rank(term=term, query="ind:fda:braftovi") == 1
+    assert services.term_rank(term=term, query="ind:fda:braftovi:0") == 0
+    assert services.term_rank(term={**term, "record_description": "Other text."}, query="braftovi") is None

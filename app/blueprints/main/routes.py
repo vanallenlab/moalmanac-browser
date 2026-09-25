@@ -16,8 +16,12 @@ from . import services
 def index():
     about = requests.Local.get_about()
     terms = requests.Local.get_terms()
+    search_terms = services.process_search_terms(terms=terms)
     return flask.render_template(
-        template_name_or_list="index.html", about=about, terms=terms
+        template_name_or_list="index.html",
+        about=about,
+        terms=terms,
+        search_terms=search_terms,
     )
 
 
@@ -344,22 +348,63 @@ def propositions(proposition_id: str | None = None):
                 requests.API.get_config_organization_filters()
             ),
         )
-    records = requests.API.get_propositions()
+    show_all = flask.request.args.get("scope") == "all"
+    if show_all:
+        # Every proposition in the database, for curation. Propositions without statements are absent from
+        # search results, so they get no per-organization aggregates and show "None" for organizations.
+        records = requests.API.get_propositions()
+        records = services.append_field_from_matching_records(
+            target_list=records,
+            source_list=requests.API.get_search_results(config_organization_filter=False),
+            source_field="aggregates",
+            new_field_name="aggregates",
+            match_key="id",
+        )
+    else:
+        records = requests.API.get_search_results(config_organization_filter=True)
     processed = services.process_propositions(records=records)
+    response_organizations = services.extract_organizations(propositions=processed)
     return flask.render_template(
-        template_name_or_list="propositions.html", propositions_by_category=processed
+        template_name_or_list="propositions.html",
+        propositions_by_category=processed,
+        organizations=response_organizations,
+        show_all=show_all,
     )
 
 
 @main_bp.route("/search", methods=["GET"])
 def search():
-    records = requests.API.get_search_results(config_organization_filter=True)
-    processed = services.process_propositions(records=records)
-    response_organizations = services.extract_organizations(propositions=processed)
+    query = flask.request.args.get("q", "").strip()
+    search_terms = services.process_search_terms(terms=requests.Local.get_terms())
+    if not query:
+        return flask.render_template(
+            template_name_or_list="search.html",
+            query=query,
+            results=[],
+            search_terms=search_terms,
+        )
+
+    results = requests.Local.search_terms(query=query)
+    if len(results) == 1:
+        return flask.redirect(results[0]["url"])
+
+    for term in results:
+        if term["rank"] == 3:
+            term["snippet"] = services.term_snippet(
+                text=term["record_description"], query=query
+            )
+    # (type, plural) pairs: rows are filtered by the singular type, and the filter lists the plural.
+    all_types = [
+        (term_type, plural)
+        for term_type, plural, _, _ in services.TERM_TABLES.values()
+        if any(term["type"] == term_type for term in results)
+    ]
     return flask.render_template(
         template_name_or_list="search.html",
-        propositions_by_category=processed,
-        organizations=response_organizations,
+        query=query,
+        results=results,
+        all_types=all_types,
+        search_terms=search_terms,
     )
 
 
@@ -374,10 +419,9 @@ def statements(statement_id: str | None = None):
             statement=processed,
         )
     else:
-        records = requests.API.get_statements(config_organization_filter=True)
-        processed = services.process_statements(records=records)
+        records = requests.Local.get_statements()
         return flask.render_template(
-            template_name_or_list="statements.html", statements=processed
+            template_name_or_list="statements.html", statements=records
         )
 
 

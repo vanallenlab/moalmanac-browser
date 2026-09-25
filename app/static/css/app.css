@@ -142,6 +142,49 @@ footer {
     display: none;
 }
 
+.term-search {
+    position: relative;
+}
+
+.term-search-results {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 24rem;
+    overflow-y: auto;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.term-search-results .list-group-item {
+    cursor: pointer;
+}
+
+.term-search-results .list-group-item.active .text-muted {
+    color: inherit !important;
+}
+
+/* Bootstrap pads <mark>, which reads as spaces around a match inside a word. */
+.term-search-results mark,
+.term-search-table mark {
+    padding: 0;
+}
+
+.term-search-results .term-search-all {
+    font-size: 0.875rem;
+    color: var(--primary-color);
+}
+
+.term-search-results .term-search-all.active {
+    color: var(--bs-list-group-active-color);
+}
+
+.term-search-results .term-search-divider {
+    cursor: default;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
 /* ====================
    7. Tables
    ==================== */

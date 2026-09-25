@@ -1,6 +1,7 @@
 import argparse
 import configparser
 import flask
+import json
 import os
 import pandas
 import requests
@@ -52,6 +53,7 @@ class Process:
             "agent_name": "name",
             "agent_description": "description",
             "agent_last_updated": "last_updated",
+            "agent_type": "agent_type",
         }
         counts_by_agent = (
             document_records
@@ -210,6 +212,7 @@ class Process:
         return {
             "id": record.get("id"),
             "name": record.get("name"),
+            "description": record.get("description"),
             "type": biomarker_type,
             "proposition_id": proposition_id,
             "statement_id": statement_id,
@@ -232,6 +235,7 @@ class Process:
         return {
             "id": record.get("id"),
             "name": record.get("name"),
+            "description": record.get("description"),
             "proposition_id": proposition_id,
             "statement_id": statement_id,
         }
@@ -249,6 +253,7 @@ class Process:
             "agent_name": agent.get("name"),
             "agent_description": agent.get("description"),
             "agent_last_updated": agent.get("last_updated"),
+            "agent_type": agent.get("agentType"),
             "statement_id": statement_id,
         }
 
@@ -277,6 +282,7 @@ class Process:
         return {
             "id": record.get("id"),
             "name": record.get("name"),
+            "description": record.get("description"),
             "biomarker_id": biomarker_id,
             "proposition_id": proposition_id,
             "statement_id": statement_id,
@@ -291,7 +297,7 @@ class Process:
         )
         return {
             "id": record.get("id"),
-            "indication": record.get("description"),
+            "description": record.get("description"),
             "document_id": document.get("id"),
             "document_name": document.get("name"),
             "agent_id": agent.get("id"),
@@ -318,6 +324,7 @@ class Process:
                     {
                         "id": therapy.get("id"),
                         "name": therapy.get("name"),
+                        "description": therapy.get("description"),
                         # therapy strategy
                         "therapy_type": therapy_type,
                         "proposition_id": proposition_id,
@@ -336,6 +343,7 @@ class Process:
                 {
                     "id": therapy.get("id"),
                     "name": therapy.get("name"),
+                    "description": therapy.get("description"),
                     # therapy _strategy
                     "therapy_type": therapy_type,
                     "proposition_id": proposition_id,
@@ -659,7 +667,7 @@ class SQL:
         for record in records:
             indication = models.Indications(
                 id=record.get("id"),
-                indication=record.get("indication"),
+                description=record.get("description"),
                 document_id=record.get("document_id"),
                 document_name=record.get("document_name"),
                 agent_id=record.get("agent_id"),
@@ -670,19 +678,44 @@ class SQL:
             session.add(indication)
 
     @classmethod
+    def add_statements(cls, records, session):
+        for record in records:
+            summary = services.process_statement_summary(record=record)
+            statement = models.Statements(
+                id=summary.get("id"),
+                json_data=json.dumps(summary),
+            )
+            session.add(statement)
+
+    @classmethod
     def add_terms(cls, results, session):
-        tables = ["biomarkers", "diseases", "documents", "genes", "therapies"]
-        count = 0
-        for table in tables:
+        """
+        Adds searchable terms for each record type, keyed by the cache table (and route) they belong to.
+
+        Args:
+            results (dict): The output of `Process.statements`.
+            session (sqlalchemy.orm.Session): A session instance.
+        """
+        terms = []
+        for table in ["biomarkers", "diseases", "documents", "genes", "therapies"]:
             for record in results[table]:
-                term = models.Terms(
-                    id=count,
-                    table=table,
-                    record_id=record.get("id"),
-                    record_name=record.get("name"),
-                )
-                session.add(term)
-                count += 1
+                terms.append((table, record.get("id"), record.get("name"), record.get("description")))
+        for record in results["agents"]:
+            if record.get("agent_type") != "organization":
+                continue
+            terms.append(("agents", record.get("id"), record.get("name"), record.get("description")))
+        for record in results["indications"]:
+            terms.append(("indications", record.get("id"), None, record.get("description")))
+
+        for count, (table, record_id, record_name, record_description) in enumerate(terms):
+            term = models.Terms(
+                id=count,
+                table=table,
+                record_id=record_id,
+                record_name=cls.none_if_missing(record_name),
+                record_description=cls.none_if_missing(record_description),
+            )
+            session.add(term)
 
     @classmethod
     def add_therapies(cls, records, session):
@@ -695,6 +728,19 @@ class SQL:
                 statements_count=record.get("statements_count"),
             )
             session.add(therapy)
+
+    @staticmethod
+    def none_if_missing(value):
+        """
+        Converts missing values (None or pandas NaN) to None.
+
+        Args:
+            value: The value to check.
+
+        Returns:
+            The value, or None if it is missing.
+        """
+        return None if pandas.isna(value) else value
 
 
 class Indications:
@@ -787,6 +833,9 @@ def main(config_path, api_url="http://127.0.0.1:8000"):
             session.commit()
 
             SQL.add_indications(records=results.get("indications"), session=session)
+            session.commit()
+
+            SQL.add_statements(records=statements, session=session)
             session.commit()
 
             SQL.add_therapies(records=results.get("therapies"), session=session)
