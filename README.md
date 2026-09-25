@@ -87,14 +87,14 @@ All browser instances and [our API](https://github.com/vanallenlab/moalmanac-api
 This repository uses [Gunicorn](https://gunicorn.org) to serve the Flask application for production. Each instance runs from the [systemd template unit, service/moalmanac-browser@.service](service/moalmanac-browser@.service), where the instance name (e.g. `moalmanac-browser@ie`) selects `deploy/<instance>/config.ini`. Environment variables are set from [.env.production](.env.production) via the `EnvironmentFile` variable:
 
 ```ini
-EnvironmentFile=/home/breardon/moalmanac-browser/.env.production
-Environment="APP_CONFIG=/home/breardon/moalmanac-browser/deploy/%i/config.ini"
+EnvironmentFile=/srv/moalmanac/moalmanac-browser/.env.production
+Environment="APP_CONFIG=/srv/moalmanac/moalmanac-browser/deploy/%i/config.ini"
 ```
 
 Gunicorn is launched using the provided `ExecStart` command:
 
 ```ini
-/home/breardon/mambaforge-pypy3/envs/moalmanac-browser/bin/gunicorn --worker-class gthread --workers ${GUNICORN_WORKERS} --threads ${GUNICORN_THREADS} --bind unix:moalmanac-browser-%i.sock -m 007 run:app
+/srv/moalmanac/miniforge3/envs/moalmanac-browser/bin/gunicorn --worker-class gthread --workers ${GUNICORN_WORKERS} --threads ${GUNICORN_THREADS} --bind unix:moalmanac-browser-%i.sock -m 007 run:app
 ```
 
 Systemd and Gunicorn manage launching the application for production, so there is no need to run `python run.py` for production use.

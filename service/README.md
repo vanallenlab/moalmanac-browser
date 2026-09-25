@@ -11,12 +11,19 @@ Each instance is a folder under [deploy/](../deploy) with a `config.ini` and `ng
 
 ## Installation
 
-1. Create VM. We recommend e2-standard-4 (4 vCPU, 16 GB) with ubuntu-22.04 LTS, as it hosts all four services.
+1. Create VM. We recommend e2-standard-4 (4 vCPU, 16 GB) with ubuntu-24.04 LTS, as it hosts all four services.
 2. Create a static ip address to associate with the VM
 3. Add A and CNAME records for every domain above to the zone under network services > cloud dns > and your zone, all pointing to the VM's static ip.
-4. Set up moalmanac-api first, following its [service/README.md](https://github.com/vanallenlab/moalmanac-api/blob/main/service/README.md), and confirm it responds with `curl http://127.0.0.1:8000/`.
-5. Pull this repo to `/home/breardon/moalmanac-browser` with GitHub and git token, and install requirements into the `moalmanac-browser` environment.
-6. Populate each instance's cache from the local API:
+4. Set up moalmanac-api first, following its [service/README.md](https://github.com/vanallenlab/moalmanac-api/blob/main/service/README.md), and confirm it responds with `curl http://127.0.0.1:8000/`. That also creates the `moalmanac` service account and its conda install at `/srv/moalmanac/miniforge3`; see its "Service account" section.
+5. As `moalmanac` (`sudo -iu moalmanac`), clone this repository and build its environment:
+
+   ```bash
+   git clone https://github.com/vanallenlab/moalmanac-browser.git /srv/moalmanac/moalmanac-browser
+   conda create -y -n moalmanac-browser python=3.12
+   /srv/moalmanac/miniforge3/envs/moalmanac-browser/bin/pip install -r /srv/moalmanac/moalmanac-browser/requirements.txt
+   ```
+
+6. As `moalmanac`, from `/srv/moalmanac/moalmanac-browser`, populate each instance's cache from the local API:
 
    ```bash
    python -m app.populate_database \
@@ -27,13 +34,13 @@ Each instance is a folder under [deploy/](../deploy) with a `config.ini` and `ng
      --drop-tables
    ```
 
-7. Run `copy_serving_files_and_start_service.sh` to configure gunicorn and nginx for every instance under `deploy/`.
+7. From your own account, run `copy_serving_files_and_start_service.sh` to configure gunicorn and nginx for every instance under `deploy/`.
 8. Check [this guide](https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04) for additional steps, such as creating a https certificate. This is done through certbot.
 9. Run `secure-application.sh` to install https certifications for every instance.
 
 Gunicorn worker and thread counts are set by `GUNICORN_WORKERS` and `GUNICORN_THREADS` in [.env.production](../.env.production), and apply to each instance.
 
-## Adding an instanc
+## Adding an instance
 
 1. Create `deploy/<instance>/` with a `config.ini` (with a unique `[app] cache`) and an `nginx.conf` that proxies to `moalmanac-browser-<instance>.sock`.
 2. Populate its cache with `python -m app.populate_database --api http://127.0.0.1:8000 --config deploy/<instance>/config.ini --drop-tables`.
