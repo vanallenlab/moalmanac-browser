@@ -39,25 +39,29 @@ body {
 /* ====================
    3. Navbar
    ==================== */
+/* Mobile-first: the navbar grows to fit the expanded hamburger menu. */
 .navbar {
     background-color: var(--primary-color);
-    align-items: stretch;
     display: flex;
-    height: 56px;
-    padding: 0 50px;
+    min-height: 56px;
+    padding: 0 0.5rem;
 }
 
 .navbar .container-fluid {
     display: flex;
-    align-items: stretch;
-    height: 100%;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0;
 }
 
 .navbar .navbar-brand {
     display: flex;
     align-items: center;
-    height: 100%;
-    padding: 1rem;
+    flex: 1 1 0;
+    min-width: 0;
+    margin-right: 0.5rem;
+    padding: 0.75rem 0.5rem;
+    white-space: normal;
 }
 
 .navbar .navbar-brand:hover {
@@ -70,17 +74,27 @@ body {
     color: #FFFFFF;
 }
 
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem var(--secondary-color);
+}
+
+.navbar-collapse {
+    flex-basis: 100%;
+}
+
 .navbar-nav .nav-link {
     display: flex;
     align-items: center;
-    height: 100%;
-    padding: 1rem;
+    padding: 0.75rem 0.5rem;
 }
 
 .navbar-nav .nav-item {
-    height: 100%;
     display: flex;
-    align-items: center;
+    flex-direction: column;
 }
 
 .navbar-nav .nav-link:hover {
@@ -93,6 +107,46 @@ body {
 .navbar-collapse.collapsing,
 .navbar-collapse.collapse.show {
     background-color: var(--primary-color);
+}
+
+/* Desktop (Bootstrap lg and up): fixed-height bar with full-height hover blocks. */
+@media (min-width: 992px) {
+    .navbar {
+        align-items: stretch;
+        height: 56px;
+        padding: 0 50px;
+    }
+
+    .navbar .container-fluid {
+        flex-wrap: nowrap;
+        align-items: stretch;
+        height: 100%;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .navbar .navbar-brand {
+        flex: 0 0 auto;
+        height: 100%;
+        margin-right: 1rem;
+        padding: 1rem;
+        white-space: nowrap;
+    }
+
+    .navbar-collapse {
+        flex-basis: auto;
+    }
+
+    .navbar-nav .nav-item {
+        flex-direction: row;
+        align-items: center;
+        height: 100%;
+    }
+
+    .navbar-nav .nav-link {
+        height: 100%;
+        padding: 1rem;
+    }
 }
 
 /* ====================
@@ -215,16 +269,21 @@ table.dataTable td {
   text-align: left !important;
 }
 
-/* Override DataTables pagination active button */
-.dataTables_wrapper .dataTables_paginate .pagination .page-item.active .page-link {
-    background-color: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
-    color: #fff !important;
+/* Sort arrows are hidden (see initTable), so drop the padding reserved for them */
+div.dt-container table.dataTable thead > tr > th.dt-orderable-asc,
+div.dt-container table.dataTable thead > tr > th.dt-orderable-desc {
+  padding-right: 0.25rem;
 }
 
-/* Override default page buttons */
-.dataTables_wrapper .dataTables_paginate .pagination .page-link {
-    color: var(--primary-color) !important;
+/* DataTables pagination: use the theme's primary color */
+.dt-container .dt-paging .pagination {
+    --bs-pagination-color: var(--primary-color);
+    --bs-pagination-bg: #fff;
+    --bs-pagination-hover-color: var(--primary-color);
+    --bs-pagination-focus-color: var(--primary-color);
+    --bs-pagination-active-color: #fff;
+    --bs-pagination-active-bg: var(--primary-color);
+    --bs-pagination-active-border-color: var(--primary-color);
 }
 
 
