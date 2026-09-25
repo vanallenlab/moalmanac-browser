@@ -1,9 +1,10 @@
-# Molecular Oncology Almanac - Web Browser
-In development web browser for the [Molecular Oncology Almanac](https://moalmanac.org) [database](https://github.com/vanallenlab/moalmanac-db), viewable at: [dev.moalmanac.org](https://dev.moalmanac.org).
+Web browser for the [Molecular Oncology Almanac](https://moalmanac.org) [database](https://github.com/vanallenlab/moalmanac-db), viewable at: [moalmanac.org](https://moalmanac.org).
 
 ## Installation 
 ### Download
+
 This repository can be downloaded through GitHub by either using the website or terminal. To download on the website, navigate to the top of this page, click the green `Clone or download` button, and select `Download ZIP` to download this repository in a compressed format. To install using GitHub on terminal, type:
+
 ```bash
 git clone https://github.com/vanallenlab/moalmanac-browser.git
 cd moalmanac-browser
@@ -31,17 +32,19 @@ The Molecular Oncology Almanac web browser supports multiple configurable instan
 
 ### Updating local caches
 To update a local cache, run:
+
 ```bash
 python -m app.populate_database \
-  --api http://localhost:8000 \
+  --api http://127.0.0.1:8000 \
   --config deploy/default/config.ini \
   --drop-tables
 ```
 
 To update multiple local caches, append `--config` multiple times. For example:
+
 ```bash
 python -m app.populate_database \
-  --api http://localhost:8000 \
+  --api http://127.0.0.1:8000 \
   --config deploy/default/config.ini \
   --config deploy/ie/config.ini \
   --config deploy/ca/config.ini \
@@ -49,18 +52,28 @@ python -m app.populate_database \
 ```
 
 ### Instances
-Each instance is defined under the [`deploy/`](deploy) directory. To activate a specific instance, run:
+
+Each instance is defined by a folder under the [`deploy/`](deploy) directory, containing a `config.ini` and an `nginx.conf`. The instance is selected with the `APP_CONFIG` environment variable, or `--config` when running [run.py](run.py). For example, to launch the Ireland instance for development:
+
 ```bash
-bash switch_instance.sh default
+python run.py --config deploy/ie/config.ini
 ```
 
-This command updates internal symlinks so that the app and deployment scripts point to the correct files for that instance.
+Each instance reads its own local SQLite cache from `data/`, named by `[app] cache` in its config, so multiple instances can run from the same checkout.
 
 ### Environment configuration
+
 Flask configuration variables are managed using environment files:
 
 - [.env](.env) - used for local development
 - [.env.production](.env.production) - used for production, loaded with systemd 
+
+| Variable | Description |
+|---|---|
+| `API_URL` | API used by the server to request data. In production, this is the API instance running on the same VM, `http://127.0.0.1:8000`. |
+| `API_PUBLIC_URL` | API address shown to users in links, such as `https://api.moalmanac.org`. Defaults to `API_URL`. |
+| `APP_CONFIG` | Instance config file, such as `deploy/default/config.ini`. In production, this is set per instance by systemd. |
+| `GUNICORN_WORKERS`, `GUNICORN_THREADS` | Gunicorn workers and threads per instance, used in production. |
 
 To launch the application for development, using variables from [.env](.env):
 ```bash
@@ -68,17 +81,26 @@ python run.py
 ```
 
 ### Production deployment
-This repository uses [Gunicorn](https://gunicorn.org) to serve the Flask application for production. The service is configured using a [systemd unit file, service/moalmanac-browser.service](service/moalmanac-browser.service), which sets environment variables from [.env.production](.env.production) via the `EnvironmentFile` variable:
+
+All browser instances and [our API](https://github.com/vanallenlab/moalmanac-api) are hosted on the same VM behind one nginx, and browser instances request data from the local API rather than over the internet. See [service/README.md](service/README.md) for set up.
+
+This repository uses [Gunicorn](https://gunicorn.org) to serve the Flask application for production. Each instance runs from the [systemd template unit, service/moalmanac-browser@.service](service/moalmanac-browser@.service), where the instance name (e.g. `moalmanac-browser@ie`) selects `deploy/<instance>/config.ini`. Environment variables are set from [.env.production](.env.production) via the `EnvironmentFile` variable:
+
 ```ini
 EnvironmentFile=/home/breardon/moalmanac-browser/.env.production
+Environment="APP_CONFIG=/home/breardon/moalmanac-browser/deploy/%i/config.ini"
 ```
+
 Gunicorn is launched using the provided `ExecStart` command:
+
 ```ini
-/home/breardon/mambaforge-pypy3/envs/moalmanac-browser/bin/gunicorn --workers 5 --bind unix:moalmanac-browser.sock -m 007 run:app
+/home/breardon/mambaforge-pypy3/envs/moalmanac-browser/bin/gunicorn --worker-class gthread --workers ${GUNICORN_WORKERS} --threads ${GUNICORN_THREADS} --bind unix:moalmanac-browser-%i.sock -m 007 run:app
 ```
-Systemd and Gunicorn manage launching the application for production using the [service/moalmanac-browser.service](service/moalmanac-browser.service) file, so there is no need to run `python run.py` for production use.
+
+Systemd and Gunicorn manage launching the application for production, so there is no need to run `python run.py` for production use.
 
 ## Citation
+
 If you find this tool or any code herein useful, please cite:  
 > [Reardon, B., Moore, N.D., Moore, N.S., *et al*. Integrating molecular profiles into clinical frameworks through the Molecular Oncology Almanac to prospectively guide precision oncology. *Nat Cancer* (2021). https://doi.org/10.1038/s43018-021-00243-3](https://www.nature.com/articles/s43018-021-00243-3)
 
