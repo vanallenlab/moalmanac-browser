@@ -8,11 +8,8 @@ sudo apt update -y
 sudo apt install -y build-essential libssl-dev libffi-dev nginx python3-certbot-nginx
 sudo ufw disable
 
-#sudo wget https://github.com/conda-forge/miniforge/releases/download/24.7.1-0/Mambaforge-pypy3-24.7.1-0-Linux-x86_64.sh
-#bash Mambaforge-pypy3-24.7.1-0-Linux-x86_64.sh
-# restart shell (close out of VM and open a new one)
-# conda create virtual env, make sure that conda is installed correctly
-# activate venv and install requirements into it
+# Before running this script, the moalmanac account must own a conda install at /srv/moalmanac/miniforge3 with this
+# repository's environment built in it. See service/README.md.
 
 sudo cp "$REPO_DIR/service/moalmanac-browser@.service" /etc/systemd/system/moalmanac-browser@.service
 sudo systemctl daemon-reload
@@ -31,4 +28,4 @@ done
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl restart nginx
 
-sudo chmod 755 /home/breardon
+sudo chmod 755 /srv/moalmanac
