@@ -70,6 +70,8 @@ function initTable(selector) {
         bottomStart: 'info',
         bottomEnd: 'paging'
       },
+      // Hide the sort arrows in column headers; clicking a header still sorts.
+      ordering: { indicators: false },
       pageLength: 10,
       responsive: true,
       // Tables can relabel their filter box, e.g. to distinguish it from the search page's main search box.

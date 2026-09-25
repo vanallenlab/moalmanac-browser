@@ -269,16 +269,21 @@ table.dataTable td {
   text-align: left !important;
 }
 
-/* Override DataTables pagination active button */
-.dataTables_wrapper .dataTables_paginate .pagination .page-item.active .page-link {
-    background-color: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
-    color: #fff !important;
+/* Sort arrows are hidden (see initTable), so drop the padding reserved for them */
+div.dt-container table.dataTable thead > tr > th.dt-orderable-asc,
+div.dt-container table.dataTable thead > tr > th.dt-orderable-desc {
+  padding-right: 0.25rem;
 }
 
-/* Override default page buttons */
-.dataTables_wrapper .dataTables_paginate .pagination .page-link {
-    color: var(--primary-color) !important;
+/* DataTables pagination: use the theme's primary color */
+.dt-container .dt-paging .pagination {
+    --bs-pagination-color: var(--primary-color);
+    --bs-pagination-bg: #fff;
+    --bs-pagination-hover-color: var(--primary-color);
+    --bs-pagination-focus-color: var(--primary-color);
+    --bs-pagination-active-color: #fff;
+    --bs-pagination-active-bg: var(--primary-color);
+    --bs-pagination-active-border-color: var(--primary-color);
 }
 
 
