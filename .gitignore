@@ -3,12 +3,6 @@
 *__pycache__*
 *.ipynb_checkpoints*
 
-# symlinks for instances
-/config.ini
-/data/cache.sqlite3
-/service/moalmanac-browser
-/service/secure-application.sh
-
 # Old web browser files
 venv_old*
 venv_backup*

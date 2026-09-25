@@ -31,10 +31,12 @@ def load_fixture(name: str):
 @pytest.fixture
 def app():
     """
-    Builds a Flask app using the repo's active instance (config.ini / data/cache.sqlite3, set by
-    switch_instance.sh), pointed at the API running at http://localhost:8080.
+    Builds a Flask app for the instance given by the APP_CONFIG environment variable (default:
+    deploy/default/config.ini), using that instance's sqlite cache, pointed at the API running at
+    http://localhost:8080.
     """
-    config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "config.ini")
+    repo_dir = os.path.dirname(os.path.dirname(__file__))
+    config_path = os.path.join(repo_dir, os.environ.get("APP_CONFIG", "deploy/default/config.ini"))
     application = create_app(
         config_path=config_path, api="http://localhost:8080"
     )

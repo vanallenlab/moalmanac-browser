@@ -8,16 +8,24 @@ from .blueprints import main
 from .blueprints.main import services
 from .blueprints.main.requests import APIError
 
-def create_app(config_path='config.ini', api='https://api.moalmanac.org', populating: bool = False):
+def create_app(
+    config_path='deploy/default/config.ini',
+    api='http://127.0.0.1:8000',
+    api_public: str | None = None,
+    populating: bool = False
+):
     app = flask.Flask(__name__)
     app.json.sort_keys = False
 
     config = database.read_config_ini(path=config_path)
     app.config['INI_CONFIG'] = config
+    # API_URL is used for server-side requests (the local API instance in production), while API_PUBLIC_URL is
+    # rendered into templates as links for users.
     app.config['API_URL'] = api
+    app.config['API_PUBLIC_URL'] = api_public or api
 
-    db_filename = config['app'].get('cache') if populating else 'cache.sqlite3'
-    engine, session_factory = database.init_db(file=db_filename)
+    db_filename = config['app']['cache']
+    engine, session_factory = database.init_db(file=db_filename, must_exist=not populating)
     models.Base.metadata.create_all(bind=engine)
 
     app.config['SESSION_FACTORY'] = session_factory
@@ -57,8 +65,8 @@ def create_app(config_path='config.ini', api='https://api.moalmanac.org', popula
         footer_logos_path = config['app'].get('logos', 'default-footer.html')
         subtitle = config['homepage'].get('subtitle', 'Browser')
         caption = config['homepage'].get('caption', 'An open-source knowledgebase for precision cancer medicine.')
-        api_url = app.config['API_URL']
-        url = app.config['INI_CONFIG']['app'].get('url', 'dev.moalmanac.org')
+        api_url = app.config['API_PUBLIC_URL']
+        url = app.config['INI_CONFIG']['app'].get('url', 'moalmanac.org')
         about_template = app.config['INI_CONFIG']['about'].get('template', None)
         return dict(
             css_path=css_path,

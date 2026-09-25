@@ -1,8 +1,8 @@
 """
 test_routes.py
 
-End-to-end route tests against a locally running moalmanac-api (http://localhost:8080) and the active
-instance's sqlite cache (data/cache.sqlite3, set by switch_instance.sh). These are integration tests, not
+End-to-end route tests against a locally running moalmanac-api (http://localhost:8080) and the sqlite
+cache of the instance given by APP_CONFIG (default: deploy/default/config.ini). These are integration tests, not
 unit tests: they are skipped automatically if the local API cannot be reached.
 """
 
