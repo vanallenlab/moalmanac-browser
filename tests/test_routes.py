@@ -29,6 +29,7 @@ LIST_ROUTES = [
     "/",
     "/about",
     "/biomarkers",
+    "/contributors",
     "/diseases",
     "/documents",
     "/genes",
@@ -88,6 +89,74 @@ def test_organization_detail_route_redirects_legacy_short_name(client):
 def test_unknown_organization_returns_404(client):
     response = client.get("/organizations/not-an-org")
     assert response.status_code == 404
+
+
+def test_contributors_list_route_lists_user_contributors(client):
+    response = client.get("/contributors")
+    assert response.status_code == 200
+    assert b'href="/contributors/agent:user:vanallenlab"' in response.data
+    contributors_table = response.data.split(b'id="contributions-table-result"')[0]
+    assert b"/contributors/agent:org:" not in contributors_table
+
+
+def test_contributors_list_route_lists_contributions_from_all_contributors(client):
+    response = client.get("/contributors")
+    text = response.data.decode()
+    assert 'id="contributions-table-result"' in text
+    assert 'href="/contributors/agent:org:fda"' in text
+    assert 'href="/contributors/agent:user:vanallenlab"' in text.split('id="contributions-table-result"')[1]
+
+
+def test_organizations_list_route_lists_only_site_organization_contributions(client):
+    response = client.get("/organizations")
+    assert response.status_code == 200
+    table = response.data.decode().split('id="contributions-table-result"')[1]
+    assert 'href="/contributors/agent:org:' in table
+    assert 'href="/contributors/agent:user:' not in table
+
+
+def test_contributor_detail_route_lists_contributed_records(client):
+    response = client.get("/contributors/agent:user:vanallenlab")
+    assert response.status_code == 200
+    assert b"Van Allen lab" in response.data
+    assert b'href="/indications/ind:' in response.data
+    assert b'href="/statements/stmt:' in response.data
+
+
+def test_contributor_detail_route_groups_records_with_the_same_text(client):
+    # The 28 statements derived from stmt:fda:lynparza:6 share one description, so they share one row.
+    response = client.get("/contributors/agent:user:vanallenlab")
+    text = response.data.decode()
+    assert text.count('href="/statements/stmt:fda:lynparza:6:0"') == 1
+    assert "28 statements:" in text
+    assert 'href="/statements/stmt:fda:lynparza:6:27"' in text
+
+
+def test_contributor_detail_route_redirects_organizations(client):
+    response = client.get("/contributors/agent:org:fda")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/organizations/agent:org:fda")
+
+
+def test_unknown_contributor_returns_404(client):
+    response = client.get("/contributors/not-a-contributor")
+    assert response.status_code == 404
+
+
+def test_indication_detail_route_lists_contributions_newest_first(client):
+    response = client.get("/indications/ind:fda:verzenio:0")
+    assert response.status_code == 200
+    text = response.data.decode()
+    assert 'id="contributions-table-result"' in text
+    assert text.index("2025-04-10") < text.index("2024-10-30") < text.index("2023-03-03")
+    assert 'href="/contributors/agent:org:fda"' in text
+
+
+def test_statement_detail_route_lists_contributions(client):
+    response = client.get("/statements/stmt:ema:jemperli:0:0")
+    assert response.status_code == 200
+    assert b'id="contributions-table-result"' in response.data
+    assert b'href="/contributors/agent:user:vanallenlab"' in response.data
 
 
 def test_proposition_lists_absent_biomarkers_after_present(client):
