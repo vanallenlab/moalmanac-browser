@@ -1,0 +1,22 @@
+{% from "macros.html" import contribution_records_cell %}
+<table id="contributions-table-result" class="table table-striped table-hover table-sm small w-100 dataTable"
+  data-order='[[0, "desc"]]'>
+  <thead>
+    <tr>
+      <th style="width: 12%">Date</th>
+      <th style="width: 20%">Contributor</th>
+      <th style="width: 68%">Name or description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for contribution in contributions %}
+    <tr>
+      <td>{{ contribution.date }}</td>
+      <td>
+        <a href="{{ url_for('main.contributors', contributor_id=contribution.contributor.id) }}">{{ contribution.contributor.name }}</a>
+      </td>
+      <td>{{ contribution_records_cell(contribution) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

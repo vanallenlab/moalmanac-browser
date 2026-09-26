@@ -48,4 +48,7 @@ Statement {{ statement.id }} | Molecular Oncology Almanac
   </a>
 </div>
 
+{% with contributions=statement.contributions %}
+{% include "contributions_table.html" %}
+{% endwith %}
 {% endblock %}

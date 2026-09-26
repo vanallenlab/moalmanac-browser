@@ -61,17 +61,22 @@ function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, 
 function initTable(selector) {
   const el = document.querySelector(selector);
   if (el) {
+    // Compact tables (e.g. a record's contributions) are short, so they show every row without search or paging.
+    const compact = el.dataset.compact !== undefined;
     $(el).DataTable({
       autoWidth: false,
       classes: { table: 'table table-striped' },
-      layout: {
-        topStart: 'search',
-        topEnd: 'pageLength',
-        bottomStart: 'info',
-        bottomEnd: 'paging'
-      },
+      layout: compact
+        ? { topStart: null, topEnd: null, bottomStart: null, bottomEnd: null }
+        : {
+          topStart: 'search',
+          topEnd: 'pageLength',
+          bottomStart: 'info',
+          bottomEnd: 'paging'
+        },
       // Hide the sort arrows in column headers; clicking a header still sorts.
       ordering: { indicators: false },
+      paging: !compact,
       pageLength: 10,
       responsive: true,
       // Tables can relabel their filter box, e.g. to distinguish it from the search page's main search box.
@@ -325,6 +330,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // Table selectors
   const tableSelectors = [
     '#biomarkers-table-result',
+    '#contributions-table-result',
+    '#contributors-table-result',
     '#diseases-table-result',
     '#documents-table-result',
     '#genes-table-result',

@@ -42,4 +42,9 @@
 <p>Precision oncology relationships for therapeutic response derived from this regulatory approval.</p>
 
 {% include "search_table_therapeutic_response.html" %}
+<br>
+
+{% with contributions=indication.contributions %}
+{% include "contributions_table.html" %}
+{% endwith %}
 {% endblock %}

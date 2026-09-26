@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% from "macros.html" import contribution_records_cell %}
+
+{% block title %}
+{{ contributor.id }} | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+<br>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('main.contributors') }}">Contributors</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ contributor.id }}</li>
+  </ol>
+</nav>
+<h2 class="title">{{ contributor.name }}</h2>
+<p>{{ contributor.description }}</p>
+
+<div class="d-flex justify-content-end mb-3">
+  <a href="{{ api_url }}/contributions?agent_id={{ contributor.id | api_id }}" target="_blank"
+    class="btn btn-outline-primary">
+    View API
+  </a>
+</div>
+
+<h4 class="subtitle">Contributions</h4>
+<p>Regulatory approvals and statements that {{ contributor.name }} has contributed to.</p>
+
+<table id="contributions-table-result" class="table table-striped table-hover table-sm small w-100 dataTable"
+  data-order='[[0, "desc"]]'>
+  <thead>
+    <tr>
+      <th style="width: 15%">Date</th>
+      <th style="width: 85%">Name or description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for contribution in contributions %}
+    <tr>
+      <td>{{ contribution.date }}</td>
+      <td>{{ contribution_records_cell(contribution) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

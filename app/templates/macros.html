@@ -16,3 +16,16 @@
 {{ biomarker_link(biomarker) }}{% if not loop.last %}{% if n == 2 %} and {% elif loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}
 {%- endfor %}
 {%- endmacro %}
+
+{# A contribution table's "Name or description" cell: the text links to its record, or, for records grouped by
+   services.process_contribution_records, lists a link to each record beneath it. #}
+{% macro contribution_records_cell(row) -%}
+{% if row.records|length == 1 -%}
+<a href="{{ row.records[0].url }}">{{ row.label }}</a>
+{%- else -%}
+{{ row.label }}
+<div class="text-muted">{{ row.records|length }} {{ row.type|lower }}s:
+  {% for record in row.records %}<a href="{{ record.url }}">{{ record.id }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
+</div>
+{%- endif %}
+{%- endmacro %}

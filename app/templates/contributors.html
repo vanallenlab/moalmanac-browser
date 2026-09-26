@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Contributors | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">Contributors</h2>
+  Contributors who have added or updated records in the Molecular Oncology Almanac.
+  <br><br>
+
+  <table id="contributors-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+    <thead>
+      <tr>
+        <th style="width: 25%">Name</th>
+        <th style="width: 60%">Description</th>
+        <th style="width: 15%">Contributions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for contributor in contributors %}
+        <tr>
+          <td>
+            <a href="{{ url_for('main.contributors', contributor_id=contributor.id) }}">{{ contributor.name }}</a>
+          </td>
+          <td>{{ contributor.description }}</td>
+          <td>{{ contributor.contributions_count }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <br>
+
+  <h4 class="subtitle">Contributions</h4>
+  <p>Regulatory approvals and statements that have received contributions, from all contributors and organizations.</p>
+  {% include "contribution_records_table.html" %}
+{% endblock %}
