@@ -42,5 +42,10 @@ Statement {{ statement.id }} | Molecular Oncology Almanac
   <a href="{{ url_for('main.documents', document_id=document.id) }}">{{ document.description }}</a>
   {% endfor %}
 </p>
+<div class="d-flex justify-content-end mb-3">
+  <a href="{{ api_url }}/statements?statement_id={{ statement.id | api_id }}" target="_blank" class="btn btn-outline-primary">
+    View API
+  </a>
+</div>
 
 {% endblock %}

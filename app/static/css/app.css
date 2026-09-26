@@ -286,6 +286,20 @@ div.dt-container table.dataTable thead > tr > th.dt-orderable-desc {
     --bs-pagination-active-border-color: var(--primary-color);
 }
 
+/* Outline primary buttons (e.g., View API): use the theme's primary color */
+.btn-outline-primary {
+    --bs-btn-color: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--primary-color);
+    --bs-btn-hover-border-color: var(--primary-color);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--primary-color);
+    --bs-btn-active-border-color: var(--primary-color);
+    --bs-btn-disabled-color: var(--primary-color);
+    --bs-btn-disabled-border-color: var(--primary-color);
+}
+
 
 /* ====================
    8. Hover Effects
