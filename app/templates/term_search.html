@@ -1,5 +1,5 @@
-{# Term search box with suggestions. Expects `search_terms` (see services.process_search_terms); optionally
-   `query` to prefill the box and `search_column_class` to size it. #}
+{# Term search box with suggestions, which app.js loads from main.search_terms when the box is focused. Optionally
+   takes `query` to prefill the box and `search_column_class` to size it. #}
 <div class="row justify-content-center mb-4">
   <div class="{{ search_column_class or 'col-12 col-md-9' }}">
     <form action="{{ url_for('main.search') }}" method="get" role="search" class="term-search">
@@ -18,11 +18,11 @@
           aria-autocomplete="list"
           aria-expanded="false"
           aria-controls="term-search-results"
+          data-terms-url="{{ url_for('main.search_terms') }}"
         >
         <button type="submit" class="btn btn-term-search">Search</button>
       </div>
       <ul id="term-search-results" class="list-group term-search-results" role="listbox" hidden></ul>
     </form>
-    <script type="application/json" id="term-search-data">{{ search_terms | tojson }}</script>
   </div>
 </div>

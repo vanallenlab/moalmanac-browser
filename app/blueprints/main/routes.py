@@ -11,37 +11,15 @@ from . import requests
 from . import services
 
 
-# Endpoints that show the full term search box, so the navbar leaves out its compact one.
-FULL_SEARCH_ENDPOINTS = ("main.index", "main.search")
-
-
-@main_bp.app_context_processor
-def inject_navbar_search_terms():
-    """
-    Provides the term search suggestions for the navbar's search box on every page except those in
-    FULL_SEARCH_ENDPOINTS. The navbar shows its search box only when `navbar_search_terms` is defined.
-
-    Returns:
-        dict: `navbar_search_terms` (see services.process_search_terms), or nothing on pages with the full search box.
-    """
-    if flask.request.endpoint in FULL_SEARCH_ENDPOINTS:
-        return {}
-    return {
-        "navbar_search_terms": services.process_search_terms(terms=requests.Local.get_terms())
-    }
-
-
 @main_bp.route("/", endpoint="index")
 @main_bp.route("/index", methods=["GET", "POST"])
 def index():
     about = requests.Local.get_about()
     terms = requests.Local.get_terms()
-    search_terms = services.process_search_terms(terms=terms)
     return flask.render_template(
         template_name_or_list="index.html",
         about=about,
         terms=terms,
-        search_terms=search_terms,
     )
 
 
@@ -433,13 +411,11 @@ def propositions(proposition_id: str | None = None):
 @main_bp.route("/search", methods=["GET"])
 def search():
     query = flask.request.args.get("q", "").strip()
-    search_terms = services.process_search_terms(terms=requests.Local.get_terms())
     if not query:
         return flask.render_template(
             template_name_or_list="search.html",
             query=query,
             results=[],
-            search_terms=search_terms,
         )
 
     results = requests.Local.search_terms(query=query)
@@ -462,8 +438,21 @@ def search():
         query=query,
         results=results,
         all_types=all_types,
-        search_terms=search_terms,
     )
+
+
+@main_bp.route("/search/terms.json", methods=["GET"])
+def search_terms():
+    """
+    Serves the term search boxes' suggestions (see services.process_search_terms), which app.js fetches when a box is
+    first focused. Browsers reuse the response for an hour and then revalidate it with its ETag.
+    """
+    terms = services.process_search_terms(terms=requests.Local.get_terms())
+    response = flask.jsonify(terms)
+    response.cache_control.public = True
+    response.cache_control.max_age = 3600
+    response.add_etag()
+    return response.make_conditional(flask.request)
 
 
 @main_bp.route("/statements", defaults={"statement_id": None}, methods=["GET"])

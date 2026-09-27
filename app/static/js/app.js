@@ -122,16 +122,46 @@ function snippet(text, query, width = 120) {
 }
 
 
-function initTermSearch({ inputId, resultsId, dataId, maxNameMatches = 10, maxDescriptionMatches = 5 }) {
+// Term suggestions by URL, fetched once per page and shared by every search box that uses them.
+const termSearchData = {};
+
+function fetchSearchTerms(url) {
+  if (!termSearchData[url]) {
+    termSearchData[url] = fetch(url)
+      .then(response => {
+        if (!response.ok) throw new Error(`Failed to load search terms: ${response.status}`);
+        return response.json();
+      })
+      .catch(error => {
+        // Forget the failure so the next focus retries; the form still submits to /search meanwhile.
+        delete termSearchData[url];
+        throw error;
+      });
+  }
+  return termSearchData[url];
+}
+
+
+// Suggestions are loaded from the input's `data-terms-url` when the box is first focused, so pages don't carry them.
+function initTermSearch({ inputId, resultsId, maxNameMatches = 10, maxDescriptionMatches = 5 }) {
   const input = document.getElementById(inputId);
   const results = document.getElementById(resultsId);
-  const data = document.getElementById(dataId);
-  if (!input || !results || !data) return;
+  if (!input || !results || !input.dataset.termsUrl) return;
 
-  const terms = JSON.parse(data.textContent);
+  let terms = null;
   const searchUrl = input.form.getAttribute('action');
   let options = [];
   let activeIndex = -1;
+
+  function loadTerms() {
+    fetchSearchTerms(input.dataset.termsUrl)
+      .then(data => {
+        terms = data;
+        // Show suggestions for anything typed while the terms were loading.
+        if (document.activeElement === input) render();
+      })
+      .catch(error => console.error(error));
+  }
 
   function close() {
     results.hidden = true;
@@ -204,6 +234,10 @@ function initTermSearch({ inputId, resultsId, dataId, maxNameMatches = 10, maxDe
   }
 
   function render() {
+    if (terms === null) {
+      loadTerms();
+      return;
+    }
     const query = input.value.trim().toLowerCase();
     if (query.length < 2) {
       close();
@@ -270,13 +304,11 @@ function initTermSearch({ inputId, resultsId, dataId, maxNameMatches = 10, maxDe
 document.addEventListener('DOMContentLoaded', function () {
   initTermSearch({
     inputId: 'term-search',
-    resultsId: 'term-search-results',
-    dataId: 'term-search-data'
+    resultsId: 'term-search-results'
   });
   initTermSearch({
     inputId: 'navbar-search',
-    resultsId: 'navbar-search-results',
-    dataId: 'navbar-search-data'
+    resultsId: 'navbar-search-results'
   });
 
   // Shared filters

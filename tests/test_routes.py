@@ -6,7 +6,6 @@ cache of the instance given by APP_CONFIG (default: deploy/default/config.ini). 
 unit tests: they are skipped automatically if the local API cannot be reached.
 """
 
-import re
 import socket
 
 import pytest
@@ -18,11 +17,6 @@ def _api_is_reachable():
             return True
     except OSError:
         return False
-
-
-def _without_navbar_search_terms(html: bytes) -> bytes:
-    """Removes the navbar search box's term data, which lists every record regardless of the page shown."""
-    return re.sub(rb'<script type="application/json" id="navbar-search-data">.*?</script>', b"", html, flags=re.S)
 
 
 pytestmark = pytest.mark.skipif(
@@ -207,7 +201,7 @@ def test_active_document_detail_route_has_no_status_badge(client):
 def test_indications_list_route_excludes_inactive(client):
     response = client.get("/indications")
     assert response.status_code == 200
-    assert b"ind:ema:gavreto:0" not in _without_navbar_search_terms(response.data)
+    assert b"ind:ema:gavreto:0" not in response.data
 
 
 def test_unknown_gene_returns_404(client):
@@ -288,7 +282,30 @@ def test_statements_list_route_reads_from_cache(client, monkeypatch):
 def test_index_route_has_term_search(client):
     response = client.get("/")
     assert b'id="term-search"' in response.data
-    assert b'id="term-search-data"' in response.data
+    assert b'data-terms-url="/search/terms.json"' in response.data
+
+
+def test_search_terms_route_serves_cacheable_suggestions(client):
+    response = client.get("/search/terms.json")
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "public, max-age=3600"
+    terms = response.get_json()
+    assert any(term["url"] == "/genes/gene:hgnc:3236" for term in terms)
+    assert set(terms[0]) == {"id", "name", "description", "label", "type", "url"}
+
+    revalidated = client.get("/search/terms.json", headers={"If-None-Match": response.headers["ETag"]})
+    assert revalidated.status_code == 304
+
+
+def test_detail_route_has_navbar_search(client):
+    response = client.get("/genes/gene:hgnc:3236")
+    assert b'id="navbar-search"' in response.data
+    assert b'data-terms-url="/search/terms.json"' in response.data
+
+
+def test_index_route_has_no_navbar_search(client):
+    response = client.get("/")
+    assert b'id="navbar-search"' not in response.data
 
 
 def test_search_route_without_query_shows_search_box(client):
@@ -320,7 +337,7 @@ def test_search_route_lists_multiple_matches(client):
     assert b"/biomarkers/bmkr:" in response.data
     # The search box on the results page keeps the query and offers suggestions.
     assert b'value="BRCA"' in response.data
-    assert b'id="term-search-data"' in response.data
+    assert b'data-terms-url="/search/terms.json"' in response.data
     # The browse links follow the results table.
     assert response.data.index(b"Or browse all") > response.data.index(b'id="search-table-result"')
 
