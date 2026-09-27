@@ -273,6 +273,11 @@ document.addEventListener('DOMContentLoaded', function () {
     resultsId: 'term-search-results',
     dataId: 'term-search-data'
   });
+  initTermSearch({
+    inputId: 'navbar-search',
+    resultsId: 'navbar-search-results',
+    dataId: 'navbar-search-data'
+  });
 
   // Shared filters
   const organizationFilter = document.getElementById('organizationFilter');

@@ -11,6 +11,26 @@ from . import requests
 from . import services
 
 
+# Endpoints that show the full term search box, so the navbar leaves out its compact one.
+FULL_SEARCH_ENDPOINTS = ("main.index", "main.search")
+
+
+@main_bp.app_context_processor
+def inject_navbar_search_terms():
+    """
+    Provides the term search suggestions for the navbar's search box on every page except those in
+    FULL_SEARCH_ENDPOINTS. The navbar shows its search box only when `navbar_search_terms` is defined.
+
+    Returns:
+        dict: `navbar_search_terms` (see services.process_search_terms), or nothing on pages with the full search box.
+    """
+    if flask.request.endpoint in FULL_SEARCH_ENDPOINTS:
+        return {}
+    return {
+        "navbar_search_terms": services.process_search_terms(terms=requests.Local.get_terms())
+    }
+
+
 @main_bp.route("/", endpoint="index")
 @main_bp.route("/index", methods=["GET", "POST"])
 def index():

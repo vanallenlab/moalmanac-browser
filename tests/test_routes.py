@@ -6,6 +6,7 @@ cache of the instance given by APP_CONFIG (default: deploy/default/config.ini). 
 unit tests: they are skipped automatically if the local API cannot be reached.
 """
 
+import re
 import socket
 
 import pytest
@@ -17,6 +18,11 @@ def _api_is_reachable():
             return True
     except OSError:
         return False
+
+
+def _without_navbar_search_terms(html: bytes) -> bytes:
+    """Removes the navbar search box's term data, which lists every record regardless of the page shown."""
+    return re.sub(rb'<script type="application/json" id="navbar-search-data">.*?</script>', b"", html, flags=re.S)
 
 
 pytestmark = pytest.mark.skipif(
@@ -201,7 +207,7 @@ def test_active_document_detail_route_has_no_status_badge(client):
 def test_indications_list_route_excludes_inactive(client):
     response = client.get("/indications")
     assert response.status_code == 200
-    assert b"ind:ema:gavreto:0" not in response.data
+    assert b"ind:ema:gavreto:0" not in _without_navbar_search_terms(response.data)
 
 
 def test_unknown_gene_returns_404(client):
