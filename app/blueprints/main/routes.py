@@ -16,12 +16,10 @@ from . import services
 def index():
     about = requests.Local.get_about()
     terms = requests.Local.get_terms()
-    search_terms = services.process_search_terms(terms=terms)
     return flask.render_template(
         template_name_or_list="index.html",
         about=about,
         terms=terms,
-        search_terms=search_terms,
     )
 
 
@@ -62,6 +60,48 @@ def biomarkers(biomarker_id: str | None = None):
             template_name_or_list="biomarkers.html",
             biomarkers=records,
             all_biomarker_types=all_biomarker_types,
+        )
+
+
+@main_bp.route("/contributions", methods=["GET"])
+def contributions():
+    records = requests.API.get_contributions(filters=[("include_records", "true")])
+    return flask.render_template(
+        template_name_or_list="contributions.html",
+        contributions=services.process_contributions(records=records),
+    )
+
+
+@main_bp.route("/contributors", defaults={"contributor_id": None}, methods=["GET"])
+@main_bp.route("/contributors/<contributor_id>", endpoint="contributors")
+def contributors(contributor_id: str | None = None):
+    if contributor_id:
+        record = requests.API.get_agent(agent_id=contributor_id)
+        if record.get("agentType") == "organization":
+            return flask.redirect(
+                flask.url_for("main.organizations", organization_id=contributor_id)
+            )
+        contributions = requests.API.get_contributions(
+            filters=[("agent_id", contributor_id), ("include_records", "true")],
+        )
+        return flask.render_template(
+            template_name_or_list="contributor.html",
+            contributor=record,
+            contributions=services.process_contributions(records=contributions),
+        )
+    else:
+        contributions = requests.API.get_contributions(
+            filters=[("agent_type", "contributor"), ("include_records", "true")]
+        )
+        records = requests.API.get_agents(filters=[("agent_type", "contributor")])
+        records = services.append_contributions_count(
+            contributors=records,
+            contributions=contributions,
+        )
+        return flask.render_template(
+            template_name_or_list="contributors.html",
+            contributors=sorted(records, key=lambda record: record["name"]),
+            contributions=services.process_contributions(records=contributions),
         )
 
 
@@ -375,13 +415,11 @@ def propositions(proposition_id: str | None = None):
 @main_bp.route("/search", methods=["GET"])
 def search():
     query = flask.request.args.get("q", "").strip()
-    search_terms = services.process_search_terms(terms=requests.Local.get_terms())
     if not query:
         return flask.render_template(
             template_name_or_list="search.html",
             query=query,
             results=[],
-            search_terms=search_terms,
         )
 
     results = requests.Local.search_terms(query=query)
@@ -404,8 +442,21 @@ def search():
         query=query,
         results=results,
         all_types=all_types,
-        search_terms=search_terms,
     )
+
+
+@main_bp.route("/search/terms.json", methods=["GET"])
+def search_terms():
+    """
+    Serves the term search boxes' suggestions (see services.process_search_terms), which app.js fetches when a box is
+    first focused. Browsers reuse the response for an hour and then revalidate it with its ETag.
+    """
+    terms = services.process_search_terms(terms=requests.Local.get_terms())
+    response = flask.jsonify(terms)
+    response.cache_control.public = True
+    response.cache_control.max_age = 3600
+    response.add_etag()
+    return response.make_conditional(flask.request)
 
 
 @main_bp.route("/statements", defaults={"statement_id": None}, methods=["GET"])

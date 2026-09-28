@@ -6,6 +6,7 @@ cache of the instance given by APP_CONFIG (default: deploy/default/config.ini). 
 unit tests: they are skipped automatically if the local API cannot be reached.
 """
 
+import re
 import socket
 
 import pytest
@@ -29,6 +30,8 @@ LIST_ROUTES = [
     "/",
     "/about",
     "/biomarkers",
+    "/contributions",
+    "/contributors",
     "/diseases",
     "/documents",
     "/genes",
@@ -88,6 +91,82 @@ def test_organization_detail_route_redirects_legacy_short_name(client):
 def test_unknown_organization_returns_404(client):
     response = client.get("/organizations/not-an-org")
     assert response.status_code == 404
+
+
+def test_contributors_list_route_lists_user_contributors(client):
+    response = client.get("/contributors")
+    assert response.status_code == 200
+    assert b'href="/contributors/agent:user:vanallenlab"' in response.data
+    contributors_table = response.data.split(b'id="contributions-table-result"')[0]
+    assert b"/contributors/agent:org:" not in contributors_table
+
+
+def test_contributions_list_route_lists_contributions_from_all_contributors(client):
+    response = client.get("/contributions")
+    text = response.data.decode()
+    assert 'id="contributions-table-result"' in text
+    assert 'href="/contributors/agent:org:fda"' in text
+    assert 'href="/contributors/agent:user:vanallenlab"' in text
+
+
+def test_contributors_list_route_lists_only_contributor_contributions(client):
+    response = client.get("/contributors")
+    table = response.data.decode().split('id="contributions-table-result"')[1]
+    assert 'href="/contributors/agent:user:vanallenlab"' in table
+    assert 'href="/contributors/agent:org:' not in table
+
+
+def test_organizations_list_route_has_no_contributions_table(client):
+    response = client.get("/organizations")
+    assert response.status_code == 200
+    assert b'id="contributions-table-result"' not in response.data
+
+
+def test_contributor_detail_route_lists_contributed_records(client):
+    response = client.get("/contributors/agent:user:vanallenlab")
+    assert response.status_code == 200
+    assert b"Van Allen lab" in response.data
+    assert b'href="/indications/ind:' in response.data
+    assert b'href="/statements/stmt:' in response.data
+
+
+def test_contributor_detail_route_lists_one_row_per_contribution(client):
+    response = client.get("/contributors/agent:user:vanallenlab")
+    text = response.data.decode()
+    assert "Initial access of FDA approvals" in text
+    assert "Name or description" not in text
+    # Long record lists collapse, e.g. the hundreds of statements from the initial FDA contribution.
+    assert "<details" in text
+    assert re.search(r"<summary>\d+ statements</summary>", text)
+    # Each record appears once per contribution it received, not once per shared description.
+    assert text.count('href="/statements/stmt:fda:lynparza:6:0"') == 1
+
+
+def test_contributor_detail_route_redirects_organizations(client):
+    response = client.get("/contributors/agent:org:fda")
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/organizations/agent:org:fda")
+
+
+def test_unknown_contributor_returns_404(client):
+    response = client.get("/contributors/not-a-contributor")
+    assert response.status_code == 404
+
+
+def test_indication_detail_route_lists_contributions_newest_first(client):
+    response = client.get("/indications/ind:fda:verzenio:0")
+    assert response.status_code == 200
+    text = response.data.decode()
+    assert 'id="contributions-table-result"' in text
+    assert text.index("2025-04-10") < text.index("2024-10-30") < text.index("2023-03-03")
+    assert 'href="/contributors/agent:org:fda"' in text
+
+
+def test_statement_detail_route_lists_contributions(client):
+    response = client.get("/statements/stmt:ema:jemperli:0:0")
+    assert response.status_code == 200
+    assert b'id="contributions-table-result"' in response.data
+    assert b'href="/contributors/agent:user:vanallenlab"' in response.data
 
 
 def test_proposition_lists_absent_biomarkers_after_present(client):
@@ -213,7 +292,30 @@ def test_statements_list_route_reads_from_cache(client, monkeypatch):
 def test_index_route_has_term_search(client):
     response = client.get("/")
     assert b'id="term-search"' in response.data
-    assert b'id="term-search-data"' in response.data
+    assert b'data-terms-url="/search/terms.json"' in response.data
+
+
+def test_search_terms_route_serves_cacheable_suggestions(client):
+    response = client.get("/search/terms.json")
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "public, max-age=3600"
+    terms = response.get_json()
+    assert any(term["url"] == "/genes/gene:hgnc:3236" for term in terms)
+    assert set(terms[0]) == {"id", "name", "description", "label", "type", "url"}
+
+    revalidated = client.get("/search/terms.json", headers={"If-None-Match": response.headers["ETag"]})
+    assert revalidated.status_code == 304
+
+
+def test_detail_route_has_navbar_search(client):
+    response = client.get("/genes/gene:hgnc:3236")
+    assert b'id="navbar-search"' in response.data
+    assert b'data-terms-url="/search/terms.json"' in response.data
+
+
+def test_index_route_has_no_navbar_search(client):
+    response = client.get("/")
+    assert b'id="navbar-search"' not in response.data
 
 
 def test_search_route_without_query_shows_search_box(client):
@@ -245,7 +347,7 @@ def test_search_route_lists_multiple_matches(client):
     assert b"/biomarkers/bmkr:" in response.data
     # The search box on the results page keeps the query and offers suggestions.
     assert b'value="BRCA"' in response.data
-    assert b'id="term-search-data"' in response.data
+    assert b'data-terms-url="/search/terms.json"' in response.data
     # The browse links follow the results table.
     assert response.data.index(b"Or browse all") > response.data.index(b'id="search-table-result"')
 

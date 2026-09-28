@@ -6,6 +6,30 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarMain">
+            {# Compact search, first in the collapsed menu and moved beside the right-hand links on desktop (see
+               app.css). Hidden on pages that already show the full search box. #}
+            {% if request.endpoint not in ('main.index', 'main.search') %}
+            <form class="navbar-search term-search ms-lg-auto" data-bs-theme="light" action="{{ url_for('main.search') }}" method="get" role="search">
+                <label for="navbar-search" class="visually-hidden">Search</label>
+                <div class="input-group input-group-sm">
+                    <input
+                      id="navbar-search"
+                      name="q"
+                      type="search"
+                      class="form-control"
+                      placeholder="Search"
+                      autocomplete="off"
+                      role="combobox"
+                      aria-autocomplete="list"
+                      aria-expanded="false"
+                      aria-controls="navbar-search-results"
+                      data-terms-url="{{ url_for('main.search_terms') }}"
+                    >
+                    <button type="submit" class="btn" aria-label="Search"><i class="bi bi-search" aria-hidden="true"></i></button>
+                </div>
+                <ul id="navbar-search-results" class="list-group term-search-results" role="listbox" hidden></ul>
+            </form>
+            {% endif %}
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ api_url }}" target="_blank">API</a>
@@ -17,7 +41,7 @@
                     <a class="nav-link" href="{{ url_for('main.organizations') }}">Organizations</a>
                 </li>
             </ul>
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav navbar-nav-end ms-auto mb-2 mb-lg-0">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('main.about') }}">About</a>
                 </li>

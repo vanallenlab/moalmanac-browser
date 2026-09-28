@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ contributor.id }} | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+<br>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('main.contributors') }}">Contributors</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ contributor.id }}</li>
+  </ol>
+</nav>
+<h2 class="title">{{ contributor.name }}</h2>
+<p>{{ contributor.description }}</p>
+
+<div class="d-flex justify-content-end mb-3">
+  <a href="{{ api_url }}/contributions?agent_id={{ contributor.id | api_id }}" target="_blank"
+    class="btn btn-outline-primary">
+    View API
+  </a>
+</div>
+
+<h4 class="subtitle">Contributions</h4>
+<p>Contributions from {{ contributor.name }}, with the records each one added or updated.</p>
+
+{% with hide_contributor=true %}
+{% include "contributions_by_contributor_table.html" %}
+{% endwith %}
+{% endblock %}

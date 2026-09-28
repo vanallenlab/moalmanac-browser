@@ -23,6 +23,12 @@ TERM_TABLES = {
     "indications": ("Indication", "Indications", "main.indications", "indication_id"),
 }
 
+# Maps the `type` of a record a contribution was made to onto its detail endpoint and the endpoint's id argument.
+CONTRIBUTION_RECORD_ENDPOINTS = {
+    "Indication": ("main.indications", "indication_id"),
+    "Statement": ("main.statements", "statement_id"),
+}
+
 # Maximum length of a term label derived from its description.
 TERM_LABEL_LENGTH = 120
 
@@ -59,6 +65,25 @@ def append_field_from_matching_records(
             record[new_field_name] = source_lookup[record_id]
 
     return target_list
+
+
+def append_contributions_count(contributors: list[dict], contributions: list[dict]):
+    """
+    Adds a `contributions_count` field to each contributor, counting the contributions made by it.
+
+    Args:
+        contributors (list[dict]): Agent records from the API.
+        contributions (list[dict]): Contribution records from the API.
+
+    Returns:
+        list[dict]: The contributors, each with a `contributions_count` field.
+    """
+    counts = collections.Counter(
+        contribution["contributor"]["id"] for contribution in contributions
+    )
+    for contributor in contributors:
+        contributor["contributions_count"] = counts.get(contributor["id"], 0)
+    return contributors
 
 
 def categorize_propositions(records: list[dict]):
@@ -438,6 +463,46 @@ def process_biomarker(record: dict):
     return record
 
 
+def process_contributions(records: list[dict]):
+    """
+    Processes contributions requested with `include_records=true` into one row per contribution, with the
+    indications and statements it was made to, for contribution tables.
+
+    Args:
+        records (list[dict]): Contribution records from the API, each with a `records` extension.
+
+    Returns:
+        list[dict]: Rows with `id`, `date`, `contributor`, `description`, `indications`, and `statements` fields,
+            sorted by date in descending order. `indications` and `statements` are lists of `id` and `url`.
+    """
+    rows = []
+    for contribution in records:
+        row = {
+            "id": contribution["id"],
+            "date": contribution["date"],
+            "contributor": contribution["contributor"],
+            "description": contribution.get("description"),
+            "indications": [],
+            "statements": [],
+        }
+        contributed_records = get_extension_value(
+            list_of_extensions=contribution.get("extensions"),
+            name="records",
+            default=[],
+        )
+        for record in contributed_records:
+            endpoint, argument = CONTRIBUTION_RECORD_ENDPOINTS[record["type"]]
+            key = "indications" if record["type"] == "Indication" else "statements"
+            row[key].append(
+                {
+                    "id": record["id"],
+                    "url": flask.url_for(endpoint, **{argument: record["id"]}),
+                }
+            )
+        rows.append(row)
+    return sort_dicts_by_key(data=rows, key="date", reverse=True)
+
+
 def process_gene(record: dict):
     """
     Process a gene record from the API for use within the genes view. Extracts the gene's location, and
@@ -523,7 +588,7 @@ def process_indication(record: dict):
         "status": get_extension_value(extensions, "status"),
         "reimbursement_scheme": get_extension_value(extensions, "reimbursement_scheme"),
         "reimbursement_comment": get_extension_value(extensions, "reimbursement_comment"),
-        "contributions": record.get("contributions", []),
+        "contributions": sort_contributions(contributions=record.get("contributions") or []),
     }
 
 
@@ -591,6 +656,7 @@ def process_statement(record: dict):
         "status": get_extension_value(list_of_extensions=extensions, name="status"),
         "strength": (record.get("strength") or {}).get("name"),
         "indication": process_indication(record=indication) if indication else None,
+        "contributions": sort_contributions(contributions=record.get("contributions") or []),
         "raw": record,
     }
 
@@ -733,6 +799,19 @@ def sort_biomarker_criteria(biomarkers: list[dict]):
         biomarkers,
         key=lambda biomarker: (not biomarker["present"], biomarker["name"]),
     )
+
+
+def sort_contributions(contributions: list[dict]):
+    """
+    Sorts contributions by date, most recent first.
+
+    Args:
+        contributions (list[dict]): Contribution records from the API.
+
+    Returns:
+        list[dict]: The sorted contributions.
+    """
+    return sort_dicts_by_key(data=contributions, key="date", reverse=True)
 
 
 def sort_dicts_by_key(data: list[dict], key, reverse=False):

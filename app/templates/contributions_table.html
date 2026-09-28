@@ -1,0 +1,22 @@
+<h4 class="subtitle">Contributions</h4>
+<table id="contributions-table-result" class="table table-striped table-hover table-sm small w-100 dataTable"
+  data-compact data-order='[[0, "desc"]]'>
+  <thead>
+    <tr>
+      <th style="width: 15%">Date</th>
+      <th style="width: 25%">Contributor</th>
+      <th style="width: 60%">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for contribution in contributions %}
+    <tr>
+      <td>{{ contribution.date }}</td>
+      <td>
+        <a href="{{ url_for('main.contributors', contributor_id=contribution.contributor.id) }}">{{ contribution.contributor.name }}</a>
+      </td>
+      <td>{{ contribution.description }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

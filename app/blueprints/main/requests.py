@@ -93,6 +93,16 @@ class API:
         return flask.current_app.config["API_URL"]
 
     @classmethod
+    def get_agent(cls, agent_id: str | None = None):
+        if not agent_id:
+            flask.abort(404)
+        return cls.get_one(path="agents", params=[("agent_id", agent_id)])
+
+    @classmethod
+    def get_agents(cls, filters: list[tuple] | None = None):
+        return cls.get_list(path="agents", filters=filters)
+
+    @classmethod
     def get_biomarker(cls, biomarker_id: str | None = None):
         if not biomarker_id:
             flask.abort(404)
@@ -125,6 +135,16 @@ class API:
         return [
             ("agent_id", f"agent:org:{agency.lower()}") for agency in enabled_agencies
         ]
+
+    @classmethod
+    def get_contributions(
+        cls, config_organization_filter: bool = False, filters: list[tuple] | None = None
+    ):
+        return cls.get_list(
+            path="contributions",
+            config_organization_filter=config_organization_filter,
+            filters=filters,
+        )
 
     @classmethod
     def get_disease(cls, disease_id: str | None = None):

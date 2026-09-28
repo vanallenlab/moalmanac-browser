@@ -109,6 +109,37 @@ body {
     background-color: var(--primary-color);
 }
 
+/* Compact search box in the navbar: white field with a button that inverts to the hover colors. */
+.navbar-search {
+    padding: 0.5rem;
+}
+
+.navbar-search .form-control {
+    border-color: #FFFFFF;
+}
+
+.navbar-search .form-control:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem var(--secondary-color);
+}
+
+.navbar-search .btn {
+    --bs-btn-color: var(--primary-color);
+    --bs-btn-bg: #FFFFFF;
+    --bs-btn-border-color: #FFFFFF;
+    --bs-btn-hover-color: var(--primary-color);
+    --bs-btn-hover-bg: var(--secondary-color);
+    --bs-btn-hover-border-color: var(--secondary-color);
+    --bs-btn-active-color: var(--primary-color);
+    --bs-btn-active-bg: var(--secondary-color);
+    --bs-btn-active-border-color: var(--secondary-color);
+}
+
+/* Keep the search box beside the right-hand links rather than splitting the free space with them. */
+.navbar-search ~ .navbar-nav-end {
+    margin-left: 0 !important;
+}
+
 /* Desktop (Bootstrap lg and up): fixed-height bar with full-height hover blocks. */
 @media (min-width: 992px) {
     .navbar {
@@ -135,6 +166,26 @@ body {
 
     .navbar-collapse {
         flex-basis: auto;
+    }
+
+    /* The search box comes first in the markup so it leads the collapsed menu; on desktop it sits between the
+       left- and right-hand links. */
+    .navbar-search {
+        order: 1;
+        align-self: center;
+        width: 16rem;
+        padding: 0 0.5rem;
+    }
+
+    .navbar-nav-end {
+        order: 2;
+    }
+
+    /* Suggestions are wider than the compact box, so they extend leftward from its right edge. */
+    .navbar-search .term-search-results {
+        left: auto;
+        right: 0.5rem;
+        width: 28rem;
     }
 
     .navbar-nav .nav-item {
@@ -198,6 +249,19 @@ footer {
 
 .term-search {
     position: relative;
+}
+
+/* Search button: filled with the theme's primary color, and on hover the light grey of the search icon beside it */
+.term-search .btn-term-search {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-color: var(--primary-color);
+    --bs-btn-hover-bg: var(--bs-tertiary-bg);
+    --bs-btn-hover-border-color: var(--primary-color);
+    --bs-btn-active-color: var(--primary-color);
+    --bs-btn-active-bg: var(--bs-tertiary-bg);
+    --bs-btn-active-border-color: var(--primary-color);
 }
 
 .term-search-results {
@@ -284,6 +348,20 @@ div.dt-container table.dataTable thead > tr > th.dt-orderable-desc {
     --bs-pagination-active-color: #fff;
     --bs-pagination-active-bg: var(--primary-color);
     --bs-pagination-active-border-color: var(--primary-color);
+}
+
+/* Outline primary buttons (e.g., View API): use the theme's primary color */
+.btn-outline-primary {
+    --bs-btn-color: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--primary-color);
+    --bs-btn-hover-border-color: var(--primary-color);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--primary-color);
+    --bs-btn-active-border-color: var(--primary-color);
+    --bs-btn-disabled-color: var(--primary-color);
+    --bs-btn-disabled-border-color: var(--primary-color);
 }
 
 
