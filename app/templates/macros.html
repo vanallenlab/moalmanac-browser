@@ -17,15 +17,24 @@
 {%- endfor %}
 {%- endmacro %}
 
-{# A contribution table's "Name or description" cell: the text links to its record, or, for records grouped by
-   services.process_contribution_records, lists a link to each record beneath it. #}
-{% macro contribution_records_cell(row) -%}
-{% if row.records|length == 1 -%}
-<a href="{{ row.records[0].url }}">{{ row.label }}</a>
+{# Links to the records a contribution was made to, e.g. "2 indications: ind:fda:a:0, ind:fda:b:0". Lists longer than
+   `inline_limit` collapse into an expandable summary. Renders nothing for an empty list. #}
+{% macro contribution_record_links(records, noun, inline_limit=10) -%}
+{% if records %}
+{% set label = records|length ~ " " ~ noun ~ ("" if records|length == 1 else "s") %}
+{% set links %}{% for record in records %}<a href="{{ record.url }}">{{ record.id }}</a>{% if not loop.last %}, {% endif %}{% endfor %}{% endset %}
+{% if records|length <= inline_limit -%}
+<div class="text-muted">{{ label }}: {{ links }}</div>
 {%- else -%}
-{{ row.label }}
-<div class="text-muted">{{ row.records|length }} {{ row.type|lower }}s:
-  {% for record in row.records %}<a href="{{ record.url }}">{{ record.id }}</a>{% if not loop.last %}, {% endif %}{% endfor %}
-</div>
+<details class="text-muted"><summary>{{ label }}</summary>{{ links }}</details>
 {%- endif %}
+{% endif %}
+{%- endmacro %}
+
+{# A contribution table's Description cell: the contribution's description, then its indications and statements,
+   as processed by services.process_contributions. #}
+{% macro contribution_description_cell(row) -%}
+<div>{{ row.description }}</div>
+{{ contribution_record_links(row.indications, "indication") }}
+{{ contribution_record_links(row.statements, "statement") }}
 {%- endmacro %}

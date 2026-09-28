@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Contributions | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">Contributions</h2>
+  Contributions from all <a href="{{ url_for('main.contributors') }}">contributors</a> and
+  <a href="{{ url_for('main.organizations') }}">organizations</a>, with the records each one added or updated.
+  <br><br>
+
+  {% include "contributions_by_contributor_table.html" %}
+{% endblock %}

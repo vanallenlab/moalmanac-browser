@@ -6,6 +6,7 @@ cache of the instance given by APP_CONFIG (default: deploy/default/config.ini). 
 unit tests: they are skipped automatically if the local API cannot be reached.
 """
 
+import re
 import socket
 
 import pytest
@@ -29,6 +30,7 @@ LIST_ROUTES = [
     "/",
     "/about",
     "/biomarkers",
+    "/contributions",
     "/contributors",
     "/diseases",
     "/documents",
@@ -99,20 +101,25 @@ def test_contributors_list_route_lists_user_contributors(client):
     assert b"/contributors/agent:org:" not in contributors_table
 
 
-def test_contributors_list_route_lists_contributions_from_all_contributors(client):
-    response = client.get("/contributors")
+def test_contributions_list_route_lists_contributions_from_all_contributors(client):
+    response = client.get("/contributions")
     text = response.data.decode()
     assert 'id="contributions-table-result"' in text
     assert 'href="/contributors/agent:org:fda"' in text
-    assert 'href="/contributors/agent:user:vanallenlab"' in text.split('id="contributions-table-result"')[1]
+    assert 'href="/contributors/agent:user:vanallenlab"' in text
 
 
-def test_organizations_list_route_lists_only_site_organization_contributions(client):
+def test_contributors_list_route_lists_only_contributor_contributions(client):
+    response = client.get("/contributors")
+    table = response.data.decode().split('id="contributions-table-result"')[1]
+    assert 'href="/contributors/agent:user:vanallenlab"' in table
+    assert 'href="/contributors/agent:org:' not in table
+
+
+def test_organizations_list_route_has_no_contributions_table(client):
     response = client.get("/organizations")
     assert response.status_code == 200
-    table = response.data.decode().split('id="contributions-table-result"')[1]
-    assert 'href="/contributors/agent:org:' in table
-    assert 'href="/contributors/agent:user:' not in table
+    assert b'id="contributions-table-result"' not in response.data
 
 
 def test_contributor_detail_route_lists_contributed_records(client):
@@ -123,13 +130,16 @@ def test_contributor_detail_route_lists_contributed_records(client):
     assert b'href="/statements/stmt:' in response.data
 
 
-def test_contributor_detail_route_groups_records_with_the_same_text(client):
-    # The 28 statements derived from stmt:fda:lynparza:6 share one description, so they share one row.
+def test_contributor_detail_route_lists_one_row_per_contribution(client):
     response = client.get("/contributors/agent:user:vanallenlab")
     text = response.data.decode()
+    assert "Initial access of FDA approvals" in text
+    assert "Name or description" not in text
+    # Long record lists collapse, e.g. the hundreds of statements from the initial FDA contribution.
+    assert "<details" in text
+    assert re.search(r"<summary>\d+ statements</summary>", text)
+    # Each record appears once per contribution it received, not once per shared description.
     assert text.count('href="/statements/stmt:fda:lynparza:6:0"') == 1
-    assert "28 statements:" in text
-    assert 'href="/statements/stmt:fda:lynparza:6:27"' in text
 
 
 def test_contributor_detail_route_redirects_organizations(client):

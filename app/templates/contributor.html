@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% from "macros.html" import contribution_records_cell %}
 
 {% block title %}
 {{ contributor.id }} | Molecular Oncology Almanac
@@ -24,23 +23,9 @@
 </div>
 
 <h4 class="subtitle">Contributions</h4>
-<p>Regulatory approvals and statements that {{ contributor.name }} has contributed to.</p>
+<p>Contributions from {{ contributor.name }}, with the records each one added or updated.</p>
 
-<table id="contributions-table-result" class="table table-striped table-hover table-sm small w-100 dataTable"
-  data-order='[[0, "desc"]]'>
-  <thead>
-    <tr>
-      <th style="width: 15%">Date</th>
-      <th style="width: 85%">Name or description</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for contribution in contributions %}
-    <tr>
-      <td>{{ contribution.date }}</td>
-      <td>{{ contribution_records_cell(contribution) }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% with hide_contributor=true %}
+{% include "contributions_by_contributor_table.html" %}
+{% endwith %}
 {% endblock %}

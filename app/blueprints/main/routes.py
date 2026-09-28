@@ -63,6 +63,15 @@ def biomarkers(biomarker_id: str | None = None):
         )
 
 
+@main_bp.route("/contributions", methods=["GET"])
+def contributions():
+    records = requests.API.get_contributions(filters=[("include_records", "true")])
+    return flask.render_template(
+        template_name_or_list="contributions.html",
+        contributions=services.process_contributions(records=records),
+    )
+
+
 @main_bp.route("/contributors", defaults={"contributor_id": None}, methods=["GET"])
 @main_bp.route("/contributors/<contributor_id>", endpoint="contributors")
 def contributors(contributor_id: str | None = None):
@@ -78,11 +87,11 @@ def contributors(contributor_id: str | None = None):
         return flask.render_template(
             template_name_or_list="contributor.html",
             contributor=record,
-            contributions=services.process_contribution_records(records=contributions),
+            contributions=services.process_contributions(records=contributions),
         )
     else:
         contributions = requests.API.get_contributions(
-            filters=[("include_records", "true")]
+            filters=[("agent_type", "contributor"), ("include_records", "true")]
         )
         records = requests.API.get_agents(filters=[("agent_type", "contributor")])
         records = services.append_contributions_count(
@@ -92,7 +101,7 @@ def contributors(contributor_id: str | None = None):
         return flask.render_template(
             template_name_or_list="contributors.html",
             contributors=sorted(records, key=lambda record: record["name"]),
-            contributions=services.process_contribution_records(records=contributions),
+            contributions=services.process_contributions(records=contributions),
         )
 
 
@@ -350,14 +359,9 @@ def organizations(organization_id):
         )
     else:
         records = requests.Local.get_organizations()
-        contributions = requests.API.get_contributions(
-            config_organization_filter=True,
-            filters=[("include_records", "true")],
-        )
         return flask.render_template(
             template_name_or_list="organizations.html",
             organizations=records,
-            contributions=services.process_contribution_records(records=contributions),
         )
 
 

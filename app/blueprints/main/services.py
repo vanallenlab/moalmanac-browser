@@ -463,47 +463,44 @@ def process_biomarker(record: dict):
     return record
 
 
-def process_contribution_records(records: list[dict]):
+def process_contributions(records: list[dict]):
     """
-    Flattens contributions requested with `include_records=true` into rows for contribution tables that list
-    records. Records of the same type with the same text within one contribution (e.g. the statements derived from
-    one indication, which share its description) are grouped into a single row.
+    Processes contributions requested with `include_records=true` into one row per contribution, with the
+    indications and statements it was made to, for contribution tables.
 
     Args:
         records (list[dict]): Contribution records from the API, each with a `records` extension.
 
     Returns:
-        list[dict]: Rows with `date`, `contributor` (the contribution's agent), `label` (the records' name, else
-            their description, else the record id), `type` (e.g. "Statement"), and `records` (a list of `id` and
-            `url` for each grouped record) fields, sorted by date in descending order.
+        list[dict]: Rows with `id`, `date`, `contributor`, `description`, `indications`, and `statements` fields,
+            sorted by date in descending order. `indications` and `statements` are lists of `id` and `url`.
     """
-    rows = {}
+    rows = []
     for contribution in records:
+        row = {
+            "id": contribution["id"],
+            "date": contribution["date"],
+            "contributor": contribution["contributor"],
+            "description": contribution.get("description"),
+            "indications": [],
+            "statements": [],
+        }
         contributed_records = get_extension_value(
             list_of_extensions=contribution.get("extensions"),
             name="records",
             default=[],
         )
         for record in contributed_records:
-            label = record.get("name") or record.get("description") or record["id"]
-            row = rows.setdefault(
-                (contribution["id"], record["type"], label),
-                {
-                    "date": contribution["date"],
-                    "contributor": contribution["contributor"],
-                    "label": label,
-                    "type": record["type"],
-                    "records": [],
-                },
-            )
             endpoint, argument = CONTRIBUTION_RECORD_ENDPOINTS[record["type"]]
-            row["records"].append(
+            key = "indications" if record["type"] == "Indication" else "statements"
+            row[key].append(
                 {
                     "id": record["id"],
                     "url": flask.url_for(endpoint, **{argument: record["id"]}),
                 }
             )
-    return sort_dicts_by_key(data=list(rows.values()), key="date", reverse=True)
+        rows.append(row)
+    return sort_dicts_by_key(data=rows, key="date", reverse=True)
 
 
 def process_gene(record: dict):

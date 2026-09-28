@@ -33,6 +33,9 @@ Contributors | Molecular Oncology Almanac
   <br>
 
   <h4 class="subtitle">Contributions</h4>
-  <p>Regulatory approvals and statements that have received contributions, from all contributors and organizations.</p>
-  {% include "contribution_records_table.html" %}
+  <p>
+    Contributions from these contributors, with the records each one added or updated. See
+    <a href="{{ url_for('main.contributions') }}">all contributions</a>, including those from organizations.
+  </p>
+  {% include "contributions_by_contributor_table.html" %}
 {% endblock %}
