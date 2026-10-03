@@ -94,6 +94,15 @@ class Therapies(Base):
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
+class TherapyGroups(Base):
+    __tablename__ = "therapy_groups"
+
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
+    # JSON list of {"id", "name"} for each member therapy, sorted by name
+    therapies = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
+    propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+
 class Terms(Base):
     __tablename__ = "terms"
 

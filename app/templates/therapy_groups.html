@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% from "macros.html" import therapy_prose %}
+
+{% block title %}
+Therapy groups | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">Therapy groups</h2>
+  <p>
+    Therapy groups are combinations of two or more therapies given together as a single treatment, such as
+    dabrafenib and trametinib. A proposition that involves a therapy group applies to the combination, not to each
+    therapy on its own. Select one or more therapies to find the combinations that include all of them.
+  </p>
+  <p class="small"><a href="{{ url_for('main.therapies') }}">View therapies</a></p>
+
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div id="therapyGroupFilter" class="dropdown">
+        <button class="form-select form-select-sm text-start text-truncate" type="button"
+          data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">{{ all_therapies|length }} therapies</button>
+        <div class="dropdown-menu w-100 p-2 therapy-toggle-menu">
+          <div class="d-flex gap-2 mb-2">
+            <input type="search" class="form-control form-control-sm therapy-toggle-search" placeholder="Find therapy"
+              aria-label="Find therapy">
+            <button class="btn btn-sm btn-outline-secondary therapy-toggle-clear" type="button">Clear</button>
+          </div>
+          {% for t in all_therapies %}
+            <div class="form-check small therapy-toggle-item">
+              <input class="form-check-input therapy-toggle" type="checkbox" value="{{ t.id }}" data-name="{{ t.name }}"
+                id="therapy-{{ t.id }}">
+              <label class="form-check-label w-100" for="therapy-{{ t.id }}">{{ t.name }}</label>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <table id="therapy-groups-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+    <thead>
+      <tr>
+        <th style="width: 20%">Therapies</th>
+        <th style="width: 10%">Propositions</th>
+        <th style="width: 10%">Statements</th>
+        <th style="width: 5%"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for group in therapy_groups %}
+        <tr data-therapies="{{ group.therapies | map(attribute='id') | join(',') }}">
+          <td>{{ therapy_prose(group.therapies) }}</td>
+          <td>{{ group.propositions_count }}</td>
+          <td>{{ group.statements_count }}</td>
+          <td>
+            <a href="{{ url_for('main.therapy_groups', therapy_group_id=group.id) }}" class="btn btn-sm"
+              title="More information" data-bs-toggle="tooltip">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -7,7 +7,13 @@ Therapies | Molecular Oncology Almanac
 {% block content %}
   <br>
   <h2 class="title">Therapies</h2>
-  <br>
+  <p>
+    Therapies are the individual cancer treatments referenced by propositions in the database. Each therapy has a
+    <a href="https://www.cancer.gov/about-cancer/treatment/types" target="_blank">therapy type</a> defined by the
+    National Cancer Institute: chemotherapy, hormone therapy, immunotherapy, or targeted therapy. The proposition and
+    statement counts include those where the therapy is given as part of a combination.
+  </p>
+  <p class="small"><a href="{{ url_for('main.therapy_groups') }}">View therapy groups</a></p>
 
   <div class="row mb-4">
     <div class="col-md-4">

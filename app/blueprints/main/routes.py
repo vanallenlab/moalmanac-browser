@@ -511,3 +511,40 @@ def therapies(therapy_id: str | None = None):
             therapies=records,
             all_therapy_types=all_therapy_types,
         )
+
+
+@main_bp.route("/therapy-groups", defaults={"therapy_group_id": None}, methods=["GET"])
+@main_bp.route("/therapy-groups/<therapy_group_id>", endpoint="therapy_groups")
+def therapy_groups(therapy_group_id: str | None = None):
+    if therapy_group_id:
+        record = requests.API.get_therapy_group(therapy_group_id=therapy_group_id)
+        if not record:
+            flask.abort(404)
+        record["therapies"] = services.sort_dicts_by_key(data=record["therapies"], key="name")
+
+        # Search matches propositions with any of the named therapies, so keep only those for this group.
+        therapy_propositions = requests.API.get_search_results(
+            config_organization_filter=True, filters=[("therapy", record["therapies"][0]["name"])]
+        )
+        group_propositions = [
+            proposition
+            for proposition in therapy_propositions
+            if proposition.get("objectTherapeutic", {}).get("id") == therapy_group_id
+        ]
+        processed_propositions = services.process_propositions(records=group_propositions)
+
+        return flask.render_template(
+            template_name_or_list="therapy_group.html",
+            therapy_group=record,
+            propositions_by_category=processed_propositions,
+        )
+
+    records = requests.Local.get_therapy_groups()
+    all_therapies = {
+        therapy["id"]: therapy for record in records for therapy in record["therapies"]
+    }
+    return flask.render_template(
+        template_name_or_list="therapy_groups.html",
+        therapy_groups=records,
+        all_therapies=services.sort_dicts_by_key(data=list(all_therapies.values()), key="name"),
+    )

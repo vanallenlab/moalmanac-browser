@@ -17,6 +17,14 @@
 {%- endfor %}
 {%- endmacro %}
 
+{# Therapies joined for sentences, e.g. "A and B" or "A, B, and C". #}
+{% macro therapy_prose(therapies) -%}
+{% set n = therapies|length %}
+{%- for therapy in therapies -%}
+<a href="{{ url_for('main.therapies', therapy_id=therapy.id) }}">{{ therapy.name }}</a>{% if not loop.last %}{% if n == 2 %} and {% elif loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}
+{%- endfor %}
+{%- endmacro %}
+
 {# Links to the records a contribution was made to, e.g. "2 indications: ind:fda:a:0, ind:fda:b:0". Lists longer than
    `inline_limit` collapse into an expandable summary. Renders nothing for an empty list. #}
 {% macro contribution_record_links(records, noun, inline_limit=10) -%}

@@ -193,3 +193,8 @@ class Therapies(BaseHandler):
     """
     Handler class to manage queries against the Therapies table.
     """
+
+class TherapyGroups(BaseHandler):
+    """
+    Handler class to manage queries against the TherapyGroups table.
+    """

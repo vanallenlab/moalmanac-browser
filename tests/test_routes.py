@@ -41,6 +41,7 @@ LIST_ROUTES = [
     "/search",
     "/statements",
     "/therapies",
+    "/therapy-groups",
 ]
 
 
@@ -257,6 +258,18 @@ def test_disease_detail_route_by_legacy_name_with_slash_redirects(client):
 
 def test_disease_detail_route_unknown_returns_404(client):
     response = client.get("/diseases/not-a-disease")
+    assert response.status_code == 404
+
+
+def test_therapy_group_detail_route_by_id_returns_200(client):
+    response = client.get("/therapy-groups/txgrp:18")
+    assert response.status_code == 200
+    assert b"Dabrafenib" in response.data
+    assert b"Trametinib" in response.data
+
+
+def test_therapy_group_detail_route_unknown_returns_404(client):
+    response = client.get("/therapy-groups/not-a-therapy-group")
     assert response.status_code == 404
 
 

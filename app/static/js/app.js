@@ -58,6 +58,51 @@ function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, 
 }
 
 
+// Multi-select of therapies for the therapy groups table: a row is shown if its group includes every checked therapy.
+function initTherapyGroupFilter(container) {
+  const toggleSelector = '.therapy-toggle';
+  const button = container.querySelector('[data-bs-toggle="dropdown"]');
+  const defaultLabel = button.textContent;
+  const search = container.querySelector('.therapy-toggle-search');
+  const items = container.querySelectorAll('.therapy-toggle-item');
+
+  addToggleFilter({
+    toggleSelector,
+    attributeName: 'data-therapies',
+    tableSelector: '#therapy-groups-table-result',
+    mode: 'all'
+  });
+
+  function updateLabel() {
+    const names = Array.from(container.querySelectorAll(toggleSelector))
+      .filter(el => el.checked)
+      .map(el => el.dataset.name);
+    button.textContent = names.length ? names.join(', ') : defaultLabel;
+  }
+  container.querySelectorAll(toggleSelector).forEach(el => el.addEventListener('change', updateLabel));
+  container.addEventListener('shown.bs.dropdown', () => search.focus());
+
+  // Narrows the listed therapies; checked therapies stay visible so they can be unchecked.
+  search.addEventListener('input', () => {
+    const query = search.value.trim().toLowerCase();
+    items.forEach(item => {
+      const toggle = item.querySelector(toggleSelector);
+      item.hidden = !toggle.checked && !toggle.dataset.name.toLowerCase().includes(query);
+    });
+  });
+
+  container.querySelector('.therapy-toggle-clear').addEventListener('click', () => {
+    container.querySelectorAll(toggleSelector).forEach(el => (el.checked = false));
+    search.value = '';
+    items.forEach(item => (item.hidden = false));
+    updateLabel();
+    $('.dataTable').each(function () {
+      $(this).DataTable().draw();
+    });
+  });
+}
+
+
 function initTable(selector) {
   const el = document.querySelector(selector);
   if (el) {
@@ -364,6 +409,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  const therapyGroupFilter = document.getElementById('therapyGroupFilter');
+  if (therapyGroupFilter) {
+    initTherapyGroupFilter(therapyGroupFilter);
+  }
+
   // Table selectors
   const tableSelectors = [
     '#biomarkers-table-result',
@@ -376,7 +426,8 @@ document.addEventListener('DOMContentLoaded', function () {
     '#propositions-therapeutic-response-table-result',
     '#search-table-result',
     '#statements-table-result',
-    '#therapies-table-result'
+    '#therapies-table-result',
+    '#therapy-groups-table-result'
   ];
 
   tableSelectors.forEach(initTable);
