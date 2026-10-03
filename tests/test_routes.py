@@ -389,7 +389,8 @@ def test_propositions_route_defaults_to_site_organizations(client):
     response = client.get("/propositions")
     assert response.status_code == 200
     assert b"Show all propositions" in response.data
-    assert b'class="form-check-input org-toggle"' in response.data
+    for attribute in (b"data-orgs", b"data-biomarkers", b"data-diseases", b"data-therapies"):
+        assert b'class="dropdown multiselect-filter" data-attribute="' + attribute + b'"' in response.data
 
 
 def test_propositions_route_scope_all_includes_propositions_without_statements(client):
@@ -403,3 +404,10 @@ def test_propositions_route_scope_all_includes_propositions_without_statements(c
 def test_index_statements_link_points_to_statements(client):
     response = client.get("/")
     assert b'href="/statements">' in response.data
+
+
+def test_statements_route_has_filters(client):
+    response = client.get("/statements")
+    assert response.status_code == 200
+    for attribute in (b"data-orgs", b"data-biomarkers", b"data-diseases", b"data-therapies"):
+        assert b'class="dropdown multiselect-filter" data-attribute="' + attribute + b'"' in response.data

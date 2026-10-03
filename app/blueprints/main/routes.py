@@ -408,6 +408,9 @@ def propositions(proposition_id: str | None = None):
         template_name_or_list="propositions.html",
         propositions_by_category=processed,
         organizations=response_organizations,
+        filter_options=services.extract_proposition_filter_options(
+            propositions=processed.get("VariantTherapeuticResponseProposition", [])
+        ),
         show_all=show_all,
     )
 
@@ -471,8 +474,17 @@ def statements(statement_id: str | None = None):
         )
     else:
         records = requests.Local.get_statements()
+        # Cached statement summaries carry only the organization's short name, so it serves as the filter value too.
+        organizations = sorted(
+            set(record["organization"] for record in records if record["organization"])
+        )
         return flask.render_template(
-            template_name_or_list="statements.html", statements=records
+            template_name_or_list="statements.html",
+            statements=records,
+            organizations=[{"id": name, "name": name} for name in organizations],
+            filter_options=services.extract_proposition_filter_options(
+                propositions=[record["proposition"] for record in records]
+            ),
         )
 
 

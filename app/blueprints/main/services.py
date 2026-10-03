@@ -249,14 +249,39 @@ def extract_organizations(propositions: dict):
         propositions (dict): A dictionary processed propositions by type from /search route.
 
     Returns:
-        list(dict): list of dictionaries of agent ids.
+        list(dict): list of dictionaries of agent ids and their short display names.
     """
     agents = set()
     for proposition in propositions.get("VariantTherapeuticResponseProposition", []):
         for agent in proposition.get("aggregates", {}).get("by_agent", []):
             if "id" in agent:
                 agents.add(agent["id"])
-    return [{"id": agent_id} for agent_id in sorted(agents)]
+    return [{"id": agent_id, "name": short_agent_id(agent_id)} for agent_id in sorted(agents)]
+
+
+def extract_proposition_filter_options(propositions: list[dict]):
+    """
+    Returns the distinct biomarkers, cancer types, and therapies of simplified therapeutic response propositions, for
+    the propositions and statements views' filters.
+
+    Args:
+        propositions (list[dict]): Simplified proposition records, from simplify_proposition_record.
+
+    Returns:
+        dict: `biomarkers`, `cancer_types`, and `therapies`, each a list of `{id, name}` dictionaries sorted by name.
+    """
+    biomarkers, cancer_types, therapies = {}, {}, {}
+    for proposition in propositions:
+        for biomarker in proposition["biomarkers"]:
+            biomarkers[biomarker["id"]] = {"id": biomarker["id"], "name": biomarker["name"]}
+        cancer_types[proposition["cancer_type"]["id"]] = proposition["cancer_type"]
+        for therapy in proposition["therapies"]:
+            therapies[therapy["id"]] = therapy
+    return {
+        "biomarkers": sort_dicts_by_key(data=list(biomarkers.values()), key="name"),
+        "cancer_types": sort_dicts_by_key(data=list(cancer_types.values()), key="name"),
+        "therapies": sort_dicts_by_key(data=list(therapies.values()), key="name"),
+    }
 
 
 def extract_therapies(object_therapeutic: dict):

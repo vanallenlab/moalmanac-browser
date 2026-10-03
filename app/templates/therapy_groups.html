@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from "macros.html" import therapy_prose %}
+{% from "macros.html" import multiselect_filter, therapy_prose %}
 
 {% block title %}
 Therapy groups | Molecular Oncology Almanac
@@ -17,24 +17,7 @@ Therapy groups | Molecular Oncology Almanac
 
   <div class="row mb-4">
     <div class="col-md-4">
-      <div id="therapyGroupFilter" class="dropdown">
-        <button class="form-select form-select-sm text-start text-truncate" type="button"
-          data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">{{ all_therapies|length }} therapies</button>
-        <div class="dropdown-menu w-100 p-2 therapy-toggle-menu">
-          <div class="d-flex gap-2 mb-2">
-            <input type="search" class="form-control form-control-sm therapy-toggle-search" placeholder="Find therapy"
-              aria-label="Find therapy">
-            <button class="btn btn-sm btn-outline-secondary therapy-toggle-clear" type="button">Clear</button>
-          </div>
-          {% for t in all_therapies %}
-            <div class="form-check small therapy-toggle-item">
-              <input class="form-check-input therapy-toggle" type="checkbox" value="{{ t.id }}" data-name="{{ t.name }}"
-                id="therapy-{{ t.id }}">
-              <label class="form-check-label w-100" for="therapy-{{ t.id }}">{{ t.name }}</label>
-            </div>
-          {% endfor %}
-        </div>
-      </div>
+      {{ multiselect_filter(all_therapies, "therapy", "therapies", "data-therapies", "#therapy-groups-table-result", mode="all") }}
     </div>
   </div>
 

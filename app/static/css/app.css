@@ -423,7 +423,7 @@ blockquote p {
 }
 
 /* Therapy groups multi-select: scroll long therapy lists inside the dropdown. */
-.therapy-toggle-menu {
+.multiselect-menu {
   max-height: 20rem;
   overflow-y: auto;
 }

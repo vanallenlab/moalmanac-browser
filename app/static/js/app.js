@@ -16,7 +16,7 @@ function addFilter({ filterEl, attributeName }) {
 }
 
 
-function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, mode = 'any' }) {
+function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, mode = 'any', root = document }) {
   $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
     // If scoping to a specific table, skip other tables
     if (tableSelector) {
@@ -24,7 +24,7 @@ function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, 
       if (!tableEl || ('#' + tableEl.id) !== tableSelector) return true;
     }
 
-    const toggles = document.querySelectorAll(toggleSelector);
+    const toggles = root.querySelectorAll(toggleSelector);
     if (!toggles || toggles.length === 0) return true;
 
     const selectedValues = Array.from(toggles)
@@ -48,7 +48,7 @@ function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, 
   });
 
   // Redraw all tables on toggle change (matches addFilter style)
-  document.querySelectorAll(toggleSelector).forEach(el => {
+  root.querySelectorAll(toggleSelector).forEach(el => {
     el.addEventListener('change', () => {
       $('.dataTable').each(function () {
         $(this).DataTable().draw();
@@ -58,19 +58,21 @@ function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, 
 }
 
 
-// Multi-select of therapies for the therapy groups table: a row is shown if its group includes every checked therapy.
-function initTherapyGroupFilter(container) {
-  const toggleSelector = '.therapy-toggle';
+// Multi-select dropdown (see macros.multiselect_filter) that filters rows of the container's `data-table` by their
+// `data-attribute` values. In `data-mode` "all", a row must include every checked value; in "any", at least one.
+function initMultiSelectFilter(container) {
+  const toggleSelector = '.multiselect-toggle';
   const button = container.querySelector('[data-bs-toggle="dropdown"]');
   const defaultLabel = button.textContent;
-  const search = container.querySelector('.therapy-toggle-search');
-  const items = container.querySelectorAll('.therapy-toggle-item');
+  const search = container.querySelector('.multiselect-search');
+  const items = container.querySelectorAll('.multiselect-item');
 
   addToggleFilter({
     toggleSelector,
-    attributeName: 'data-therapies',
-    tableSelector: '#therapy-groups-table-result',
-    mode: 'all'
+    attributeName: container.dataset.attribute,
+    tableSelector: container.dataset.table,
+    mode: container.dataset.mode,
+    root: container
   });
 
   function updateLabel() {
@@ -82,7 +84,7 @@ function initTherapyGroupFilter(container) {
   container.querySelectorAll(toggleSelector).forEach(el => el.addEventListener('change', updateLabel));
   container.addEventListener('shown.bs.dropdown', () => search.focus());
 
-  // Narrows the listed therapies; checked therapies stay visible so they can be unchecked.
+  // Narrows the listed options; checked options stay visible so they can be unchecked.
   search.addEventListener('input', () => {
     const query = search.value.trim().toLowerCase();
     items.forEach(item => {
@@ -91,7 +93,7 @@ function initTherapyGroupFilter(container) {
     });
   });
 
-  container.querySelector('.therapy-toggle-clear').addEventListener('click', () => {
+  container.querySelector('.multiselect-clear').addEventListener('click', () => {
     container.querySelectorAll(toggleSelector).forEach(el => (el.checked = false));
     search.value = '';
     items.forEach(item => (item.hidden = false));
@@ -409,10 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  const therapyGroupFilter = document.getElementById('therapyGroupFilter');
-  if (therapyGroupFilter) {
-    initTherapyGroupFilter(therapyGroupFilter);
-  }
+  document.querySelectorAll('.multiselect-filter').forEach(initMultiSelectFilter);
 
   // Table selectors
   const tableSelectors = [
