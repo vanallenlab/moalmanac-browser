@@ -354,6 +354,8 @@ class Local:
         handler = handlers.Therapies()
         statement = handler.construct_base_query(model=models.Therapies)
         results = cls.get(handler=handler, statement=statement)
+        for result in results:
+            result["therapy_strategy"] = json.loads(result["therapy_strategy"])
         return cls.sort(data=results, sort_key="name")
 
     @classmethod

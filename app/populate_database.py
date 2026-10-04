@@ -232,10 +232,16 @@ class Process:
 
     @classmethod
     def get_disease(cls, record, proposition_id, statement_id):
+        # True for solid tumors, False for hematological malignancies, None if the API doesn't say.
+        solid_tumor = next(
+            (ext["value"] for ext in record.get("extensions") or [] if ext["name"] == "solid_tumor"),
+            None,
+        )
         return {
             "id": record.get("id"),
             "name": record.get("name"),
             "description": record.get("description"),
+            "solid_tumor": solid_tumor,
             "proposition_id": proposition_id,
             "statement_id": statement_id,
         }
@@ -325,7 +331,7 @@ class Process:
                         "id": therapy.get("id"),
                         "name": therapy.get("name"),
                         "description": therapy.get("description"),
-                        # therapy strategy
+                        "therapy_strategy": cls.get_therapy_strategy(record=therapy),
                         "therapy_type": therapy_type,
                         "proposition_id": proposition_id,
                         "statement_id": statement_id,
@@ -344,12 +350,30 @@ class Process:
                     "id": therapy.get("id"),
                     "name": therapy.get("name"),
                     "description": therapy.get("description"),
-                    # therapy _strategy
+                    "therapy_strategy": cls.get_therapy_strategy(record=therapy),
                     "therapy_type": therapy_type,
                     "proposition_id": proposition_id,
                     "statement_id": statement_id,
                 }
             ]
+
+    @staticmethod
+    def get_therapy_strategy(record):
+        """
+        Returns a therapy's strategies (mechanisms of action) from its `therapy_strategy` extension.
+
+        Args:
+            record (dict): A therapy record.
+
+        Returns:
+            str: A JSON list of the therapy's strategies, sorted. A string, so that therapy records can be deduplicated.
+        """
+        strategies = [
+            ext.get("value")
+            for ext in record.get("extensions") or []
+            if ext.get("name") == "therapy_strategy"
+        ]
+        return json.dumps(sorted(strategies[0] if strategies else []))
 
     @classmethod
     def get_therapy_group(cls, record, proposition_id, statement_id):
@@ -704,6 +728,7 @@ class SQL:
             disease = models.Diseases(
                 id=record.get("id"),
                 name=record.get("name"),
+                solid_tumor=None if record.get("solid_tumor") is None else bool(record.get("solid_tumor")),
                 propositions_count=record.get("propositions_count"),
                 statements_count=record.get("statements_count"),
             )
@@ -797,6 +822,7 @@ class SQL:
             therapy = models.Therapies(
                 id=record.get("id"),
                 name=record.get("name"),
+                therapy_strategy=record.get("therapy_strategy"),
                 therapy_type=record.get("therapy_type"),
                 propositions_count=record.get("propositions_count"),
                 statements_count=record.get("statements_count"),

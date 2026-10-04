@@ -16,7 +16,7 @@ function addFilter({ filterEl, attributeName }) {
 }
 
 
-function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, mode = 'any', root = document }) {
+function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, mode = 'any', root = document, separator = ',' }) {
   $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
     // If scoping to a specific table, skip other tables
     if (tableSelector) {
@@ -36,7 +36,7 @@ function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, 
 
     const row = settings.aoData[dataIndex].nTr;
     const raw = row.getAttribute(attributeName) || '';
-    const rowValues = raw.split(',').map(s => s.trim()).filter(Boolean);
+    const rowValues = raw.split(separator).map(s => s.trim()).filter(Boolean);
 
     if (mode === 'all') {
       // Must contain ALL selected orgs
@@ -72,7 +72,8 @@ function initMultiSelectFilter(container) {
     attributeName: container.dataset.attribute,
     tableSelector: container.dataset.table,
     mode: container.dataset.mode,
-    root: container
+    root: container,
+    separator: container.dataset.separator || ','
   });
 
   function updateLabel() {
@@ -403,11 +404,11 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  const therapyTypeFilter = document.getElementById('therapyTypeFilter');
-  if (therapyTypeFilter) {
+  const tumorTypeFilter = document.getElementById('tumorTypeFilter');
+  if (tumorTypeFilter) {
     addFilter({
-      filterEl: therapyTypeFilter,
-      attributeName: 'data-therapyType'
+      filterEl: tumorTypeFilter,
+      attributeName: 'data-tumorType'
     });
   }
 

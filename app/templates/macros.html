@@ -47,12 +47,13 @@
 {{ contribution_record_links(row.statements, "statement") }}
 {%- endmacro %}
 
-{# Searchable multi-select dropdown that filters `table`'s rows by their `attribute` (comma-separated ids); see
+{# Searchable multi-select dropdown that filters `table`'s rows by their `attribute` (ids joined by `separator`); see
    app.js initMultiSelectFilter. `items` are dicts with `id` and `name`. In mode "all" a row must include every checked
    item, in "any" at least one. #}
-{% macro multiselect_filter(items, noun, plural, attribute, table, mode="any") -%}
+{% macro multiselect_filter(items, noun, plural, attribute, table, mode="any", separator=",") -%}
 {% set prefix = attribute|replace("data-", "") %}
-<div class="dropdown multiselect-filter" data-attribute="{{ attribute }}" data-table="{{ table }}" data-mode="{{ mode }}">
+<div class="dropdown multiselect-filter" data-attribute="{{ attribute }}" data-table="{{ table }}" data-mode="{{ mode }}"
+  data-separator="{{ separator }}">
   <button class="form-select form-select-sm text-start text-truncate" type="button"
     data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">{{ items|length }} {{ noun if items|length == 1 else plural }}</button>
   <div class="dropdown-menu w-100 p-2 multiselect-menu">
@@ -64,8 +65,8 @@
     {% for item in items %}
       <div class="form-check small multiselect-item">
         <input class="form-check-input multiselect-toggle" type="checkbox" value="{{ item.id }}" data-name="{{ item.name }}"
-          id="{{ prefix }}-{{ item.id }}">
-        <label class="form-check-label w-100" for="{{ prefix }}-{{ item.id }}">{{ item.name }}</label>
+          id="{{ prefix }}-{{ loop.index }}">
+        <label class="form-check-label w-100" for="{{ prefix }}-{{ loop.index }}">{{ item.name }}</label>
       </div>
     {% endfor %}
   </div>

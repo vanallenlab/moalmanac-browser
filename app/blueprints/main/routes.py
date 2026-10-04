@@ -518,10 +518,15 @@ def therapies(therapy_id: str | None = None):
     else:
         records = requests.Local.get_therapies()
         all_therapy_types = sorted(set(record["therapy_type"] for record in records))
+        all_therapy_strategies = sorted(
+            set(strategy for record in records for strategy in record["therapy_strategy"]),
+            key=str.lower,
+        )
         return flask.render_template(
             template_name_or_list="therapies.html",
             therapies=records,
-            all_therapy_types=all_therapy_types,
+            all_therapy_types=[{"id": name, "name": name} for name in all_therapy_types],
+            all_therapy_strategies=[{"id": name, "name": name} for name in all_therapy_strategies],
         )
 
 
