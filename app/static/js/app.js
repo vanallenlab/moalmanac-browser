@@ -16,7 +16,7 @@ function addFilter({ filterEl, attributeName }) {
 }
 
 
-function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, mode = 'any' }) {
+function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, mode = 'any', root = document, separator = ',' }) {
   $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
     // If scoping to a specific table, skip other tables
     if (tableSelector) {
@@ -24,7 +24,7 @@ function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, 
       if (!tableEl || ('#' + tableEl.id) !== tableSelector) return true;
     }
 
-    const toggles = document.querySelectorAll(toggleSelector);
+    const toggles = root.querySelectorAll(toggleSelector);
     if (!toggles || toggles.length === 0) return true;
 
     const selectedValues = Array.from(toggles)
@@ -36,7 +36,7 @@ function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, 
 
     const row = settings.aoData[dataIndex].nTr;
     const raw = row.getAttribute(attributeName) || '';
-    const rowValues = raw.split(',').map(s => s.trim()).filter(Boolean);
+    const rowValues = raw.split(separator).map(s => s.trim()).filter(Boolean);
 
     if (mode === 'all') {
       // Must contain ALL selected orgs
@@ -48,11 +48,59 @@ function addToggleFilter({ toggleSelector, attributeName, tableSelector = null, 
   });
 
   // Redraw all tables on toggle change (matches addFilter style)
-  document.querySelectorAll(toggleSelector).forEach(el => {
+  root.querySelectorAll(toggleSelector).forEach(el => {
     el.addEventListener('change', () => {
       $('.dataTable').each(function () {
         $(this).DataTable().draw();
       });
+    });
+  });
+}
+
+
+// Multi-select dropdown (see macros.multiselect_filter) that filters rows of the container's `data-table` by their
+// `data-attribute` values. In `data-mode` "all", a row must include every checked value; in "any", at least one.
+function initMultiSelectFilter(container) {
+  const toggleSelector = '.multiselect-toggle';
+  const button = container.querySelector('[data-bs-toggle="dropdown"]');
+  const defaultLabel = button.textContent;
+  const search = container.querySelector('.multiselect-search');
+  const items = container.querySelectorAll('.multiselect-item');
+
+  addToggleFilter({
+    toggleSelector,
+    attributeName: container.dataset.attribute,
+    tableSelector: container.dataset.table,
+    mode: container.dataset.mode,
+    root: container,
+    separator: container.dataset.separator || ','
+  });
+
+  function updateLabel() {
+    const names = Array.from(container.querySelectorAll(toggleSelector))
+      .filter(el => el.checked)
+      .map(el => el.dataset.name);
+    button.textContent = names.length ? names.join(', ') : defaultLabel;
+  }
+  container.querySelectorAll(toggleSelector).forEach(el => el.addEventListener('change', updateLabel));
+  container.addEventListener('shown.bs.dropdown', () => search.focus());
+
+  // Narrows the listed options; checked options stay visible so they can be unchecked.
+  search.addEventListener('input', () => {
+    const query = search.value.trim().toLowerCase();
+    items.forEach(item => {
+      const toggle = item.querySelector(toggleSelector);
+      item.hidden = !toggle.checked && !toggle.dataset.name.toLowerCase().includes(query);
+    });
+  });
+
+  container.querySelector('.multiselect-clear').addEventListener('click', () => {
+    container.querySelectorAll(toggleSelector).forEach(el => (el.checked = false));
+    search.value = '';
+    items.forEach(item => (item.hidden = false));
+    updateLabel();
+    $('.dataTable').each(function () {
+      $(this).DataTable().draw();
     });
   });
 }
@@ -356,13 +404,15 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  const therapyTypeFilter = document.getElementById('therapyTypeFilter');
-  if (therapyTypeFilter) {
+  const tumorTypeFilter = document.getElementById('tumorTypeFilter');
+  if (tumorTypeFilter) {
     addFilter({
-      filterEl: therapyTypeFilter,
-      attributeName: 'data-therapyType'
+      filterEl: tumorTypeFilter,
+      attributeName: 'data-tumorType'
     });
   }
+
+  document.querySelectorAll('.multiselect-filter').forEach(initMultiSelectFilter);
 
   // Table selectors
   const tableSelectors = [
@@ -376,7 +426,8 @@ document.addEventListener('DOMContentLoaded', function () {
     '#propositions-therapeutic-response-table-result',
     '#search-table-result',
     '#statements-table-result',
-    '#therapies-table-result'
+    '#therapies-table-result',
+    '#therapy-groups-table-result'
   ];
 
   tableSelectors.forEach(initTable);

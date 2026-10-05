@@ -41,6 +41,7 @@ LIST_ROUTES = [
     "/search",
     "/statements",
     "/therapies",
+    "/therapy-groups",
 ]
 
 
@@ -260,6 +261,18 @@ def test_disease_detail_route_unknown_returns_404(client):
     assert response.status_code == 404
 
 
+def test_therapy_group_detail_route_by_id_returns_200(client):
+    response = client.get("/therapy-groups/txgrp:18")
+    assert response.status_code == 200
+    assert b"Dabrafenib" in response.data
+    assert b"Trametinib" in response.data
+
+
+def test_therapy_group_detail_route_unknown_returns_404(client):
+    response = client.get("/therapy-groups/not-a-therapy-group")
+    assert response.status_code == 404
+
+
 def test_therapy_detail_route_by_id_returns_200(client):
     response = client.get("/therapies/tx:ncit:C1005")
     assert response.status_code == 200
@@ -376,7 +389,8 @@ def test_propositions_route_defaults_to_site_organizations(client):
     response = client.get("/propositions")
     assert response.status_code == 200
     assert b"Show all propositions" in response.data
-    assert b'class="form-check-input org-toggle"' in response.data
+    for attribute in (b"data-orgs", b"data-biomarkers", b"data-diseases", b"data-therapies"):
+        assert b'class="dropdown multiselect-filter" data-attribute="' + attribute + b'"' in response.data
 
 
 def test_propositions_route_scope_all_includes_propositions_without_statements(client):
@@ -390,3 +404,10 @@ def test_propositions_route_scope_all_includes_propositions_without_statements(c
 def test_index_statements_link_points_to_statements(client):
     response = client.get("/")
     assert b'href="/statements">' in response.data
+
+
+def test_statements_route_has_filters(client):
+    response = client.get("/statements")
+    assert response.status_code == 200
+    for attribute in (b"data-orgs", b"data-biomarkers", b"data-diseases", b"data-therapies"):
+        assert b'class="dropdown multiselect-filter" data-attribute="' + attribute + b'"' in response.data

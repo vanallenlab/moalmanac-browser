@@ -12,7 +12,10 @@
   </thead>
   <tbody>
     {% for statement in statements %}
-      <tr>
+      <tr data-orgs="{{ statement.organization or '' }}"
+        data-biomarkers="{{ statement.proposition.biomarkers|map(attribute='id')|join(',') }}"
+        data-diseases="{{ statement.proposition.cancer_type.id }}"
+        data-therapies="{{ statement.proposition.therapies|map(attribute='id')|join(',') }}">
         <td>{{ statement.proposition.predicate }} ({{ statement.direction }})</td>
         <td>
           {{ biomarker_list(statement.proposition.biomarkers) }}

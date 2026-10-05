@@ -14,7 +14,10 @@
   <tbody>
     {% for proposition in propositions_by_category['VariantTherapeuticResponseProposition'] %}
     <tr
-      data-orgs="{% for o in proposition.aggregates.by_agent %}{{ o.id }}{% if not loop.last %},{% endif %}{% endfor %}">
+      data-orgs="{% for o in proposition.aggregates.by_agent %}{{ o.id }}{% if not loop.last %},{% endif %}{% endfor %}"
+      data-biomarkers="{{ proposition.biomarkers|map(attribute='id')|join(',') }}"
+      data-diseases="{{ proposition.cancer_type.id }}"
+      data-therapies="{{ proposition.therapies|map(attribute='id')|join(',') }}">
       <!--<td>Tier 1<br>Level A</td>-->
       <td>
         {% if proposition.aggregates.by_agent|length == 0 %}

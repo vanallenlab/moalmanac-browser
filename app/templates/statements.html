@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "macros.html" import proposition_filters %}
 
 {% block title %}
 Statements | Molecular Oncology Almanac
@@ -11,6 +12,8 @@ Statements | Molecular Oncology Almanac
 
   <h4 class="subtitle">Therapeutic response</h4>
   <p>Precision oncology relationships for therapeutic response.</p>
+
+  {{ proposition_filters("#statements-table-result", organizations, filter_options) }}
 
   {% include "statements_table.html" %}
 {% endblock %}

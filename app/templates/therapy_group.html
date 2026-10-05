@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% from "macros.html" import therapy_prose %}
+
+{% block title %}{{ therapy_group.therapies | map(attribute='name') | join(', ') }} | Molecular Oncology Almanac{% endblock %}
+
+{% block content %}
+<br>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{ url_for('main.therapy_groups') }}">Therapy groups</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ therapy_group.id }}</li>
+  </ol>
+</nav>
+<h2 class="title">{{ therapy_prose(therapy_group.therapies) }}</h2>
+
+<div class="row align-items-stretch">
+  <div class="col-sm-6 d-flex">
+    <div class="card flex-fill mb-3">
+      <h5 class="card-header">About</h5>
+      <div class="card-body compact-card-text">
+        <p class="card-text"><strong>Membership operator</strong>: {{ therapy_group.membershipOperator }}</p>
+        <p class="card-text"><strong>Therapies</strong>: {{ therapy_group.therapies | length }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 d-flex">
+    <div class="card flex-fill mb-3">
+      <h5 class="card-header">Therapies</h5>
+      <div class="card-body compact-card-text">
+        {% for therapy in therapy_group.therapies %}
+        <p class="card-text"><a href="{{ url_for('main.therapies', therapy_id=therapy.id) }}">{{ therapy.name }}</a>
+          <span class="text-muted">({{ therapy.id }})</span></p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="d-flex justify-content-end mb-3">
+    <a href="{{ api_url }}/therapy_groups?therapy_group_id={{ therapy_group.id | api_id }}" target="_blank"
+      class="btn btn-outline-primary">View API</a>
+  </div>
+</div>
+
+<h4 class="subtitle">Therapeutic response</h4>
+<p>Precision oncology relationships for therapeutic response involving this therapy group.</p>
+
+{% include "search_table_therapeutic_response.html" %}
+{% endblock %}

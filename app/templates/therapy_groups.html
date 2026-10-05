@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% from "macros.html" import multiselect_filter, therapy_prose %}
+
+{% block title %}
+Therapy groups | Molecular Oncology Almanac
+{% endblock %}
+
+{% block content %}
+  <br>
+  <h2 class="title">Therapy groups</h2>
+  <p>
+    Therapy groups are combinations of two or more therapies given together as a single treatment, such as
+    dabrafenib and trametinib. A proposition that involves a therapy group applies to the combination, not to each
+    therapy on its own. Select one or more therapies to find the combinations that include all of them.
+  </p>
+  <p class="small"><a href="{{ url_for('main.therapies') }}">View therapies</a></p>
+
+  <div class="row mb-4">
+    <div class="col-md-4">
+      {{ multiselect_filter(all_therapies, "therapy", "therapies", "data-therapies", "#therapy-groups-table-result", mode="all") }}
+    </div>
+  </div>
+
+  <table id="therapy-groups-table-result" class="table table-striped table-hover table-sm small w-100 dataTable">
+    <thead>
+      <tr>
+        <th style="width: 20%">Therapies</th>
+        <th style="width: 10%">Propositions</th>
+        <th style="width: 10%">Statements</th>
+        <th style="width: 5%"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for group in therapy_groups %}
+        <tr data-therapies="{{ group.therapies | map(attribute='id') | join(',') }}">
+          <td>{{ therapy_prose(group.therapies) }}</td>
+          <td>{{ group.propositions_count }}</td>
+          <td>{{ group.statements_count }}</td>
+          <td>
+            <a href="{{ url_for('main.therapy_groups', therapy_group_id=group.id) }}" class="btn btn-sm"
+              title="More information" data-bs-toggle="tooltip">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

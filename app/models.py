@@ -42,6 +42,7 @@ class Diseases(Base):
 
     id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    solid_tumor = sqlalchemy.Column(sqlalchemy.Boolean, nullable=True)
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 
@@ -89,8 +90,18 @@ class Therapies(Base):
 
     id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    # therapy_strategy
+    # JSON list of the therapy's strategies (mechanisms of action), sorted
+    therapy_strategy = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
     therapy_type = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+
+class TherapyGroups(Base):
+    __tablename__ = "therapy_groups"
+
+    id = sqlalchemy.Column(sqlalchemy.String, primary_key=True)
+    # JSON list of {"id", "name"} for each member therapy, sorted by name
+    therapies = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
     propositions_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     statements_count = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
 

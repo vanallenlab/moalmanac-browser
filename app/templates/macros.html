@@ -17,6 +17,14 @@
 {%- endfor %}
 {%- endmacro %}
 
+{# Therapies joined for sentences, e.g. "A and B" or "A, B, and C". #}
+{% macro therapy_prose(therapies) -%}
+{% set n = therapies|length %}
+{%- for therapy in therapies -%}
+<a href="{{ url_for('main.therapies', therapy_id=therapy.id) }}">{{ therapy.name }}</a>{% if not loop.last %}{% if n == 2 %} and {% elif loop.revindex == 2 %}, and {% else %}, {% endif %}{% endif %}
+{%- endfor %}
+{%- endmacro %}
+
 {# Links to the records a contribution was made to, e.g. "2 indications: ind:fda:a:0, ind:fda:b:0". Lists longer than
    `inline_limit` collapse into an expandable summary. Renders nothing for an empty list. #}
 {% macro contribution_record_links(records, noun, inline_limit=10) -%}
@@ -37,4 +45,53 @@
 <div>{{ row.description }}</div>
 {{ contribution_record_links(row.indications, "indication") }}
 {{ contribution_record_links(row.statements, "statement") }}
+{%- endmacro %}
+
+{# Searchable multi-select dropdown that filters `table`'s rows by their `attribute` (ids joined by `separator`); see
+   app.js initMultiSelectFilter. `items` are dicts with `id` and `name`. In mode "all" a row must include every checked
+   item, in "any" at least one. #}
+{% macro multiselect_filter(items, noun, plural, attribute, table, mode="any", separator=",") -%}
+{% set prefix = attribute|replace("data-", "") %}
+<div class="dropdown multiselect-filter" data-attribute="{{ attribute }}" data-table="{{ table }}" data-mode="{{ mode }}"
+  data-separator="{{ separator }}">
+  <button class="form-select form-select-sm text-start text-truncate" type="button"
+    data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">{{ items|length }} {{ noun if items|length == 1 else plural }}</button>
+  <div class="dropdown-menu w-100 p-2 multiselect-menu">
+    <div class="d-flex gap-2 mb-2">
+      <input type="search" class="form-control form-control-sm multiselect-search" placeholder="Find {{ noun }}"
+        aria-label="Find {{ noun }}">
+      <button class="btn btn-sm btn-outline-secondary multiselect-clear" type="button">Clear</button>
+    </div>
+    {% for item in items %}
+      <div class="form-check small multiselect-item">
+        <input class="form-check-input multiselect-toggle" type="checkbox" value="{{ item.id }}" data-name="{{ item.name }}"
+          id="{{ prefix }}-{{ loop.index }}">
+        <label class="form-check-label w-100" for="{{ prefix }}-{{ loop.index }}">{{ item.name }}</label>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{%- endmacro %}
+
+{# Organization, biomarker, cancer type, and therapy filters for a table of therapeutic response propositions or
+   statements, whose rows carry `data-orgs`, `data-biomarkers`, `data-diseases`, and `data-therapies`. #}
+{% macro proposition_filters(table, organizations, filter_options) -%}
+<div class="row g-2 mb-3">
+  <div class="col-md-3">
+    <span class="text-muted small">Organizations</span>
+    {{ multiselect_filter(organizations, "organization", "organizations", "data-orgs", table, mode="any") }}
+  </div>
+  <div class="col-md-3">
+    <span class="text-muted small">Biomarkers</span>
+    {{ multiselect_filter(filter_options.biomarkers, "biomarker", "biomarkers", "data-biomarkers", table, mode="all") }}
+  </div>
+  <div class="col-md-3">
+    <span class="text-muted small">Cancer types</span>
+    {{ multiselect_filter(filter_options.cancer_types, "cancer type", "cancer types", "data-diseases", table, mode="any") }}
+  </div>
+  <div class="col-md-3">
+    <span class="text-muted small">Therapies</span>
+    {{ multiselect_filter(filter_options.therapies, "therapy", "therapies", "data-therapies", table, mode="all") }}
+  </div>
+</div>
 {%- endmacro %}

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "macros.html" import multiselect_filter %}
 
 {% block title %}
 Therapies | Molecular Oncology Almanac
@@ -7,16 +8,23 @@ Therapies | Molecular Oncology Almanac
 {% block content %}
   <br>
   <h2 class="title">Therapies</h2>
-  <br>
+  <p>
+    Therapies are the individual cancer treatments referenced by propositions in the database. Each therapy has a
+    <a href="https://www.cancer.gov/about-cancer/treatment/types" target="_blank">therapy type</a> defined by the
+    National Cancer Institute: chemotherapy, hormone therapy, immunotherapy, or targeted therapy. The proposition and
+    statement counts include those where the therapy is given as part of a combination.
+  </p>
+  <p class="small"><a href="{{ url_for('main.therapy_groups') }}">View therapy groups</a></p>
 
-  <div class="row mb-4">
+  {% set table = "#therapies-table-result" %}
+  <div class="row g-2 mb-4">
     <div class="col-md-4">
-      <select id="therapyTypeFilter" class="form-select form-select-sm">
-        <option value="">{{ all_therapy_types|length }} therapy types</option>
-        {% for t in all_therapy_types %}
-          <option value="{{ t }}">{{ t }}</option>
-        {% endfor %}
-      </select>
+      <span class="text-muted small">Therapy types</span>
+      {{ multiselect_filter(all_therapy_types, "therapy type", "therapy types", "data-therapyTypes", table, mode="any") }}
+    </div>
+    <div class="col-md-4">
+      <span class="text-muted small">Therapy strategies</span>
+      {{ multiselect_filter(all_therapy_strategies, "therapy strategy", "therapy strategies", "data-therapyStrategies", table, mode="any", separator="|") }}
     </div>
   </div>
 
@@ -24,7 +32,7 @@ Therapies | Molecular Oncology Almanac
     <thead>
       <tr>
         <th style="width: 10%">Name</th>
-        <!--<th style="width: 10%">Therapy strategies</th>-->
+        <th style="width: 15%">Therapy strategies</th>
         <th style="width: 10%">Therapy type</th>
         <th style="width: 10%">Propositions</th>
         <th style="width: 10%">Statements</th>
@@ -32,9 +40,9 @@ Therapies | Molecular Oncology Almanac
     </thead>
     <tbody>
       {% for therapy in therapies %}
-        <tr data-therapyType="{{ therapy.therapy_type }}">
+        <tr data-therapyTypes="{{ therapy.therapy_type }}" data-therapyStrategies="{{ therapy.therapy_strategy|join('|') }}">
           <td><a href="{{ url_for('main.therapies', therapy_id=therapy.id) }}">{{ therapy.name }}</a></td>
-          <!--<td>{{ therapy.therapy_strategy }}</td>-->
+          <td>{{ therapy.therapy_strategy|join(', ') }}</td>
           <td>{{ therapy.therapy_type }}</td>
           <td>{{ therapy.propositions_count }}</td>
           <td>{{ therapy.statements_count }}</td>

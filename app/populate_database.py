@@ -232,10 +232,16 @@ class Process:
 
     @classmethod
     def get_disease(cls, record, proposition_id, statement_id):
+        # True for solid tumors, False for hematological malignancies, None if the API doesn't say.
+        solid_tumor = next(
+            (ext["value"] for ext in record.get("extensions") or [] if ext["name"] == "solid_tumor"),
+            None,
+        )
         return {
             "id": record.get("id"),
             "name": record.get("name"),
             "description": record.get("description"),
+            "solid_tumor": solid_tumor,
             "proposition_id": proposition_id,
             "statement_id": statement_id,
         }
@@ -325,7 +331,7 @@ class Process:
                         "id": therapy.get("id"),
                         "name": therapy.get("name"),
                         "description": therapy.get("description"),
-                        # therapy strategy
+                        "therapy_strategy": cls.get_therapy_strategy(record=therapy),
                         "therapy_type": therapy_type,
                         "proposition_id": proposition_id,
                         "statement_id": statement_id,
@@ -344,12 +350,57 @@ class Process:
                     "id": therapy.get("id"),
                     "name": therapy.get("name"),
                     "description": therapy.get("description"),
-                    # therapy _strategy
+                    "therapy_strategy": cls.get_therapy_strategy(record=therapy),
                     "therapy_type": therapy_type,
                     "proposition_id": proposition_id,
                     "statement_id": statement_id,
                 }
             ]
+
+    @staticmethod
+    def get_therapy_strategy(record):
+        """
+        Returns a therapy's strategies (mechanisms of action) from its `therapy_strategy` extension.
+
+        Args:
+            record (dict): A therapy record.
+
+        Returns:
+            str: A JSON list of the therapy's strategies, sorted. A string, so that therapy records can be deduplicated.
+        """
+        strategies = [
+            ext.get("value")
+            for ext in record.get("extensions") or []
+            if ext.get("name") == "therapy_strategy"
+        ]
+        return json.dumps(sorted(strategies[0] if strategies else []))
+
+    @classmethod
+    def get_therapy_group(cls, record, proposition_id, statement_id):
+        """
+        Builds a therapy group record from an `objectTherapeutic` that contains multiple therapies.
+
+        Args:
+            record (dict): The `objectTherapeutic` of a proposition.
+            proposition_id (str): The id of the proposition.
+            statement_id (str): The id of the statement.
+
+        Returns:
+            dict | None: The therapy group's id and member therapies, sorted by name, or None if the record is a
+                single therapy.
+        """
+        if "therapies" not in record:
+            return None
+        therapies = [
+            {"id": therapy.get("id"), "name": therapy.get("name")}
+            for therapy in record.get("therapies")
+        ]
+        return {
+            "id": record.get("id"),
+            "therapies": services.sort_dicts_by_key(data=therapies, key="name"),
+            "proposition_id": proposition_id,
+            "statement_id": statement_id,
+        }
 
     @classmethod
     def indications(cls, indication_records, all_indications):
@@ -400,6 +451,7 @@ class Process:
         gene_records = []
         indication_records = []
         therapy_records = []
+        therapy_group_records = []
         for record in records:
             statement_id = record.get("id")
             for document in record.get("reportedIn"):
@@ -456,6 +508,14 @@ class Process:
             )
             therapy_records.extend(record_therapeutic)
 
+            record_therapy_group = cls.get_therapy_group(
+                record=proposition.get("objectTherapeutic"),
+                proposition_id=proposition.get("id"),
+                statement_id=statement_id,
+            )
+            if record_therapy_group:
+                therapy_group_records.append(record_therapy_group)
+
         biomarker_records = pandas.DataFrame(biomarker_records)
         disease_records = pandas.DataFrame(disease_records)
         document_records = pandas.DataFrame(document_records)
@@ -482,6 +542,9 @@ class Process:
             indication_records=indication_records,
         )
         therapy_records = cls.therapies(therapy_records=therapy_records)
+        therapy_group_records = cls.therapy_groups(
+            therapy_group_records=therapy_group_records
+        )
 
         propositions = cls.propositions(statements=records)
 
@@ -493,6 +556,7 @@ class Process:
             "genes": gene_records.to_dict(orient="records"),
             "indications": indication_records.to_dict(orient="records"),
             "therapies": therapy_records.to_dict(orient="records"),
+            "therapy_groups": therapy_group_records,
             "documents_count": document_records.to_dict(orient="records").__len__(),
             "indications_count": active_indication_records.shape[0],
             "organizations_count": agent_records.to_dict(orient="records").__len__(),
@@ -523,6 +587,40 @@ class Process:
         return therapy_records.drop(
             ["proposition_id", "statement_id"], axis="columns"
         ).drop_duplicates()
+
+    @classmethod
+    def therapy_groups(cls, therapy_group_records):
+        """
+        Builds one record per therapy group, with each group's propositions and statements counts.
+
+        Args:
+            therapy_group_records (list[dict]): Therapy group records derived from statements, one per statement.
+
+        Returns:
+            list[dict]: One record per therapy group, with `propositions_count` and `statements_count` keys.
+        """
+        groups = {}
+        for record in therapy_group_records:
+            group = groups.setdefault(
+                record["id"],
+                {
+                    "id": record["id"],
+                    "therapies": record["therapies"],
+                    "propositions": set(),
+                    "statements": set(),
+                },
+            )
+            group["propositions"].add(record["proposition_id"])
+            group["statements"].add(record["statement_id"])
+        return [
+            {
+                "id": group["id"],
+                "therapies": group["therapies"],
+                "propositions_count": len(group.pop("propositions")),
+                "statements_count": len(group.pop("statements")),
+            }
+            for group in groups.values()
+        ]
 
 
 class Requests:
@@ -630,6 +728,7 @@ class SQL:
             disease = models.Diseases(
                 id=record.get("id"),
                 name=record.get("name"),
+                solid_tumor=None if record.get("solid_tumor") is None else bool(record.get("solid_tumor")),
                 propositions_count=record.get("propositions_count"),
                 statements_count=record.get("statements_count"),
             )
@@ -723,11 +822,23 @@ class SQL:
             therapy = models.Therapies(
                 id=record.get("id"),
                 name=record.get("name"),
+                therapy_strategy=record.get("therapy_strategy"),
                 therapy_type=record.get("therapy_type"),
                 propositions_count=record.get("propositions_count"),
                 statements_count=record.get("statements_count"),
             )
             session.add(therapy)
+
+    @classmethod
+    def add_therapy_groups(cls, records, session):
+        for record in records:
+            therapy_group = models.TherapyGroups(
+                id=record.get("id"),
+                therapies=json.dumps(record.get("therapies")),
+                propositions_count=record.get("propositions_count"),
+                statements_count=record.get("statements_count"),
+            )
+            session.add(therapy_group)
 
     @staticmethod
     def none_if_missing(value):
@@ -839,6 +950,9 @@ def main(config_path, api_url="http://127.0.0.1:8000"):
             session.commit()
 
             SQL.add_therapies(records=results.get("therapies"), session=session)
+            session.commit()
+
+            SQL.add_therapy_groups(records=results.get("therapy_groups"), session=session)
             session.commit()
 
             SQL.add_terms(results=results, session=session)

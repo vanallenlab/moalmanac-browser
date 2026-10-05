@@ -261,6 +261,14 @@ class API:
             flask.abort(404)
         return cls.find_one(path="therapies", params=[("therapy_id", therapy_id)])
 
+    @classmethod
+    def get_therapy_group(cls, therapy_group_id: str | None = None):
+        if not therapy_group_id:
+            flask.abort(404)
+        return cls.find_one(
+            path="therapy_groups", params=[("therapy_group_id", therapy_group_id)]
+        )
+
 
 class Local:
     """
@@ -346,6 +354,18 @@ class Local:
         handler = handlers.Therapies()
         statement = handler.construct_base_query(model=models.Therapies)
         results = cls.get(handler=handler, statement=statement)
+        for result in results:
+            result["therapy_strategy"] = json.loads(result["therapy_strategy"])
+        return cls.sort(data=results, sort_key="name")
+
+    @classmethod
+    def get_therapy_groups(cls):
+        handler = handlers.TherapyGroups()
+        statement = handler.construct_base_query(model=models.TherapyGroups)
+        results = cls.get(handler=handler, statement=statement)
+        for result in results:
+            result["therapies"] = json.loads(result["therapies"])
+            result["name"] = " + ".join(therapy["name"] for therapy in result["therapies"])
         return cls.sort(data=results, sort_key="name")
 
     @classmethod
