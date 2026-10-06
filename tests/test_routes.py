@@ -393,6 +393,26 @@ def test_propositions_route_defaults_to_site_organizations(client):
         assert b'class="dropdown multiselect-filter" data-attribute="' + attribute + b'"' in response.data
 
 
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/biomarkers/bmkr:8",
+        "/diseases/dis:oncotree:PRAD",
+        "/documents/doc:fda:verzenio",
+        "/genes/gene:hgnc:1097",
+        "/indications/ind:fda:verzenio:0",
+        "/organizations/agent:org:fda",
+        "/therapies/tx:ncit:C1005",
+        "/therapy-groups/txgrp:18",
+    ],
+)
+def test_detail_routes_have_proposition_filters(client, path):
+    response = client.get(path)
+    assert response.status_code == 200
+    for attribute in (b"data-orgs", b"data-biomarkers", b"data-diseases", b"data-therapies"):
+        assert b'class="dropdown multiselect-filter" data-attribute="' + attribute + b'"' in response.data
+
+
 def test_propositions_route_scope_all_includes_propositions_without_statements(client):
     site = client.get("/propositions")
     everything = client.get("/propositions?scope=all")

@@ -52,6 +52,10 @@ def biomarkers(biomarker_id: str | None = None):
             template_name_or_list="biomarker.html",
             biomarker=processed_record,
             propositions_by_category=processed_propositions,
+            organizations=services.extract_organizations(propositions=processed_propositions),
+            filter_options=services.extract_proposition_filter_options(
+                propositions=processed_propositions.get("VariantTherapeuticResponseProposition", [])
+            ),
         )
     else:
         records = requests.Local.get_biomarkers()
@@ -133,6 +137,10 @@ def diseases(disease_id: str = None):
             template_name_or_list="disease.html",
             disease=processed_record,
             propositions_by_category=processed_propositions,
+            organizations=services.extract_organizations(propositions=processed_propositions),
+            filter_options=services.extract_proposition_filter_options(
+                propositions=processed_propositions.get("VariantTherapeuticResponseProposition", [])
+            ),
         )
     else:
         records = requests.Local.get_diseases()
@@ -176,6 +184,10 @@ def documents(document_id: str | None = None):
             document=record,
             indications=document_indications,
             propositions_by_category=processed_propositions,
+            organizations=services.extract_organizations(propositions=processed_propositions),
+            filter_options=services.extract_proposition_filter_options(
+                propositions=processed_propositions.get("VariantTherapeuticResponseProposition", [])
+            ),
         )
     else:
         records = requests.Local.get_documents()
@@ -239,6 +251,10 @@ def genes(gene_id: str | None = None):
             gene=processed_record,
             biomarkers=gene_biomarkers,
             propositions_by_category=processed_propositions,
+            organizations=services.extract_organizations(propositions=processed_propositions),
+            filter_options=services.extract_proposition_filter_options(
+                propositions=processed_propositions.get("VariantTherapeuticResponseProposition", [])
+            ),
         )
     else:
         records = requests.Local.get_genes()
@@ -264,6 +280,10 @@ def indications(indication_id: str | None = None):
             template_name_or_list="indication.html",
             indication=processed_record,
             propositions_by_category=processed_propositions,
+            organizations=services.extract_organizations(propositions=processed_propositions),
+            filter_options=services.extract_proposition_filter_options(
+                propositions=processed_propositions.get("VariantTherapeuticResponseProposition", [])
+            ),
         )
     else:
         records = requests.Local.get_indications()
@@ -356,6 +376,9 @@ def organizations(organization_id):
             indications=organization_indications,
             propositions_by_category=processed_propositions,
             organizations=response_organizations,
+            filter_options=services.extract_proposition_filter_options(
+                propositions=processed_propositions.get("VariantTherapeuticResponseProposition", [])
+            ),
         )
     else:
         records = requests.Local.get_organizations()
@@ -514,6 +537,10 @@ def therapies(therapy_id: str | None = None):
             template_name_or_list="therapy.html",
             therapy=processed_record,
             propositions_by_category=processed_propositions,
+            organizations=services.extract_organizations(propositions=processed_propositions),
+            filter_options=services.extract_proposition_filter_options(
+                propositions=processed_propositions.get("VariantTherapeuticResponseProposition", [])
+            ),
         )
     else:
         records = requests.Local.get_therapies()
@@ -554,6 +581,10 @@ def therapy_groups(therapy_group_id: str | None = None):
             template_name_or_list="therapy_group.html",
             therapy_group=record,
             propositions_by_category=processed_propositions,
+            organizations=services.extract_organizations(propositions=processed_propositions),
+            filter_options=services.extract_proposition_filter_options(
+                propositions=processed_propositions.get("VariantTherapeuticResponseProposition", [])
+            ),
         )
 
     records = requests.Local.get_therapy_groups()

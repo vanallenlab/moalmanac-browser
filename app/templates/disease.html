@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "macros.html" import proposition_filters %}
 
 {% block title %}
 {{ disease.name }} | Molecular Oncology Almanac
@@ -64,6 +65,8 @@
 
   <h4 class="subtitle">Therapeutic response</h4>
   <p>Precision oncology relationships for therapeutic response involving this cancer type.</p>
+
+  {{ proposition_filters("#propositions-therapeutic-response-table-result", organizations, filter_options) }}
 
   {% include "search_table_therapeutic_response.html" %}
 {% endblock %}

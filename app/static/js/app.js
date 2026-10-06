@@ -368,26 +368,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  const orgToggles = document.querySelectorAll('.org-toggle');
-  if (orgToggles && orgToggles.length > 0) {
-    addToggleFilter({
-      toggleSelector: '.org-toggle',
-      attributeName: 'data-orgs',
-      tableSelector: '#propositions-therapeutic-response-table-result', 
-      mode: 'any'
-    });
-  }
-
-  const orgClear = document.getElementById('org-clear');
-  if (orgClear) {
-    orgClear.addEventListener('click', () => {
-      document.querySelectorAll('.org-toggle').forEach(el => (el.checked = false));
-      $('.dataTable').each(function () {
-        $(this).DataTable().draw();
-      });
-    });
-  }
-
   const conceptFilter = document.getElementById('conceptFilter');
   if (conceptFilter) {
     addFilter({
