@@ -455,6 +455,13 @@ class Process:
         for record in records:
             statement_id = record.get("id")
             for document in record.get("reportedIn"):
+                # Deprecated documents (e.g. dated FDA labels) are not cached; they are
+                # surfaced by id through the API instead.
+                document_status = services.get_extension_value(
+                    list_of_extensions=document.get("extensions"), name="status"
+                )
+                if document_status == "Deprecated":
+                    continue
                 record_document = cls.get_document(
                     record=document,
                     statement_id=statement_id,
