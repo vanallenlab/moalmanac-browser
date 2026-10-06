@@ -239,7 +239,7 @@ def test_api_down_returns_503(client, monkeypatch):
 
 
 def test_disease_detail_route_by_id_returns_200(client):
-    response = client.get("/diseases/dis:oncotree:PRAD")
+    response = client.get("/diseases/dis:ncit:C2919")
     assert response.status_code == 200
     assert b"Prostate Adenocarcinoma" in response.data
 
@@ -247,10 +247,18 @@ def test_disease_detail_route_by_id_returns_200(client):
 def test_disease_detail_route_by_legacy_name_redirects_to_id(client):
     response = client.get("/diseases/Prostate%20Adenocarcinoma")
     assert response.status_code == 301
-    assert response.headers["Location"].endswith("/diseases/dis:oncotree:PRAD")
+    assert response.headers["Location"].endswith("/diseases/dis:ncit:C2919")
 
 
-def test_disease_detail_route_by_legacy_name_with_slash_redirects(client):
+def test_disease_detail_route_by_legacy_name_with_slash_redirects(client, monkeypatch):
+    # No current disease name contains a slash, so stub the name lookup to check that the path converter passes
+    # the full slash-containing name through to it.
+    from app.blueprints.main import requests as browser_requests
+
+    def _find(cls, name):
+        return {"id": "dis:ncit:C9290"} if name == "Myeloid/Lymphoid Neoplasms" else None
+
+    monkeypatch.setattr(browser_requests.API, "find_disease_by_name", classmethod(_find))
     response = client.get("/diseases/Myeloid/Lymphoid%20Neoplasms")
     assert response.status_code == 301
     assert "/diseases/dis:" in response.headers["Location"]
@@ -389,6 +397,26 @@ def test_propositions_route_defaults_to_site_organizations(client):
     response = client.get("/propositions")
     assert response.status_code == 200
     assert b"Show all propositions" in response.data
+    for attribute in (b"data-orgs", b"data-biomarkers", b"data-diseases", b"data-therapies"):
+        assert b'class="dropdown multiselect-filter" data-attribute="' + attribute + b'"' in response.data
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/biomarkers/bmkr:8",
+        "/diseases/dis:ncit:C2919",
+        "/documents/doc:fda:verzenio",
+        "/genes/gene:hgnc:1097",
+        "/indications/ind:fda:verzenio:0",
+        "/organizations/agent:org:fda",
+        "/therapies/tx:ncit:C1005",
+        "/therapy-groups/txgrp:18",
+    ],
+)
+def test_detail_routes_have_proposition_filters(client, path):
+    response = client.get(path)
+    assert response.status_code == 200
     for attribute in (b"data-orgs", b"data-biomarkers", b"data-diseases", b"data-therapies"):
         assert b'class="dropdown multiselect-filter" data-attribute="' + attribute + b'"' in response.data
 

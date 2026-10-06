@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from "macros.html" import therapy_prose %}
+{% from "macros.html" import proposition_filters, therapy_prose %}
 
 {% block title %}{{ therapy_group.therapies | map(attribute='name') | join(', ') }} | Molecular Oncology Almanac{% endblock %}
 
@@ -42,6 +42,8 @@
 
 <h4 class="subtitle">Therapeutic response</h4>
 <p>Precision oncology relationships for therapeutic response involving this therapy group.</p>
+
+{{ proposition_filters("#propositions-therapeutic-response-table-result", organizations, filter_options) }}
 
 {% include "search_table_therapeutic_response.html" %}
 {% endblock %}

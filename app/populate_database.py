@@ -106,10 +106,10 @@ class Process:
             id_column="id",
             count_column="statement_id",
         )
-        biomarker_records["propositions_count"] = biomarker_records.get("id").replace(
+        biomarker_records["propositions_count"] = biomarker_records.get("id").map(
             biomarker_to_proposition_count
         )
-        biomarker_records["statements_count"] = biomarker_records.get("id").replace(
+        biomarker_records["statements_count"] = biomarker_records.get("id").map(
             biomarker_to_statement_count
         )
         return biomarker_records.drop(
@@ -130,10 +130,10 @@ class Process:
             id_column="id",
             count_column="statement_id",
         )
-        disease_records["propositions_count"] = disease_records.get("id").replace(
+        disease_records["propositions_count"] = disease_records.get("id").map(
             disease_to_proposition_count
         )
-        disease_records["statements_count"] = disease_records.get("id").replace(
+        disease_records["statements_count"] = disease_records.get("id").map(
             disease_to_statement_count
         )
         return disease_records.drop(
@@ -190,13 +190,13 @@ class Process:
             id_column="id",
             count_column="statement_id",
         )
-        gene_records["biomarkers_count"] = gene_records.get("id").replace(
+        gene_records["biomarkers_count"] = gene_records.get("id").map(
             gene_to_biomarker_count
         )
-        gene_records["propositions_count"] = gene_records.get("id").replace(
+        gene_records["propositions_count"] = gene_records.get("id").map(
             gene_to_proposition_count
         )
-        gene_records["statements_count"] = gene_records.get("id").replace(
+        gene_records["statements_count"] = gene_records.get("id").map(
             gene_to_statement_count
         )
         return gene_records.drop(
@@ -455,6 +455,13 @@ class Process:
         for record in records:
             statement_id = record.get("id")
             for document in record.get("reportedIn"):
+                # Deprecated documents (e.g. dated FDA labels) are not cached; they are
+                # surfaced by id through the API instead.
+                document_status = services.get_extension_value(
+                    list_of_extensions=document.get("extensions"), name="status"
+                )
+                if document_status == "Deprecated":
+                    continue
                 record_document = cls.get_document(
                     record=document,
                     statement_id=statement_id,
@@ -578,10 +585,10 @@ class Process:
             id_column="id",
             count_column="statement_id",
         )
-        therapy_records["propositions_count"] = therapy_records.get("id").replace(
+        therapy_records["propositions_count"] = therapy_records.get("id").map(
             therapy_to_proposition_count
         )
-        therapy_records["statements_count"] = therapy_records.get("id").replace(
+        therapy_records["statements_count"] = therapy_records.get("id").map(
             therapy_to_statement_count
         )
         return therapy_records.drop(
@@ -891,6 +898,13 @@ class Statements:
             return f"Something went wrong getting statements from {api} with filters: {filters}"
 
 
+CONFIG_PATHS = [
+    "deploy/default/config.ini",
+    "deploy/ie/config.ini",
+    "deploy/ca/config.ini",
+]
+
+
 def delete_sqlite_db(path):
     if os.path.exists(path):
         try:
@@ -982,14 +996,11 @@ if __name__ == "__main__":
         help="URL for the MOAlmanac API: http://localhost:8080 (local), http://127.0.0.1:8000 (VM), or https://api.moalmanac.org (live)",
     )
     arg_parser.add_argument(
-        "-c", "--config", action="append", help="Path to config file", required=True
-    )
-    arg_parser.add_argument(
         "-d", "--drop-tables", help="Drop tables before populating", action="store_true"
     )
     args = arg_parser.parse_args()
 
-    for config_file in args.config:
+    for config_file in CONFIG_PATHS:
         if args.drop_tables:
             cache_file = database.read_config_ini(path=config_file)["app"]["cache"]
             cache_path = os.path.join("data", cache_file)
