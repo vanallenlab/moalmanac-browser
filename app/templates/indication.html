@@ -18,10 +18,13 @@
   {% if indication.status %}<span class="badge text-bg-secondary">{{ indication.status }}</span>{% endif %}
 </p>
 
-<p>{{ indication.description }}</p>
+<p>{{ indication.statement_description }}</p>
 
 <p>This is written in the <a href="{{ url_for('main.documents', document_id=indication.document.id) }}">approval
-    document</a>.</p>
+    document</a> as:</p>
+<blockquote class="blockquote">
+  <p>{{ indication.description }}</p>
+</blockquote>
 
 {% if indication.reimbursement_scheme or indication.reimbursement_comment %}
 <h4 class="subtitle">Reimbursement</h4>

@@ -611,6 +611,7 @@ def process_indication(record: dict):
         "document": document,
         "agent": agent,
         "status": get_extension_value(extensions, "status"),
+        "statement_description": get_extension_value(extensions, "statement description"),
         "reimbursement_scheme": get_extension_value(extensions, "reimbursement_scheme"),
         "reimbursement_comment": get_extension_value(extensions, "reimbursement_comment"),
         "contributions": sort_contributions(contributions=record.get("contributions") or []),

@@ -48,6 +48,7 @@ def test_process_indication():
     assert processed["document"]["id"]
     assert processed["agent"]["name"]
     assert processed["status"] in {"Approved", "Accelerated", "Withdrawn", "Superseded"}
+    assert processed["statement_description"]
 
 
 def test_process_statement():
