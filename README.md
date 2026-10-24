@@ -1,6 +1,9 @@
-Web browser for the [Molecular Oncology Almanac](https://moalmanac.org) [database](https://github.com/vanallenlab/moalmanac-db), viewable at: [moalmanac.org](https://moalmanac.org).
+[![License: GPL v2](https://img.shields.io/badge/Code-GPL%20v2-informational)](./LICENSE.md)
 
-## Installation 
+Web browser for the [Molecular Oncology Almanac](https://moalmanac.org) [knowledge base](https://github.com/vanallenlab/moalmanac-db), viewable at: [moalmanac.org](https://moalmanac.org).
+
+## Installation
+
 ### Download
 
 This repository can be downloaded through GitHub by either using the website or terminal. To download on the website, navigate to the top of this page, click the green `Clone or download` button, and select `Download ZIP` to download this repository in a compressed format. To install using GitHub on terminal, type:
@@ -11,16 +14,17 @@ cd moalmanac-browser
 ```
 
 ### Python dependencies
-This repository uses Python 3.12. We recommend using a [virtual environment](https://docs.python.org/3/tutorial/venv.html) and running Python with either [Anaconda](https://www.anaconda.com/download/) or [Miniconda](https://conda.io/miniconda.html). 
 
-Run the following from this repository's directory to create a virtual environment and install dependencies with Anaconda or Miniconda:
+This repository uses Python 3.12. We recommend managing your environment wih [Conda-forge](https://conda-forge.org)'s installer [Miniforge](https://conda-forge.org/download/). Run the following from this repository's directory to create a virtual environment and install dependencies with Miniforge:
+
 ```bash
 conda create -y -n moalmanac-browser python=3.12
 conda activate moalmanac-browser
 pip install -r requirements.txt
 ```
 
-Or, if using base Python: 
+Or, if using base Python:
+
 ```bash
 virtualenv venv
 source activate venv/bin/activate
@@ -28,9 +32,11 @@ pip install -r requirements.txt
 ```
 
 ## Usage
+
 The Molecular Oncology Almanac web browser supports multiple configurable instances, each defined by a folder under [deploy/](deploy). Each instance has its own configuration file, https set up, and dedicated SQLite cache. [Our API](https://github.com/vanallenlab/moalmanac-api) provides the data source for the local SQLite3 cache, which is populated according to the settings in the selected config file.
 
 ### Updating local caches
+
 To update the local caches for every instance under [deploy/](deploy), run:
 
 ```bash
@@ -64,6 +70,7 @@ Flask configuration variables are managed using environment files:
 | `GUNICORN_WORKERS`, `GUNICORN_THREADS` | Gunicorn workers and threads per instance, used in production. |
 
 To launch the application for development, using variables from [.env](.env):
+
 ```bash
 python run.py
 ```
@@ -92,7 +99,18 @@ Systemd and Gunicorn manage launching the application for production, so there i
 If you find this tool or any code herein useful, please cite:  
 > [Reardon, B., Moore, N.D., Moore, N.S., *et al*. Integrating molecular profiles into clinical frameworks through the Molecular Oncology Almanac to prospectively guide precision oncology. *Nat Cancer* (2021). https://doi.org/10.1038/s43018-021-00243-3](https://www.nature.com/articles/s43018-021-00243-3)
 
-## Disclaimer - For research use only
-DIAGNOSTIC AND CLINICAL USE PROHIBITED. DANA-FARBER CANCER INSTITUTE (DFCI) and THE BROAD INSTITUTE (Broad) MAKE NO REPRESENTATIONS OR WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT OR VALIDITY OF ANY INTELLECTUAL PROPERTY RIGHTS OR CLAIMS, WHETHER ISSUED OR PENDING, AND THE ABSENCE OF LATENT OR OTHER DEFECTS, WHETHER OR NOT DISCOVERABLE.
+## License
 
-In no event shall DFCI or Broad or their Trustees, Directors, Officers, Employees, Students, Affiliates, Core Faculty, Associate Faculty and Contractors, be liable for incidental, punitive, consequential or special damages, including economic damages or injury to persons or property or lost profits, regardless of whether the party was advised, had other reason to know or in fact knew of the possibility of the foregoing, regardless of fault, and regardless of legal theory or basis. You may not download or use any portion of this program for any non-research use not expressly authorized by DFCI or Broad. You further agree that the program shall not be used as the basis of a commercial product and that the program shall not be rewritten or otherwise adapted to circumvent the need for obtaining permission for use of the program other than as specified herein.
+- Database content: [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/), see [LICENSE](./LICENSE).
+- Scripts in `utils/` and `tests/`: [GNU General Public License, Version 2 (GPL v2)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html), see [LICENSE-code.md](./LICENSE-code.md).
+- Third-party files in [datasources/](./datasources) are not covered by the CC BY license; see [datasources/README.md](./datasources/README.md#licensing).
+
+## Disclaimer
+
+For purposes of this Disclaimer, the “Service” means the Molecular Oncology Almanac database, software, API, browsers, and related materials.
+
+THIS DATABASE AND SOFTWARE HAVE NOT BEEN VALIDATED FOR DIAGNOSTIC OR CLINICAL USE, AND DANA-FARBER CANCER INSTITUTE (DFCI) MAKES NO WARRANTY OF FITNESS FOR DIAGNOSTIC OR CLINICAL USE. USERS ARE SOLELY RESPONSIBLE FOR ENSURING THAT THEIR ACCESS TO AND USE OF THE DATABASE, SOFTWARE, API, BROWSERS, AND RELATED MATERIALS COMPLIES WITH ALL APPLICABLE LAWS, REGULATIONS, INSTITUTIONAL POLICIES, AND ETHICAL REQUIREMENTS, INCLUDING ANY REQUIREMENTS APPLICABLE TO RESEARCH INVOLVING HUMAN SUBJECTS OR HUMAN-DERIVED DATA. DFCI MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT OR VALIDITY OF ANY INTELLECTUAL PROPERTY RIGHTS OR CLAIMS, WHETHER ISSUED OR PENDING, AND THE ABSENCE OF LATENT OR OTHER DEFECTS, WHETHER OR NOT DISCOVERABLE.
+
+In no event shall DFCI or its trustees, directors, officers, employees, students, affiliates, core faculty, associate faculty and contractors be liable for incidental, punitive, consequential or special damages, including economic damages or injury to persons or property or lost profits, regardless of whether the party was advised, had other reason to know or in fact knew of the possibility of the foregoing, regardless of fault, and regardless of legal theory or basis. To the extent liability cannot be disclaimed, DFCI’s liability shall be limited to direct, actual damages resulting from DFCI’s failure to perform its obligations under the applicable terms.
+
+The Molecular Oncology Almanac database is made available under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/), which permits use, including commercial use, provided appropriate credit is given. The software is licensed under the [GNU General Public License, Version 2 (GPL v2)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html). Certain third-party code or materials may be subject to separate license terms. For additional terms governing access to and use of the Service, please see the [Terms of Use](https://docs.moalmanac.org/about/terms-of-use/).
