@@ -23,13 +23,6 @@ def index():
     )
 
 
-@main_bp.route("/about", methods=["GET", "POST"])
-def about():
-    return flask.render_template(
-        template_name_or_list="about.html",
-    )
-
-
 @main_bp.route(
     "/biomarkers", defaults={"biomarker_id": None}, methods=["GET", "POST"]
 )

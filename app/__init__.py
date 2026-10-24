@@ -67,7 +67,6 @@ def create_app(
         caption = config['homepage'].get('caption', 'An open-source knowledgebase for precision cancer medicine.')
         api_url = app.config['API_PUBLIC_URL']
         url = app.config['INI_CONFIG']['app'].get('url', 'moalmanac.org')
-        about_template = app.config['INI_CONFIG']['about'].get('template', None)
         return dict(
             css_path=css_path,
             footer_logos_path=footer_logos_path,
@@ -75,7 +74,6 @@ def create_app(
             caption=caption,
             api_url=api_url,
             url=url,
-            about_template=about_template
         )
 
     return app

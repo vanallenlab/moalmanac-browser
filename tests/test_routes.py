@@ -28,7 +28,6 @@ pytestmark = pytest.mark.skipif(
 
 LIST_ROUTES = [
     "/",
-    "/about",
     "/biomarkers",
     "/contributions",
     "/contributors",
