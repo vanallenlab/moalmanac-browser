@@ -1,5 +1,5 @@
 [![License: CC BY 4.0](https://img.shields.io/badge/Database-CC%20BY%204.0-informational)](./LICENSE)
-[![License: GPL v2](https://img.shields.io/badge/Code-GPL%20v2-informational)](./LICENSE-code.md)
+[![License: GPL v2](https://img.shields.io/badge/Code-GPL%20v2-informational)](./LICENSE-code)
 
 Web browser for the [Molecular Oncology Almanac's knowledge base](https://github.com/vanallenlab/moalmanac-db), viewable at: [moalmanac.org](https://moalmanac.org).
 
@@ -103,7 +103,7 @@ If you find this tool or any code herein useful, please cite:
 ## License
 
 - Database content: [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/), see [LICENSE](./LICENSE).
-- Code: [GNU General Public License, Version 2 (GPL v2)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html), see [LICENSE-code.md](./LICENSE-code.md).
+- Code: [GNU General Public License, Version 2 (GPL v2)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html), see [LICENSE-code.md](./LICENSE-code).
 
 ## Disclaimer
 
